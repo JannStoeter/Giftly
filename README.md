@@ -3,7 +3,8 @@
 Persönliches Geschenkprofil, Wunschlisten, Geschenk-Historie und kluge Geschenkideen.
 
 - `/` Landingpage (`index.html`)
-- `/app/` die App (Hash-Routing: `#profil`, `#wuensche`, `#historie`, `#entdecken`, `#schenken`, `#start`)
+- `/app/` die App für Besitzer (Hash-Routing: `#profil`, `#wuensche`, `#historie`, `#entdecken`, `#start`)
+- `/app/#p/<id>` die Gast-Ansicht: ein Freund sieht nur das Profil mit Wunschliste (z. B. `#p/jonas`). In dieser Demo ohne Server funktionieren Links nur im selben Browser.
 
 ## Entwicklung
 ```bash

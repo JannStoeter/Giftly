@@ -3,6 +3,7 @@ import { esc, ic } from '../lib/util.js';
 import { art } from '../lib/art.js';
 import { ACT, CATS, BRANDS, TRIES, NOGOS, ALTS, cat, crea } from '../data/content.js';
 import { VisPill, Legend } from './shared.js';
+import { GuestPage } from './giver.js';
 
 export const STEPS=[
  {k:'interests',t:'Was machst du gerne?',h:'Wähle alles, was zu deinem Alltag gehört.',opts:()=>ACT.map(a=>a.l)},
@@ -49,14 +50,16 @@ export function Profil(){
   const chips=(a,cls='')=>a.length?`<div class="chips">${a.map(x=>`<span class="chip ${cls}">${esc(x)}</span>`).join('')}</div>`:'<p class="muted">Noch nichts hinterlegt.</p>';
   const line=`${m.name} ${m.interests.length?`liebt ${m.interests.slice(0,3).map(esc).join(', ')}`:'hat noch keine Interessen hinterlegt'}. ${m.nogos.length?`Lieber nichts mit ${m.nogos.slice(0,2).map(esc).join(' oder ')}.`:''} ${m.alts.length?`Wenn die Idee fehlt: ${esc(m.alts[0])}.`:''}`;
   return `<div class="wrap">
-   <div class="pcard"><span class="av t${m.tone}">${initials(m.name)}</span>
+   ${pv?'':`   <div class="pcard"><span class="av t${m.tone}">${initials(m.name)}</span>
     <div><p class="eyebrow" style="color:#B8C4A8">Wishtale</p><h1>${esc(m.name)}</h1><p style="margin-top:8px">${line}</p></div>
-    <button class="btn gold sm" data-act="edit">Profil bearbeiten</button></div>
+    <div class="row" style="gap:8px"><button class="btn gold sm" data-act="share">Link teilen</button><button class="btn sec sm" style="border-color:var(--accent-ink);color:var(--accent-ink)" data-act="edit">Bearbeiten</button></div></div>`}
    <div class="row" style="margin:18px 0 4px;justify-content:space-between">
      <div class="seg" role="group" aria-label="Ansicht"><button class="${!pv?'on':''}" data-act="preview" data-v="0">Meine Ansicht</button><button class="${pv?'on':''}" data-act="preview" data-v="1">So sehen Schenkende es</button></div>
    </div>
    ${pv?`<div class="banner green" style="margin-top:12px">${ic('eye')}<span>Vorschau: Private Bereiche und dein Feedback sind für Schenkende nicht sichtbar.</span></div>`:`<p class="muted" style="font-size:14px;margin-top:8px">Tippe auf die Sichtbarkeit, um sie pro Bereich zu ändern.</p>`}
-   ${m.managed&&!pv?MgPanel(m):''}
+   ${pv?GuestPage(m,{preview:true}):`
+   ${m.managed?MgPanel(m):''}
+   ${AboutSec(m)}
    ${sec('interests','Interessen',chips(m.interests))}
    ${sec('cats','Welten',`<div class="catrow">${m.cats.map(id=>{const c=cat(id);return `<div class="catmini">${art(c.a,c.t)}<div>${c.n}</div></div>`}).join('')||'<p class="muted">Noch nichts hinterlegt.</p>'}</div>`)}
    ${(m.style||[]).length?sec('style','Im Notfall',`<div class="chips">${m.style.map(x=>`<button class="chip gold" data-act="creator" data-id="${x.id}" data-go="1">${esc(crea(x.id).scope)} von ${esc(crea(x.id).handle)}</button>`).join('')}</div><p class="muted" style="font-size:14px">Wenn nichts Konkretes passt, orientieren sich Schenkende an diesen Listen.</p>`):''}
@@ -64,7 +67,13 @@ export function Profil(){
    ${sec('tries','Möchte ich ausprobieren',chips(m.tries,'gold'))}
    ${sec('nogos','Bitte nicht',chips(m.nogos,'warn'))}
    ${sec('alts','Alternativen, wenn keine Idee passt',chips(m.alts,'ok'))}
-   ${pv?'':`<section class="psec"><div class="hd"><h3>Dein Feedback</h3>${VisPill('nur')}</div><p class="muted">Wie dir Geschenke gefallen haben, sehen nur du und Wishtale. Schenkende erhalten höchstens eine freundliche Nachricht.</p></section>`}
-   ${pv?'':Legend()}
+   <section class="psec"><div class="hd"><h3>Dein Feedback</h3>${VisPill('nur')}</div><p class="muted">Wie dir Geschenke gefallen haben, sehen nur du und Wishtale. Schenkende erhalten höchstens eine freundliche Nachricht.</p></section>
+   ${Legend()}`}
   </div>`;
+}
+
+function AboutSec(m){
+  return `<section class="psec"><div class="hd"><h3>Über mich</h3>${VisPill('alle')}</div>
+   <label for="about" class="muted" style="font-size:14px">Zwei, drei Sätze für Freunde, die etwas schenken wollen. Sie stehen ganz oben auf deiner Profilseite.</label>
+   <textarea id="about" class="ta" data-prof="about" maxlength="320" placeholder="z. B. Ich koche gern für Freunde, trinke meinen Kaffee selbst gebrüht und richte meine Wohnung Stück für Stück ein.">${esc(m.about||'')}</textarea></section>`;
 }

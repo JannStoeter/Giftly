@@ -109,3 +109,6 @@ export function resetState(){
   try{localStorage.removeItem(KEY)}catch{}
   location.hash='#profil';location.reload();
 }
+
+/** Person, deren Profil gerade als Gast geöffnet ist (Beispielprofile oder ein Konto aus diesem Browser). */
+export const guestPerson=()=>S.people[S.ui.person]||S.accounts[S.ui.person]||null;

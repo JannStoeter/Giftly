@@ -1,4 +1,4 @@
-import { S, W, switchTo, resetState } from './state.js';
+import { S, W, switchTo, resetState, guestPerson, saveState } from './state.js';
 import { $, toast, kwOf, nid, money, overlap } from './lib/util.js';
 import { LOOKS, PRODUCTS, CATALOG, PRIO, crea, cprod, cat } from './data/content.js';
 import { check } from './logic.js';
@@ -35,6 +35,13 @@ const A={
  delw(el){S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
  modal(el){S.ui.modal=el.dataset.v;render();setTimeout(()=>document.querySelector('.sheet input,.sheet select')?.focus(),30)},
  close(){S.ui.modal=null;render()},
+ share(){
+  const url=`${location.origin}${location.pathname}#p/${S.ui.acct}`;
+  const done=()=>toast('Link kopiert. Hinweis: In dieser Demo öffnet er nur in diesem Browser das Profil.');
+  if(navigator.share){navigator.share({title:`${S.me.name} bei Wishtale`,url}).catch(()=>{})}
+  else if(navigator.clipboard?.writeText){navigator.clipboard.writeText(url).then(done,()=>toast(url))}
+  else toast(url);
+ },
  azopen(){S.ui.az={q:'',text:'',res:null,title:'',price:'',c:'wohnen',searched:false};S.ui.modal='amazon';render();setTimeout(()=>$('#azq')?.focus(),30)},
  azq(el){S.ui.az.q=el.dataset.v;render()},
  azclip(){
@@ -63,16 +70,14 @@ const A={
   S.me.history.unshift({id:g.id,what:g.what,from:g.from,when:'November 2026',liked:'teils',have:false,again:false,a:g.a,tone:g.tone,kw:g.kw});
   S.ui.swap=null;toast(`Simuliert: ${g.from} bekommt eine freundliche Nachricht, ohne Bewertung.`);render();
  },
- person(el){S.ui.person=el.dataset.id;S.ui.ideaRes=null;S.ui.idea='';render()},
- tab(el){S.ui.tab=el.dataset.v;render()},
  reserve(el){
-  const p=S.people[S.ui.person],w=p.wishes.find(x=>x.id===el.dataset.id);w.res='me';
+  const p=guestPerson(),w=p.wishes.find(x=>x.id===el.dataset.id);w.res='me';
   toast(`Reserviert. ${p.name} sieht davon nichts, andere Schenkende sehen nur „reserviert“.`);
   if(el.dataset.stay){S.ui.ideaRes=null;S.ui.tab='wuensche'}render();
  },
- release(el){const w=S.people[S.ui.person].wishes.find(x=>x.id===el.dataset.id);w.res=null;render()},
- bought(el){const w=S.people[S.ui.person].wishes.find(x=>x.id===el.dataset.id);w.bought=true;toast('Als gekauft markiert. Die Überraschung bleibt erhalten.');render()},
- try(el){const p=S.people[S.ui.person];S.ui.idea=el.dataset.v;S.ui.ideaRes=check(p,el.dataset.v);render()},
+ release(el){const w=guestPerson().wishes.find(x=>x.id===el.dataset.id);w.res=null;render()},
+ bought(el){const w=guestPerson().wishes.find(x=>x.id===el.dataset.id);w.bought=true;toast('Als gekauft markiert. Die Überraschung bleibt erhalten.');render()},
+ try(el){const p=guestPerson();S.ui.idea=el.dataset.v;S.ui.ideaRes=check(p,el.dataset.v);render()},
  save(el){const id=el.dataset.id;S.ui.saved[id]=!S.ui.saved[id];render()},
  kind(el){S.ui.kind=el.dataset.v;render()},
  acct(el){switchTo(el.dataset.id);render(true)},
@@ -90,7 +95,7 @@ const A={
  occ(el){S.ui.occ=el.dataset.v;S.ui.budget=el.dataset.v==='danke'?40:100;render()},
  dens(el){S.ui.big=el.dataset.v==='1';render()},
  suggest(el){S.ui.pickId=el.dataset.id;S.ui.modal='pick';render()},
- buy(el){const p=S.people[S.ui.person],w=p.wishes.find(x=>x.id===el.dataset.wid),pr=PRODUCTS.find(x=>x.id===el.dataset.id);w.res='me';S.ui.modal=null;S.ui.ideaRes=null;window.open(amazonUrl(pr),'_blank','noopener');toast(`Reserviert. „${pr.t}“ wurde bei Amazon geöffnet.`);render()}
+ buy(el){const p=guestPerson(),w=p.wishes.find(x=>x.id===el.dataset.wid),pr=PRODUCTS.find(x=>x.id===el.dataset.id);w.res='me';S.ui.modal=null;S.ui.ideaRes=null;window.open(amazonUrl(pr),'_blank','noopener');toast(`Reserviert. „${pr.t}“ wurde bei Amazon geöffnet.`);render()}
 };
 document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;const f=A[t.dataset.act];if(f)f(t,e)});
 document.addEventListener('input',e=>{if(e.target.id==='bud'){S.ui.budget=+e.target.value;$('#budv').textContent=money(S.ui.budget)}});
@@ -107,6 +112,7 @@ window.addEventListener('focus',()=>{
   if(S.ui.modal!=='amazon'||!z?.searched||(z.res&&!z.res.error)||!navigator.clipboard?.readText)return;
   navigator.clipboard.readText().then(t=>{if(/amazon\.de\//i.test(t))azParse(t)}).catch(()=>{});
 });
+document.addEventListener('input',e=>{const f=e.target.dataset?.prof;if(f){S.me[f]=e.target.value;saveState()}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.ui.modal)A.close()});
 document.addEventListener('submit',e=>{
   const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();
@@ -131,7 +137,7 @@ document.addEventListener('submit',e=>{
     return;
   }
   if(kind==='custom'){const v=(fd.get('v')||'').trim(),k=fd.get('k');if(v&&!S.me[k].includes(v))S.me[k].push(v);render()}
-  if(kind==='idea'){const v=(fd.get('idea')||'').trim();S.ui.idea=v;S.ui.ideaRes=v?check(S.people[S.ui.person],v):null;render()}
+  if(kind==='idea'){const v=(fd.get('idea')||'').trim();S.ui.idea=v;S.ui.ideaRes=v?check(guestPerson(),v):null;render()}
   if(kind==='gift'){
     const [y,mo]=(fd.get('when')||'2026-11').split('-');
     const what=fd.get('what').trim();

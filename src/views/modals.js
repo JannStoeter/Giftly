@@ -1,4 +1,4 @@
-import { S, initials } from '../state.js';
+import { S, initials, guestPerson } from '../state.js';
 import { esc, ic, money } from '../lib/util.js';
 import { art } from '../lib/art.js';
 import { CATS, OCC, PRIO, PRICE_DATE } from '../data/content.js';
@@ -20,7 +20,7 @@ export function AcctModal(){
    <p class="disc" style="margin-top:18px">Alle Daten liegen nur in deinem Browser. <button class="chip" data-act="reset">Demodaten zurücksetzen</button></p></div></div>`;
 }
 export function PickModal(){
-  const p=S.people[S.ui.person],w=p.wishes.find(x=>x.id===S.ui.pickId);if(!w)return '';
+  const p=guestPerson(),w=p.wishes.find(x=>x.id===S.ui.pickId);if(!w)return '';
   const {list,over}=picks(p,w),top=list[0],rest=list.slice(1,3);
   return `<div class="scrim" data-act="closebg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mt">
    <p class="eyebrow">Produktvorschlag für ${esc(p.name)}</p><h2 id="mt" style="font-size:32px;margin-top:6px">${esc(w.t)}</h2>

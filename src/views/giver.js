@@ -1,4 +1,4 @@
-import { S, initials } from '../state.js';
+import { S, initials, guestPerson } from '../state.js';
 import { esc, ic, money, kwOf } from '../lib/util.js';
 import { art } from '../lib/art.js';
 import { CATS, OCC, ABOUT, cat, crea, cprod, occL, occTip, PRIO } from '../data/content.js';
@@ -7,17 +7,23 @@ import { WishArt, densSeg, slot } from './wishes.js';
 import { AMAZON_DISCLOSURE, searchUrl } from '../lib/shops.js';
 import { EmptyBlock } from './product.js';
 
-export function Schenken(){
-  const u=S.ui,p=S.people[u.person];
-  const wl=WishList(p);
-  return `<div class="wrap">
-   <div class="people" role="group" aria-label="Person wählen"><span class="muted" style="align-self:center;font-size:14px">Du schenkst:</span>${Object.values(S.people).map(x=>`<button class="person ${x.id===p.id?'on':''}" data-act="person" data-id="${x.id}"><span class="av t${x.tone}">${initials(x.name)}</span>${esc(x.name)}${x.managed?'<small class="muted" style="font-weight:500">Kind</small>':''}</button>`).join('')}</div>
-   ${ProfileHead(p)}
+/* Gast-Ansicht: ein Freund öffnet den Link und sieht nur dieses eine Profil. */
+export function Gast(){
+  const p=guestPerson();
+  if(!p)return `<div class="wrap"><div class="panel" style="max-width:520px;margin:40px auto;display:grid;gap:12px"><h2>Profil nicht gefunden</h2><p class="muted">Dieser Link gehört zu keinem Profil in diesem Browser. Frag die Person nach einem neuen Link.</p><a class="btn pri" href="../" style="justify-self:start">Zu Wishtale</a></div></div>`;
+  return GuestPage(p,{});
+}
+
+/* Dieselbe Seite sieht der Besitzer als "So sehen Schenkende es" (preview: ohne Reservierungen und Aktionen). */
+export function GuestPage(p,{preview=false}={}){
+  const wl=WishList(p,{preview});
+  return `<div class="${preview?'':'wrap'}">
+   ${ProfileHead(p,{preview})}
    <div class="pgrid">
     <div class="pmain">
      ${wl.html}
      ${Curated(p,wl.open)}
-     <section class="sect" id="ideen"><p class="eyebrow">Eigene Idee?</p><h3>Idee prüfen</h3><p class="muted" style="font-size:14.5px;margin:4px 0 12px">Wishtale gleicht sie mit Wünschen, Besitz, bisherigen Geschenken und No-Gos ab.</p>${Ideen(p)}</section>
+     ${preview?'':`<details class="sect ideacheck" id="ideen"><summary><h3>Eigene Idee prüfen</h3></summary><p class="muted" style="font-size:14.5px;margin:4px 0 12px">Wishtale gleicht sie mit Wünschen, Besitz, bisherigen Geschenken und No-Gos von ${esc(p.name)} ab.</p>${Ideen(p)}</details>`}
      <p class="disc">Links zu Shops sind Partnerlinks (Anzeige). ${AMAZON_DISCLOSURE} Preise können abweichen, maßgeblich ist der Preis bei Amazon.</p>
     </div>
     <aside class="paside" aria-label="Mehr über ${esc(p.name)}">${Facts(p)}</aside>
@@ -26,17 +32,17 @@ export function Schenken(){
 }
 
 /* Kopfbereich: Über mich, Interessen, Marken und No-Gos auf einen Blick, daneben der Anlass. */
-export function ProfileHead(p){
+export function ProfileHead(p,{preview=false}={}){
   const u=S.ui,about=p.about||ABOUT[p.id]||'';
+  const hide=k=>preview&&p.vis&&p.vis[k]==='privat';
   const row=(l,items,cls='')=>items.length?`<div class="pfact"><span class="eyebrow">${l}</span><div class="chips">${items.map(x=>`<span class="chip ${cls}">${esc(x)}</span>`).join('')}</div></div>`:'';
   return `<section class="phead" aria-label="Profil von ${esc(p.name)}">
    <div>
     <div class="top"><span class="av t${p.tone}">${initials(p.name)}</span><div><p class="eyebrow">${p.managed?`Kind-Konto${p.age?', '+p.age+' Jahre':''}`:'Wishtale-Profil'}</p><h1>${esc(p.name)}</h1></div></div>
     ${about?`<p class="about"><span class="eyebrow" style="display:block;margin-bottom:4px">Über ${esc(p.name)}</span>${esc(about)}</p>`:''}
-    <div class="pfacts">${row('Interessen',p.interests)}${row('Lieblingsmarken',p.brands)}${row('Bitte nicht',p.nogos,'warn')}</div>
+    <div class="pfacts">${hide('interests')?'':row('Interessen',p.interests)}${hide('brands')?'':row('Lieblingsmarken',p.brands)}${hide('nogos')?'':row('Bitte nicht',p.nogos,'warn')}</div>
    </div>
-   <div class="occ pocc"><p class="eyebrow">Wofür suchst du?</p><div class="seg" role="group" aria-label="Anlass">${[['none','Ohne Anlass'],...OCC.map(o=>[o.id,o.l])].map(([k,l])=>`<button class="${u.occ===k?'on':''}" data-act="occ" data-v="${k}">${l}</button>`).join('')}</div><p class="muted tip">${occTip(u.occ)}</p>
-    <button class="btn ghost sm" data-act="scroll" data-t="ideen" style="justify-self:start;padding-left:0">${ic('search','sm')}Eigene Idee prüfen</button></div>
+   <div class="occ pocc"><p class="eyebrow">Wofür suchst du?</p><div class="seg" role="group" aria-label="Anlass">${[['none','Ohne Anlass'],...OCC.map(o=>[o.id,o.l])].map(([k,l])=>`<button class="${u.occ===k?'on':''}" data-act="occ" data-v="${k}">${l}</button>`).join('')}</div><p class="muted tip">${occTip(u.occ)}</p></div>
   </section>`;
 }
 
@@ -46,27 +52,28 @@ export function Facts(p){
   const block=(t,inner)=>inner?`<section class="fact"><h3>${t}</h3>${inner}</section>`:'';
   const chips=(a,c='')=>a.length?`<div class="chips">${a.map(x=>`<span class="chip ${c}">${esc(x)}</span>`).join('')}</div>`:'';
   return block('Hat '+esc(p.name)+' schon',chips(owned.map(w=>w.t),'ok'))
-   +block('Schon verschenkt',chips(p.gifts.map(g=>`${g.what} · ${g.from}`)))
+   +block('Schon verschenkt',chips((p.gifts||p.history||[]).map(g=>`${g.what} · ${g.from}`)))
    +block('Möchte ausprobieren',chips(p.tries,'gold'))
    +block('Welten',p.cats.length?`<div class="catrow">${p.cats.map(id=>{const c=cat(id);return `<div class="catmini">${art(c.a,c.t)}<div>${c.n}</div></div>`}).join('')}</div>`:'')
    +block('Wenn nichts passt',`<p class="muted" style="font-size:13.5px;margin-bottom:8px">${esc(p.name)} freut sich auch über:</p>`+chips(p.alts,'ok'));
 }
 
 /* Die Wunschliste: steht direkt unter dem Profilkopf. */
-export function WishList(p){
+export function WishList(p,{preview=false}={}){
   const oc=S.ui.occ;
   const rel=w=>(!w.occ.length||oc==='none')?1:(w.occ.includes(oc)?2:0);
   const open=p.wishes.filter(w=>w.status==='offen'&&w.vis!=='privat').sort((a,b)=>rel(b)-rel(a)||b.prio-a.prio);
   const html=`<section id="wunschliste" aria-label="Wunschliste von ${esc(p.name)}">
    <div class="row" style="justify-content:space-between;margin-bottom:8px"><div><p class="eyebrow">Wunschliste</p><h2 style="font-size:clamp(30px,4vw,44px)">${open.length} Wünsche von ${esc(p.name)}</h2></div>${densSeg()}</div>
    <p class="muted" style="font-size:14px;margin-bottom:14px">${ic('lock','sm')} ${p.managed?`${esc(p.parent||'Die Eltern')} pflegt die Wünsche und sieht Reservierungen. ${esc(p.name)} sieht nichts.`:`Reservierungen sind anonym. ${esc(p.name)} sieht nie, was reserviert oder gekauft wurde.`}${oc!=='none'?` Passende zu ${occL(oc)} stehen zuerst.`:''}</p>
-   <div class="wgrid ${S.ui.big?'big':''}">${open.map(w=>{
+   <div class="wgrid ${S.ui.big?'big':''}">${open.map(w0=>{const w=preview?{...w0,res:null,bought:false}:w0;
     const r=rel(w),isCat=w.kind==='kategorie';
     let st='',btn='';
     if(w.bought)st=`<div class="state me">${ic('check','sm')}Von dir gekauft. Bleibt eine Überraschung.</div>`;
     else if(w.res==='me'){st=`<div class="state me">${ic('lock','sm')}Von dir reserviert</div>`;btn=`<button class="btn pri sm" data-act="bought" data-id="${w.id}">Gekauft</button><button class="btn ghost sm" data-act="release" data-id="${w.id}">Freigeben</button>`}
     else if(w.res==='other')st=`<div class="state res">${ic('lock','sm')}Bereits reserviert</div>`;
     else btn=isCat?`<button class="btn sec sm" data-act="suggest" data-id="${w.id}">${ic('spark','sm')}Weitere Vorschläge</button><button class="btn pri sm" data-act="reserve" data-id="${w.id}">Reservieren</button>`:`<button class="btn pri sm" data-act="reserve" data-id="${w.id}">Reservieren</button>`;
+    if(preview)btn='';
     return `<article class="wcard ${(w.res==='other'||r===0)?'dim':''}"><div style="position:relative">${WishArt(w)}<div class="top"><span class="tag">${cat(w.c).n}</span><span class="dots" aria-label="Priorität: ${PRIO[w.prio]}">${[1,2,3].map(n=>`<i class="${n<=w.prio?'on':''}"></i>`).join('')}</span></div></div>
      <div class="bd"><h3>${esc(w.t)}</h3><p class="note">${esc(w.note||'')}</p>
       <div class="chips meta">${w.via?`<span class="chip gold">Tipp von ${esc(crea(w.via).handle)}</span>`:''}${r===2&&w.occ.length?`<span class="chip gold">Für ${occL(oc)}</span>`:''}${r===0?`<span class="chip">Eher: ${w.occ.map(occL).join(', ')}</span>`:''}${isCat?`<span class="chip">Kategorie${w.budget?' bis '+money(w.budget):''}</span>`:''}</div>
