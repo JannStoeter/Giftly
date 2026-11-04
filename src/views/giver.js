@@ -68,7 +68,7 @@ export function Ideen(p){
   }
   return `<form data-form="idea" class="ibar"><label for="idea" style="position:absolute;left:-9999px">Deine Geschenkidee</label><input id="idea" name="idea" class="inp" placeholder="Deine Idee, z. B. Kaffeemühle, Pfanne, Duftkerze" value="${esc(u.idea)}" autocomplete="off"><button class="btn pri" type="submit">${ic('search','sm')}Prüfen</button></form>
    <div class="chips" style="margin-bottom:6px"><span class="muted" style="font-size:13px;align-self:center">Probier:</span>${['Kaffeemühle','Pfanne','Duftkerze','Vase'].map(x=>`<button class="chip" data-act="try" data-v="${x}">${x}</button>`).join('')}</div>
-   ${out||`<p class="muted" style="margin-top:16px;max-width:520px">Giftly gleicht deine Idee mit Wünschen, Besitz, bisherigen Geschenken und No-Gos von ${esc(p.name)} ab.</p>`}`;
+   ${out||`<p class="muted" style="margin-top:16px;max-width:520px">Wishtale gleicht deine Idee mit Wünschen, Besitz, bisherigen Geschenken und No-Gos von ${esc(p.name)} ab.</p>`}`;
 }
 export function RecCard(g){
   const {it,why}=g,saved=S.ui.saved[it.id];

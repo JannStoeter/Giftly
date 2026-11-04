@@ -1,4 +1,4 @@
-# Giftly
+# Wishtale
 
 Persönliches Geschenkprofil, Wunschlisten, Geschenk-Historie und kluge Geschenkideen.
 

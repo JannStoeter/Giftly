@@ -86,12 +86,12 @@ S.accounts.emma={id:'emma',name:'Emma',age:6,managed:true,tone:1,invited:['Oma',
 export function switchTo(id){const u=S.ui;u.acct=id;u.wf='offen';u.wc='alle';u.preview=false;u.swap=null;u.swapSel=[];u.modal=null}
 
 /* ============ Persistenz (localStorage) ============ */
-const KEY='giftly:v1';
+const KEY='wishtale:v1';
 const PERSIST_UI=['acct','occ','person','big','budget','saved','cf'];
 
 export function loadState(){
   try{
-    const d=JSON.parse(localStorage.getItem(KEY)||'null');
+    const d=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem('giftly:v1')||'null'); // alter Schlüssel: Daten aus der Zeit vor der Umbenennung übernehmen
     if(!d)return;
     if(d.accounts&&d.accounts.me)S.accounts=d.accounts;
     if(d.people&&Object.keys(d.people).length)S.people=d.people;

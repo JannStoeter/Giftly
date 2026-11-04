@@ -18,7 +18,7 @@ export function Wuensche(){
   return `<div class="wrap">
    <div class="pagehead"><p class="eyebrow">Meine Wünsche</p><h1>${m.managed?`${open} Wünsche von ${esc(m.name)}.`:`${open} Dinge, die mir Freude machen würden.`}</h1></div>
    <div class="banner" style="margin-bottom:8px">${ic('lock')}<span>${m.managed?`Als Elternteil siehst du, was reserviert oder gekauft ist. ${esc(m.name)} sieht es nicht.`:'Überraschungsschutz: Du siehst nicht, ob jemand einen Wunsch reserviert oder gekauft hat.'}</span></div>
-   <p class="muted" style="font-size:14px;margin-bottom:16px">Tipp: Ein Kategorie-Wunsch wie „Hochwertige Pfanne bis 100 €“ bekommt von Giftly einen konkreten Produktvorschlag für Schenkende. Auch ohne Link suchen wir bei jedem Wunsch ein passendes Amazon-Produkt.</p>
+   <p class="muted" style="font-size:14px;margin-bottom:16px">Tipp: Ein Kategorie-Wunsch wie „Hochwertige Pfanne bis 100 €“ bekommt von Wishtale einen konkreten Produktvorschlag für Schenkende. Auch ohne Link suchen wir bei jedem Wunsch ein passendes Amazon-Produkt.</p>
    <div class="row" style="justify-content:space-between;margin-bottom:16px">
      <div class="seg" role="group" aria-label="Status">${[['offen','Offen'],['selbst','Selbst gekauft'],['alle','Alle']].map(([k,l])=>`<button class="${u.wf===k?'on':''}" data-act="wf" data-v="${k}">${l}</button>`).join('')}</div>
      <div class="seg" role="group" aria-label="Kategorie"><button class="${u.wc==='alle'?'on':''}" data-act="wc" data-v="alle">Alle</button>${used.map(c=>`<button class="${u.wc===c?'on':''}" data-act="wc" data-v="${c}">${cat(c).n}</button>`).join('')}</div>

@@ -22,7 +22,7 @@ export function LookView(){
      <p class="eyebrow" style="margin-bottom:8px">Shop the Look</p>
      ${pts.map((o,i)=>{const x=cprod(o.pid);return `<div class="altrow" style="grid-template-columns:28px 64px 1fr auto"><span class="numb">${i+1}</span>${pimg(x)}<div><strong>${esc(x.t)}</strong><br><span class="muted" style="font-size:13px">ca. ${money(x.p)}</span></div>${mine.includes(x.id)?`<span class="chip ok">${ic('check','sm')}Gemerkt</span>`:`<button class="btn sec sm" data-act="cadd" data-id="${x.id}" data-cid="${c.id}">${ic('plus','sm')}Wunsch</button>`}</div>`}).join('')}
      <div class="row" style="margin-top:12px"><button class="btn pri" data-act="lookall">Alle auf meine Wunschliste</button><button class="btn sec" data-act="style" data-id="${c.id}">${styleOn?`${ic('check','sm')}Stil-Vorbild`:'Als Stil-Vorbild'}</button></div>
-     <p class="disc" style="margin-top:16px"><b>Transparenz:</b> Kauft jemand einen übernommenen Wunsch über Giftly, erhält ${esc(c.name.split(' ')[0])} eine Provision. Dir kostet das nichts. Beispieldaten: fiktive Creatorin, Fotos: Unsplash, Preise und Links simuliert.</p>
+     <p class="disc" style="margin-top:16px"><b>Transparenz:</b> Kauft jemand einen übernommenen Wunsch über Wishtale, erhält ${esc(c.name.split(' ')[0])} eine Provision. Dir kostet das nichts. Beispieldaten: fiktive Creatorin, Fotos: Unsplash, Preise und Links simuliert.</p>
     </div></div></div>`;
 }
 export function Entdecken(){
@@ -57,6 +57,6 @@ export function Entdecken(){
    <div class="wgrid">${c.items.map(cprod).map(x=>`
     <article class="wcard">${pimg(x)}<div class="bd"><h3>${esc(x.t)}</h3><p class="quote">„${esc(x.note)}“</p><div class="chips"><span class="chip">ca. ${money(x.p)}</span></div>
      <div class="acts">${mine.includes(x.id)?`<span class="state me">${ic('check','sm')}Auf deiner Wunschliste</span>`:`<button class="btn pri sm" data-act="cadd" data-id="${x.id}" data-cid="${c.id}">${ic('plus','sm')}Auf meine Wunschliste</button>`}</div></div></article>`).join('')}</div>
-   <p class="disc" style="margin-top:18px"><b>Transparenz:</b> Kauft jemand einen übernommenen Wunsch über Giftly, erhält ${esc(c.name.split(' ')[0])} eine Provision. Dir kostet das nichts. Beispieldaten: fiktive Creatorin, Preise und Links simuliert.</p>
+   <p class="disc" style="margin-top:18px"><b>Transparenz:</b> Kauft jemand einen übernommenen Wunsch über Wishtale, erhält ${esc(c.name.split(' ')[0])} eine Provision. Dir kostet das nichts. Beispieldaten: fiktive Creatorin, Preise und Links simuliert.</p>
   </div>`;
 }

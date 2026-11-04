@@ -31,7 +31,7 @@ export function PickModal(){
    :`<p class="muted">Im Budget gibt es keinen passenden Vorschlag. Schau in die Empfehlungen.</p>`}
    ${rest.length?`<h3 style="font-size:22px;margin:18px 0 8px">Alternativen</h3>${rest.map(r=>`<div class="altrow">${art(r.x.a,r.x.tone)}<div><strong>${esc(r.x.t)}</strong><br><span class="muted" style="font-size:13.5px">${esc(r.x.brand)} · ${r.x.price?money(r.x.price)+' (Stand '+PRICE_DATE+')':'Preis bei Amazon prüfen'}</span></div><button class="btn sec sm" data-act="buy" data-id="${r.x.id}" data-wid="${w.id}">Wählen</button></div>`).join('')}`:''}
    ${over?`<p class="muted" style="font-size:13px;margin-top:10px">${over} Produkt${over>1?'e':''} über dem Budget ausgeblendet.</p>`:''}
-   <p class="disc"><b>Anzeige, Partnerlinks:</b> Kaufst du über diese Links, erhält Giftly eventuell eine Provision. Für dich ändert sich der Preis nicht.</p>
+   <p class="disc"><b>Anzeige, Partnerlinks:</b> Kaufst du über diese Links, erhält Wishtale eventuell eine Provision. Für dich ändert sich der Preis nicht.</p>
    <p class="disc">Preise stammen aus Beobachtungen bei Amazon und können abweichen; wo kein Preis steht, ist er uns nicht bekannt. Die Links führen zu den Suchergebnissen der Shops, dort siehst du den aktuellen Preis. ${AMAZON_DISCLOSURE}</p>
    <div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn ghost" data-act="close">Schließen</button></div></div></div>`;
 }
@@ -40,7 +40,7 @@ export function AmazonModal(){
   const ideas=[...new Set([...S.me.interests,...S.me.wishes.filter(w=>w.status==='offen').map(w=>w.t.split(',')[0])])].slice(0,6);
   return `<div class="scrim" data-act="closebg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mt">
    <h2 id="mt">Bei Amazon stöbern</h2>
-   <p class="muted" style="font-size:14.5px;margin-bottom:14px">Suche bei Amazon, öffne ein Produkt und komm hierher zurück. Den Link fügst du ein, den Rest übernimmt Giftly.</p>
+   <p class="muted" style="font-size:14.5px;margin-bottom:14px">Suche bei Amazon, öffne ein Produkt und komm hierher zurück. Den Link fügst du ein, den Rest übernimmt Wishtale.</p>
    <section class="azstep"><p class="eyebrow">1 · Suchen</p>
     <form data-form="azsearch" class="addrow"><label for="azq" style="position:absolute;left:-9999px">Suchbegriff</label><input id="azq" name="q" data-az="q" class="inp" value="${esc(z.q)}" placeholder="z. B. Kaffeemühle, Wanderstöcke" autocomplete="off"><button class="btn amz" type="submit">Bei Amazon suchen ${ic('arrow','sm')}</button></form>
     <div class="chips" style="margin-top:8px">${ideas.map(i=>`<button type="button" class="chip" data-act="azq" data-v="${esc(i)}">${esc(i)}</button>`).join('')}</div>

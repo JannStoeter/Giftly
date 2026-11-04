@@ -24,7 +24,7 @@ export function Start(){
   }
   return `<div class="wrap"><div class="ob">
    <div class="prog" aria-label="Schritt ${i+1} von ${STEPS.length}">${STEPS.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join('')}</div>
-   <p class="eyebrow">Dein Geschenkprofil · ${i+1} von ${STEPS.length}</p>
+   <p class="eyebrow">Dein Wishtale · ${i+1} von ${STEPS.length}</p>
    ${S.me.managed?`<div class="banner green" style="margin-top:10px">${ic('user')}<span>Du richtest das Profil für ${esc(S.me.name)} ein. Am schönsten geht das gemeinsam.</span></div>`:''}
    <h1>${st.t}</h1><p class="muted" style="font-size:17px">${st.h}</p>
    ${body}
@@ -50,7 +50,7 @@ export function Profil(){
   const line=`${m.name} ${m.interests.length?`liebt ${m.interests.slice(0,3).map(esc).join(', ')}`:'hat noch keine Interessen hinterlegt'}. ${m.nogos.length?`Lieber nichts mit ${m.nogos.slice(0,2).map(esc).join(' oder ')}.`:''} ${m.alts.length?`Wenn die Idee fehlt: ${esc(m.alts[0])}.`:''}`;
   return `<div class="wrap">
    <div class="pcard"><span class="av t${m.tone}">${initials(m.name)}</span>
-    <div><p class="eyebrow" style="color:#B8C4A8">Geschenkprofil</p><h1>${esc(m.name)}</h1><p style="margin-top:8px">${line}</p></div>
+    <div><p class="eyebrow" style="color:#B8C4A8">Wishtale</p><h1>${esc(m.name)}</h1><p style="margin-top:8px">${line}</p></div>
     <button class="btn gold sm" data-act="edit">Profil bearbeiten</button></div>
    <div class="row" style="margin:18px 0 4px;justify-content:space-between">
      <div class="seg" role="group" aria-label="Ansicht"><button class="${!pv?'on':''}" data-act="preview" data-v="0">Meine Ansicht</button><button class="${pv?'on':''}" data-act="preview" data-v="1">So sehen Schenkende es</button></div>
@@ -64,7 +64,7 @@ export function Profil(){
    ${sec('tries','Möchte ich ausprobieren',chips(m.tries,'gold'))}
    ${sec('nogos','Bitte nicht',chips(m.nogos,'warn'))}
    ${sec('alts','Alternativen, wenn keine Idee passt',chips(m.alts,'ok'))}
-   ${pv?'':`<section class="psec"><div class="hd"><h3>Dein Feedback</h3>${VisPill('nur')}</div><p class="muted">Wie dir Geschenke gefallen haben, sehen nur du und Giftly. Schenkende erhalten höchstens eine freundliche Nachricht.</p></section>`}
+   ${pv?'':`<section class="psec"><div class="hd"><h3>Dein Feedback</h3>${VisPill('nur')}</div><p class="muted">Wie dir Geschenke gefallen haben, sehen nur du und Wishtale. Schenkende erhalten höchstens eine freundliche Nachricht.</p></section>`}
    ${pv?'':Legend()}
   </div>`;
 }

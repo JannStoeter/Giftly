@@ -4,7 +4,7 @@ import { PRICE_DATE } from '../data/content.js';
 
 const REL = 'noopener noreferrer sponsored nofollow';
 const SOURCE = {
-  erzeugt: 'Vorschlag von Giftly',
+  erzeugt: 'Vorschlag von Wishtale',
   vorschlag: 'Vorschlag im Budget',
   katalog: 'Passendes Produkt',
   link: 'Gewünschtes Produkt'

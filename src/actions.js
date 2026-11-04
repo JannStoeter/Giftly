@@ -24,7 +24,7 @@ const A={
  go(el){const v=el.dataset.v;if(v==='entdecken'){S.ui.look=null;S.ui.creator=null}if(v==='start')S.ui.step=0;location.hash='#'+v;if(location.hash==='#'+v&&S.ui.view===v)render(true)},
  pick(el){const k=el.dataset.k,v=el.dataset.v,a=S.me[k],i=a.indexOf(v);i>-1?a.splice(i,1):a.push(v);render()},
  next(){S.ui.step++;render(true)},prev(){S.ui.step--;render(true)},
- finish(){toast('Dein Geschenkprofil ist bereit.');location.hash='#profil'},
+ finish(){toast('Dein Wishtale ist bereit.');location.hash='#profil'},
  edit(){S.ui.step=0;location.hash='#start'},
  preview(el){S.ui.preview=el.dataset.v==='1';render()},
  vis(el){const o=['alle','giver','privat'],k=el.dataset.k;S.me.vis[k]=o[(o.indexOf(S.me.vis[k]||'giver')+1)%3];render()},
@@ -48,7 +48,7 @@ const A={
  fb(el){
   const g=S.me.inbox.find(x=>x.id===el.dataset.id),v=el.dataset.v;
   if(v==='swap'){S.ui.swap=g.id;S.ui.swapSel=S.me.alts.slice(0,2);render();return}
-  const map={love:['ja',true,true,'Schön. Giftly merkt sich, was dir gefällt.'],happy:['ja',true,true,'Gespeichert. Das fließt in künftige Empfehlungen ein.'],meh:['teils',true,false,'Gespeichert, nur für dich sichtbar.'],have:['teils',true,false,'Gespeichert. Ähnliches wird künftig nicht mehr vorgeschlagen.']};
+  const map={love:['ja',true,true,'Schön. Wishtale merkt sich, was dir gefällt.'],happy:['ja',true,true,'Gespeichert. Das fließt in künftige Empfehlungen ein.'],meh:['teils',true,false,'Gespeichert, nur für dich sichtbar.'],have:['teils',true,false,'Gespeichert. Ähnliches wird künftig nicht mehr vorgeschlagen.']};
   const [l,h,a,msg]=map[v];
   S.me.inbox=S.me.inbox.filter(x=>x.id!==g.id);
   S.me.history.unshift({id:g.id,what:g.what,from:g.from,when:'November 2026',liked:l,have:h,again:a,a:g.a,tone:g.tone,kw:g.kw});

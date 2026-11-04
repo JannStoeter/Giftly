@@ -3,7 +3,7 @@
  *  1. Kategorie-Wunsch ("Pfanne bis 100 €")  -> bester Treffer im Budget
  *  2. Link der Person                         -> genau dieser Link
  *  3. Treffer in Produktdaten / Katalog       -> Produkt mit Amazon-Seite (ASIN) bzw. Suche
- *  4. sonst                                   -> von Giftly erzeugter Vorschlag (Amazon-Suche zur Wunschbeschreibung)
+ *  4. sonst                                   -> von Wishtale erzeugter Vorschlag (Amazon-Suche zur Wunschbeschreibung)
  */
 import { same, overlap, norm, kwOf } from './util.js';
 import { PRODUCTS, CATALOG } from '../data/content.js';

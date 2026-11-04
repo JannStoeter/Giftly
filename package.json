@@ -1,9 +1,9 @@
 {
-  "name": "giftly",
+  "name": "wishtale",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Giftly: persönliches Geschenkprofil, Wunschlisten und kluge Geschenkideen",
+  "description": "Wishtale: persönliches Geschenkprofil, Wunschlisten und kluge Geschenkideen",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

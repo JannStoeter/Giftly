@@ -4,7 +4,7 @@ import { photoUrl } from './src/data/photos.js';
 
 /* Ersetzt {{photo:<key>:<breite>}} in den HTML-Seiten durch die Foto-URL aus dem Manifest. */
 const photoPlaceholders = () => ({
-  name: 'giftly-photo-placeholders',
+  name: 'wishtale-photo-placeholders',
   transformIndexHtml: html =>
     html.replace(/\{\{photo:([\w:-]+?):(\d+)\}\}/g, (_, key, w) => photoUrl(key, +w) ?? ''),
 });
