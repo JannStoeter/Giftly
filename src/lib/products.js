@@ -19,12 +19,12 @@ export function productFor(person, w) {
     if (top) return fromProduct(top.x, 'vorschlag');
   }
   const own = deepLink(w.link);
-  if (own) return { t: w.t, url: own, host: new URL(own).hostname.replace(/^www\./, ''), source: 'link', direct: true };
+  if (own) return { t: w.t, url: own, host: new URL(own).hostname.replace(/^www\./, ''), price: w.price || null, priceBy: 'user', source: 'link', direct: true };
   const brandHit = PRODUCTS.find(x => w.kw.some(k => same(k, x.cat)) && norm(w.t).includes(norm(x.brand)));
   const catHit = brandHit || PRODUCTS.find(x => w.kw.some(k => same(k, x.cat)));
   if (catHit && w.kind !== 'frei') return fromProduct(catHit, 'katalog');
   const cat = CATALOG.find(i => i.k === 'ding' && overlap(w.kw, i.kw));
-  if (cat && w.kind !== 'frei') return { t: cat.t, url: searchUrl.amazon(cat.t), host: 'amazon.de', price: cat.p, a: cat.a, source: 'katalog', direct: false };
+  if (cat && w.kind !== 'frei') return { t: cat.t, url: searchUrl.amazon(cat.t), host: 'amazon.de', range: cat.p, a: cat.a, source: 'katalog', direct: false };
   if (w.kind === 'erlebnis' || w.kind === 'frei') return null; // dafür gibt es Ideen (ideasFor)
   return { t: w.t, url: searchUrl.amazon(w.t), host: 'amazon.de', source: 'erzeugt', direct: false };
 }
@@ -37,7 +37,7 @@ function deepLink(raw) {
   return pathname.length > 1 || search ? u : null;
 }
 
-const fromProduct = (x, source) => ({ t: x.t, url: amazonUrl(x), host: 'amazon.de', price: x.p, a: x.a, tone: x.tone, brand: x.brand, source, direct: !!x.asin });
+const fromProduct = (x, source) => ({ t: x.t, url: amazonUrl(x), host: 'amazon.de', price: x.price, a: x.a, tone: x.tone, brand: x.brand, source, direct: !!x.asin });
 
 /** Ideen zu freien Wünschen ("Etwas Schönes für den Balkon"): passende Katalogprodukte. */
 export function ideasFor(person, w, n = 3) {

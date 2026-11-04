@@ -3,10 +3,9 @@ import { esc, ic, money, kwOf } from '../lib/util.js';
 import { art } from '../lib/art.js';
 import { CATS, OCC, cat, crea, cprod, occL, occTip, PRIO } from '../data/content.js';
 import { ownedOf, excluded, recommend } from '../logic.js';
-import { WishArt, densSeg } from './wishes.js';
+import { WishArt, densSeg, slot } from './wishes.js';
 import { AMAZON_DISCLOSURE, searchUrl } from '../lib/shops.js';
-import { productFor, ideasFor } from '../lib/products.js';
-import { ProductBlock, IdeasBlock } from './product.js';
+import { EmptyBlock } from './product.js';
 
 export function Schenken(){
   const u=S.ui,p=S.people[u.person];
@@ -39,12 +38,12 @@ export function GWishes(p){
     else if(w.res==='other')st=`<div class="state res">${ic('lock','sm')}Bereits reserviert</div>`;
     else btn=isCat?`<button class="btn sec sm" data-act="suggest" data-id="${w.id}">${ic('spark','sm')}Weitere Vorschläge</button><button class="btn pri sm" data-act="reserve" data-id="${w.id}">Reservieren</button>`:`<button class="btn pri sm" data-act="reserve" data-id="${w.id}">Reservieren</button>`;
     return `<article class="wcard ${(w.res==='other'||r===0)?'dim':''}"><div style="position:relative">${WishArt(w)}<div class="top"><span class="tag">${cat(w.c).n}</span><span class="dots" aria-label="Priorität: ${PRIO[w.prio]}">${[1,2,3].map(n=>`<i class="${n<=w.prio?'on':''}"></i>`).join('')}</span></div></div>
-     <div class="bd"><h3>${esc(w.t)}</h3>${w.note?`<p class="note">${esc(w.note)}</p>`:''}
-      <div class="chips">${w.via?`<span class="chip gold">Tipp von ${esc(crea(w.via).handle)}</span>`:''}${r===2&&w.occ.length?`<span class="chip gold">Für ${occL(oc)}</span>`:''}${r===0?`<span class="chip">Eher: ${w.occ.map(occL).join(', ')}</span>`:''}${isCat?`<span class="chip">Kategorie${w.budget?' bis '+money(w.budget):''}</span>`:''}</div>
-      ${st}${w.res==='other'||w.bought?'':ProductBlock(productFor(p,w))}${w.kind==='frei'&&!w.res?IdeasBlock(ideasFor(p,w)):''}<div class="acts">${btn}</div></div></article>`}).join('')}</div>
+     <div class="bd"><h3>${esc(w.t)}</h3><p class="note">${esc(w.note||'')}</p>
+      <div class="chips meta">${w.via?`<span class="chip gold">Tipp von ${esc(crea(w.via).handle)}</span>`:''}${r===2&&w.occ.length?`<span class="chip gold">Für ${occL(oc)}</span>`:''}${r===0?`<span class="chip">Eher: ${w.occ.map(occL).join(', ')}</span>`:''}${isCat?`<span class="chip">Kategorie${w.budget?' bis '+money(w.budget):''}</span>`:''}</div>
+      <div class="stateslot">${st}</div><div class="prodslot">${w.res==='other'||w.bought?EmptyBlock('Schon vergeben','Dieser Wunsch ist reserviert oder gekauft.'):slot(p,w)}</div><div class="acts">${btn}</div></div></article>`}).join('')}</div>
   ${owned.length?`<section class="sect"><h3>Hat ${esc(p.name)} schon</h3><div class="chips">${owned.map(w=>`<span class="chip">${ic('check','sm')}${esc(w.t)}</span>`).join('')}</div></section>`:''}
   ${RecSection(p,open.length)}
-  <p class="disc">Links zu Shops sind Partnerlinks (Anzeige). ${AMAZON_DISCLOSURE} Preise sind Richtwerte, den aktuellen Preis siehst du bei Amazon.</p>
+  <p class="disc">Links zu Shops sind Partnerlinks (Anzeige). ${AMAZON_DISCLOSURE} Preise können abweichen, maßgeblich ist der Preis bei Amazon.</p>
   <section class="sect"><h3>Schon verschenkt</h3><div class="chips">${p.gifts.map(g=>`<span class="chip">${esc(g.what)} · ${esc(g.from)}</span>`).join('')}</div></section>`;
 }
 export function Ideen(p){
@@ -76,7 +75,7 @@ export function RecCard(g){
   return `<article class="rec">${art(it.a,CATS.find(c=>c.id===it.c).t)}<div>
    <h3>${esc(it.t)}</h3>
    <p class="why">${why.slice(0,3).join(' ')}</p>
-   <div class="row" style="gap:6px"><span class="chip">${money(it.p)}</span><span class="chip ${it.k==='erlebnis'?'gold':''}">${it.k==='erlebnis'?'Erlebnis':'Geschenk'}</span>${it.k==='ding'?`<a class="btn amz sm" href="${searchUrl.amazon(it.t)}" target="_blank" rel="noopener noreferrer sponsored nofollow">Bei Amazon suchen</a>`:''}<button class="chip ${saved?'on':''}" data-act="save" data-id="${it.id}" aria-pressed="${!!saved}">${saved?'Gemerkt':'Merken'}</button></div></div></article>`;
+   <div class="row" style="gap:6px"><span class="chip" title="Schätzung, kein Live-Preis">Preisrahmen ca. ${money(it.p)}</span><span class="chip ${it.k==='erlebnis'?'gold':''}">${it.k==='erlebnis'?'Erlebnis':'Geschenk'}</span>${it.k==='ding'?`<a class="btn amz sm" href="${searchUrl.amazon(it.t)}" target="_blank" rel="noopener noreferrer sponsored nofollow">Bei Amazon suchen</a>`:''}<button class="chip ${saved?'on':''}" data-act="save" data-id="${it.id}" aria-pressed="${!!saved}">${saved?'Gemerkt':'Merken'}</button></div></div></article>`;
 }
 export function StyleBlock(p){
   const out=(p.style||[]).map(x=>{
@@ -85,7 +84,7 @@ export function StyleBlock(p){
     if(!items.length)return '';
     return `<section class="panel" style="margin-bottom:20px;display:grid;gap:10px"><div><p class="eyebrow" style="color:var(--gold)">Im Notfall</p><h3 style="font-size:26px;margin-top:4px">${esc(c.scope)} von ${esc(c.handle)}</h3>
      <p class="muted" style="font-size:14.5px;margin-top:4px">${esc(p.name)} verweist auf diesen Stil. Wenn dir nichts Konkretes einfällt, passt etwas aus der Liste.</p></div>
-     <div class="recs grid">${items.map(it=>`<article class="rec">${art(it.a,it.tone)}<div><h3>${esc(it.t)}</h3><p class="quote" style="margin:4px 0 8px">„${esc(it.note)}“</p><div class="row" style="gap:6px"><span class="chip">${money(it.p)}</span><button class="chip on" data-act="cbuy" data-id="${it.id}" data-cid="${c.id}">Ansehen · Anzeige</button></div></div></article>`).join('')}</div>
+     <div class="recs grid">${items.map(it=>`<article class="rec">${art(it.a,it.tone)}<div><h3>${esc(it.t)}</h3><p class="quote" style="margin:4px 0 8px">„${esc(it.note)}“</p><div class="row" style="gap:6px"><span class="chip" title="Schätzung, kein Live-Preis">Preisrahmen ca. ${money(it.p)}</span><button class="chip on" data-act="cbuy" data-id="${it.id}" data-cid="${c.id}">Ansehen · Anzeige</button></div></div></article>`).join('')}</div>
      <p class="disc" style="margin:0">Anzeige: Kaufst du über diese Links, erhält ${esc(c.handle)} eine Provision. Für dich ändert sich der Preis nicht.</p></section>`;
   }).join('');
   return out;
@@ -95,7 +94,7 @@ export function Recs(p){
   const list=good.filter(g=>(u.kind==='alle'||g.it.k===u.kind)&&g.it.p<=u.budget).slice(0,8);
   return `${StyleBlock(p)}<div class="row" style="justify-content:space-between;margin-bottom:14px">
     <div class="seg" role="group" aria-label="Art">${[['alle','Alle'],['ding','Geschenke'],['erlebnis','Erlebnisse']].map(([k,l])=>`<button class="${u.kind===k?'on':''}" data-act="kind" data-v="${k}">${l}</button>`).join('')}</div>
-    <label class="range" for="bud">Bis <b style="color:var(--ink)" id="budv">${money(u.budget)}</b><input id="bud" type="range" min="20" max="100" step="5" value="${u.budget}"></label></div>
+    <label class="range" for="bud">Preisrahmen bis <b style="color:var(--ink)" id="budv">${money(u.budget)}</b><input id="bud" type="range" min="20" max="100" step="5" value="${u.budget}"></label></div>
   <div class="recs grid">${list.map(RecCard).join('')||'<p class="muted">Nichts im Budget. Erhöhe es etwas.</p>'}</div>
   ${skip.length?`<div class="skipped"><p class="eyebrow">Bewusst ausgelassen</p>${skip.slice(0,5).map(s=>`<span>${ic('x','sm')} ${esc(s.it.t)}: ${esc(s.why)}</span>`).join('')}</div>`:''}
   <section class="sect"><h3>Keine Idee? Das mag ${esc(p.name)} als Alternative</h3><div class="chips">${p.alts.map(a=>`<span class="chip ok">${esc(a)}</span>`).join('')}</div></section>`;

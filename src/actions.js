@@ -1,12 +1,26 @@
 import { S, W, switchTo, resetState } from './state.js';
-import { $, toast, kwOf, nid, money } from './lib/util.js';
-import { LOOKS, PRODUCTS, PRIO, crea, cprod, cat } from './data/content.js';
+import { $, toast, kwOf, nid, money, overlap } from './lib/util.js';
+import { LOOKS, PRODUCTS, CATALOG, PRIO, crea, cprod, cat } from './data/content.js';
 import { check } from './logic.js';
 import { amazonUrl } from './lib/products.js';
+import { parseAmazonInput, searchUrl } from './lib/shops.js';
 import { render } from './render.js';
 
 export const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-export const A={
+export 
+/* ---- Amazon stöbern ---- */
+const parsePrice=v=>{const n=parseFloat(String(v||'').replace(/\./g,'').replace(',','.'));return Number.isFinite(n)&&n>0?n:null};
+function azParse(text){
+  const z=S.ui.az,r=parseAmazonInput(text);
+  z.text=text;z.res=r;
+  if(!r.error){
+    z.title=z.title||r.title;
+    const guess=CATALOG.find(i=>overlap(kwOf(r.title),i.kw));
+    z.c=guess?guess.c:(z.c||'wohnen');
+  }
+  render();
+}
+const A={
  go(el){const v=el.dataset.v;if(v==='entdecken'){S.ui.look=null;S.ui.creator=null}if(v==='start')S.ui.step=0;location.hash='#'+v;if(location.hash==='#'+v&&S.ui.view===v)render(true)},
  pick(el){const k=el.dataset.k,v=el.dataset.v,a=S.me[k],i=a.indexOf(v);i>-1?a.splice(i,1):a.push(v);render()},
  next(){S.ui.step++;render(true)},prev(){S.ui.step--;render(true)},
@@ -20,6 +34,12 @@ export const A={
  delw(el){S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
  modal(el){S.ui.modal=el.dataset.v;render();setTimeout(()=>document.querySelector('.sheet input,.sheet select')?.focus(),30)},
  close(){S.ui.modal=null;render()},
+ azopen(){S.ui.az={q:'',text:'',res:null,title:'',price:'',c:'wohnen',searched:false};S.ui.modal='amazon';render();setTimeout(()=>$('#azq')?.focus(),30)},
+ azq(el){S.ui.az.q=el.dataset.v;render()},
+ azclip(){
+  if(!navigator.clipboard?.readText){toast('Dein Browser erlaubt kein Einfügen per Knopf. Füge den Link mit Strg+V ins Feld ein.');return}
+  navigator.clipboard.readText().then(azParse).catch(()=>toast('Zwischenablage nicht lesbar. Füge den Link mit Strg+V ins Feld ein.'));
+ },
  reset(){if(confirm('Alle Änderungen verwerfen und die Beispieldaten wiederherstellen?'))resetState()},
  closebg(el,e){if(e.target===el)A.close()},
  liked(el){const g=S.me.history.find(x=>x.id===el.dataset.id),o=['ja','teils','nein'];g.liked=o[(o.indexOf(g.liked)+1)%3];render()},
@@ -74,10 +94,33 @@ export const A={
 document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;const f=A[t.dataset.act];if(f)f(t,e)});
 document.addEventListener('input',e=>{if(e.target.id==='bud'){S.ui.budget=+e.target.value;$('#budv').textContent=money(S.ui.budget)}});
 document.addEventListener('change',e=>{if(e.target.id==='bud'){S.ui.budget=+e.target.value;render()}});
+document.addEventListener('input',e=>{const f=e.target.dataset?.az;if(f&&S.ui.az)S.ui.az[f]=e.target.value});
+document.addEventListener('change',e=>{const f=e.target.dataset?.az;if(f&&S.ui.az)S.ui.az[f]=e.target.value});
+document.addEventListener('paste',e=>{
+  if(e.target.id!=='azurl')return;
+  e.preventDefault();azParse(e.clipboardData.getData('text'));
+});
+/* Zurück aus dem Amazon-Tab: Link aus der Zwischenablage automatisch übernehmen, falls erlaubt. */
+window.addEventListener('focus',()=>{
+  const z=S.ui.az;
+  if(S.ui.modal!=='amazon'||!z?.searched||(z.res&&!z.res.error)||!navigator.clipboard?.readText)return;
+  navigator.clipboard.readText().then(t=>{if(/amazon\.de\//i.test(t))azParse(t)}).catch(()=>{});
+});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.ui.modal)A.close()});
 document.addEventListener('submit',e=>{
   const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();
   const fd=new FormData(f),kind=f.dataset.form;
+  if(kind==='azsearch'){
+    const q=(fd.get('q')||'').trim();S.ui.az.q=q;S.ui.az.searched=true;
+    window.open(q?searchUrl.amazon(q):'https://www.amazon.de/?tag=jannst-21','_blank','noopener');return;
+  }
+  if(kind==='azlink'){azParse(fd.get('text')||'');return}
+  if(kind==='azadd'){
+    const z=S.ui.az,t=(fd.get('t')||'').trim();if(!t||!z.res||z.res.error)return;
+    const c=fd.get('c');
+    S.me.wishes.unshift(W({t,c,kind:'produkt',prio:2,link:z.res.url,price:parsePrice(fd.get('price')),a:cat(c).a,tone:cat(c).t,kw:kwOf(t)}));
+    S.ui.modal=null;S.ui.az=null;S.ui.wf='offen';S.ui.wc='alle';toast('Auf deiner Wunschliste. Der Link zu Amazon ist gespeichert.');render();return;
+  }
   if(kind==='child'){
     const name=(fd.get('name')||'').trim();if(!name)return;
     const id=nid('c');
@@ -97,7 +140,7 @@ document.addEventListener('submit',e=>{
   if(kind==='wish'){
     const file=fd.get('img'),done=img=>{
       const c=fd.get('c'),t=fd.get('t').trim(),k=fd.get('kind');
-      S.me.wishes.unshift(W({t,c,kind:k,prio:+fd.get('prio'),link:(fd.get('link')||'').trim(),occ:fd.getAll('occ'),budget:+fd.get('budget')||null,note:(fd.get('note')||'').trim(),vis:fd.get('vis'),a:k==='erlebnis'?'ticket':cat(c).a,tone:cat(c).t,img}));
+      S.me.wishes.unshift(W({t,c,kind:k,prio:+fd.get('prio'),link:(fd.get('link')||'').trim(),price:parsePrice(fd.get('price')),occ:fd.getAll('occ'),budget:+fd.get('budget')||null,note:(fd.get('note')||'').trim(),vis:fd.get('vis'),a:k==='erlebnis'?'ticket':cat(c).a,tone:cat(c).t,img}));
       S.ui.modal=null;S.ui.wf='offen';S.ui.wc='alle';toast('Wunsch gespeichert.');render();
     };
     if(file&&file.size){const r=new FileReader();r.onload=()=>done(r.result);r.onerror=()=>done(null);r.readAsDataURL(file)}else done(null);

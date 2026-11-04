@@ -45,3 +45,28 @@ export const linkChip = (href, label) =>
   `<a class="chip" href="${href}" target="_blank" rel="noopener noreferrer sponsored">${label}</a>`;
 
 export const shopChips = q => shopLinks(q).map(s => linkChip(s.u, s.n)).join('');
+
+/**
+ * Liest einen von Amazon kopierten Link (oder Teilen-Text) und macht daraus ASIN, Titel und Partnerlink.
+ * Der Titel stammt aus dem Link-Text der Produktseite. Er ist nur ein Vorschlag und bleibt editierbar.
+ */
+export function parseAmazonInput(text) {
+  const m = String(text || '').match(/https?:\/\/[^\s<>"]+/i);
+  if (!m) return { error: 'Kein Link gefunden. Kopiere die Adresse der Produktseite bei Amazon.' };
+  let url;
+  try { url = new URL(m[0].replace(/[).,;]+$/, '')); } catch { return { error: 'Der Link ist ungültig.' }; }
+  const host = url.hostname.toLowerCase();
+  if (/^(amzn\.(to|eu)|a\.co)$/.test(host)) return { error: 'Das ist ein Kurzlink. Öffne ihn im Browser und kopiere dort die lange Adresse (amazon.de/…/dp/…).' };
+  if (!/(^|\.)amazon\.de$/.test(host)) return { error: 'Bitte einen Link von amazon.de verwenden.' };
+  const a = url.pathname.match(/\/(?:dp|gp\/product|gp\/aw\/d|exec\/obidos\/asin)\/([A-Z0-9]{10})/i);
+  if (!a) return { error: 'Das ist keine Produktseite (es fehlt /dp/…). Öffne das Produkt und kopiere dann den Link.' };
+  const asin = a[1].toUpperCase();
+  const parts = url.pathname.split('/').filter(Boolean);
+  const i = parts.findIndex(x => /^(dp|product|d|asin)$/i.test(x));
+  const seg = i > 0 ? parts[i - 1] : '';
+  let title = '';
+  if (seg && !/^(-|gp|exec|obidos|aw|de|en|s)$/i.test(seg)) {
+    try { title = decodeURIComponent(seg).replace(/-/g, ' ').replace(/\s+/g, ' ').trim(); } catch { /* ignorieren */ }
+  }
+  return { asin, title: title.slice(0, 90), url: `https://www.amazon.de/dp/${asin}?tag=${AMAZON_TAG}` };
+}

@@ -182,7 +182,7 @@ button.pill:hover{border-color:var(--ink);color:var(--ink)}
 .wcard.done h3{text-decoration:line-through;text-decoration-thickness:1px}
 .state{display:flex;gap:8px;align-items:center;font-size:13.5px;font-weight:600}
 .state.res{color:var(--warn)} .state.me{color:var(--ok)}
-.fab{position:fixed;right:18px;bottom:88px;z-index:25;box-shadow:0 12px 28px -10px rgba(0,0,0,.5)}
+.fab{position:fixed;right:18px;bottom:88px;z-index:25}
 
 /* history */
 .glist{display:grid;gap:12px}
@@ -334,3 +334,24 @@ input[type=range]{accent-color:var(--accent);width:140px}
 .recsec summary h3{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .recsec summary h3::after{content:'+';font-family:var(--body);font-size:22px;color:var(--muted)}
 .recsec details[open] summary h3::after{content:'–'}
+
+/* ---- Einheitliche Karten ---- */
+.wgrid{align-items:stretch}
+.wcard{height:100%}
+.wcard .bd{flex:1;gap:8px}
+.wcard h3{min-height:2.2em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wcard .note{min-height:calc(2 * 1.5 * 13px)}
+.wcard .chips.meta{min-height:28px;align-content:flex-start}
+.stateslot{min-height:22px}
+.prodslot{margin-top:auto;display:flex;min-height:252px}
+.prodslot .prod{flex:1;margin-top:0;align-content:start}
+.prodt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.3em}
+.price{display:grid;gap:1px}.price b{font-size:16px}.price span{font-size:12px;color:var(--muted);line-height:1.35}
+.prod.empty{background:color-mix(in srgb,var(--ink) 4%,var(--surface));border-style:dashed;border-color:var(--line)}
+.prod.empty .eyebrow{color:var(--muted)}
+.recs .rec{height:100%}
+.fab{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 36px)}
+.azstep{padding:14px 0;border-top:1px solid var(--line)}
+.azstep .addrow{margin-top:8px}
+.azprev{background:color-mix(in srgb,var(--gold) 8%,transparent);margin:0 -20px;padding:14px 20px}
+@media(max-width:560px){.addrow{flex-direction:column}}
