@@ -1,7 +1,8 @@
 import { S } from '../state.js';
 import { esc, ic, money } from '../lib/util.js';
 import { art } from '../lib/art.js';
-import { normUrl, linkChip } from '../lib/shops.js';
+import { productFor, ideasFor } from '../lib/products.js';
+import { ProductBlock, IdeasBlock } from './product.js';
 import { V, cat, crea, occL, PRIO } from '../data/content.js';
 
 export function WishArt(w){return w.img?`<span class="imgbox art" style="aspect-ratio:16/10"><img src="${w.img}" alt=""></span>`:art(w.a||cat(w.c).a,w.tone??0)}
@@ -17,7 +18,7 @@ export function Wuensche(){
   return `<div class="wrap">
    <div class="pagehead"><p class="eyebrow">Meine Wünsche</p><h1>${m.managed?`${open} Wünsche von ${esc(m.name)}.`:`${open} Dinge, die mir Freude machen würden.`}</h1></div>
    <div class="banner" style="margin-bottom:8px">${ic('lock')}<span>${m.managed?`Als Elternteil siehst du, was reserviert oder gekauft ist. ${esc(m.name)} sieht es nicht.`:'Überraschungsschutz: Du siehst nicht, ob jemand einen Wunsch reserviert oder gekauft hat.'}</span></div>
-   <p class="muted" style="font-size:14px;margin-bottom:16px">Tipp: Ein Kategorie-Wunsch wie „Hochwertige Pfanne bis 100 €“ bekommt von Giftly einen konkreten Produktvorschlag für Schenkende.</p>
+   <p class="muted" style="font-size:14px;margin-bottom:16px">Tipp: Ein Kategorie-Wunsch wie „Hochwertige Pfanne bis 100 €“ bekommt von Giftly einen konkreten Produktvorschlag für Schenkende. Auch ohne Link suchen wir bei jedem Wunsch ein passendes Amazon-Produkt.</p>
    <div class="row" style="justify-content:space-between;margin-bottom:16px">
      <div class="seg" role="group" aria-label="Status">${[['offen','Offen'],['selbst','Selbst gekauft'],['alle','Alle']].map(([k,l])=>`<button class="${u.wf===k?'on':''}" data-act="wf" data-v="${k}">${l}</button>`).join('')}</div>
      <div class="seg" role="group" aria-label="Kategorie"><button class="${u.wc==='alle'?'on':''}" data-act="wc" data-v="alle">Alle</button>${used.map(c=>`<button class="${u.wc===c?'on':''}" data-act="wc" data-v="${c}">${cat(c).n}</button>`).join('')}</div>
@@ -30,7 +31,7 @@ export function Wuensche(){
        ${w.note?`<p class="note">${esc(w.note)}</p>`:''}
        <div class="chips">${w.kind==='kategorie'?`<span class="chip gold">Kategorie${w.budget?' bis '+money(w.budget):''}</span>`:''}${w.kind==='erlebnis'?'<span class="chip">Erlebnis</span>':''}${w.kind==='frei'?'<span class="chip">Freier Wunsch</span>':''}${w.via?`<span class="chip gold">via ${esc(crea(w.via).handle)}</span>`:''}${w.occ.map(o=>`<span class="chip">${occL(o)}</span>`).join('')}</div>
        ${m.managed&&(w.res||w.bought)?`<div class="state ${w.bought?'me':'res'}">${ic('lock','sm')}${w.bought?'Gekauft':'Reserviert'}</div>`:''}
-       ${normUrl(w.link)?`<div class="chips">${linkChip(normUrl(w.link),'Link öffnen')}</div>`:''}
+       ${w.status==='selbst'?'':ProductBlock(productFor(m,w))}${w.kind==='frei'&&w.status!=='selbst'?IdeasBlock(ideasFor(m,w)):''}
        <div class="acts">${VisIcon(w.vis)}<span style="flex:1"></span>
         <button class="iconbtn" data-act="selbst" data-id="${w.id}" title="${w.status==='selbst'?'Wieder offen':'Selbst gekauft'}" aria-label="${w.status==='selbst'?'Wieder offen':'Als selbst gekauft markieren'}">${ic('check','sm')}</button>
         <button class="iconbtn" data-act="prio" data-id="${w.id}" title="Priorität ändern" aria-label="Priorität ändern">${ic('star','sm')}</button>

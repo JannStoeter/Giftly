@@ -26,8 +26,8 @@ export function PickModal(){
    <p class="eyebrow">Produktvorschlag für ${esc(p.name)}</p><h2 id="mt" style="font-size:32px;margin-top:6px">${esc(w.t)}</h2>
    ${top?`<article class="pickmain">${art(top.x.a,top.x.tone)}<div class="pm"><span class="chip gold">Unsere Empfehlung · Anzeige</span><h3>${esc(top.x.t)}</h3>
     <ul class="pros">${[...top.why,...top.x.pros].map(t=>`<li>${ic('check','sm')}<span>${t.includes('<')?t:esc(t)}</span></li>`).join('')}</ul>
-    <button class="btn pri" data-act="buy" data-id="${top.x.id}" data-wid="${w.id}">Reservieren und Preise vergleichen ${ic('arrow','sm')}</button>
-    <div class="chips" style="align-items:center"><span class="muted" style="font-size:13px">Aktuelle Preise:</span>${shopChips(top.x.search)}</div></div></article>`
+    <button class="btn pri" data-act="buy" data-id="${top.x.id}" data-wid="${w.id}">Reservieren und bei Amazon ansehen ${ic('arrow','sm')}</button>
+    <div class="chips" style="align-items:center"><span class="muted" style="font-size:13px">Preise vergleichen:</span>${shopChips(top.x.search)}</div></div></article>`
    :`<p class="muted">Im Budget gibt es keinen passenden Vorschlag. Schau in die Empfehlungen.</p>`}
    ${rest.length?`<h3 style="font-size:22px;margin:18px 0 8px">Alternativen</h3>${rest.map(r=>`<div class="altrow">${art(r.x.a,r.x.tone)}<div><strong>${esc(r.x.t)}</strong><br><span class="muted" style="font-size:13.5px">${esc(r.x.brand)} · Richtwert ca. ${money(r.x.p)}</span></div><button class="btn sec sm" data-act="buy" data-id="${r.x.id}" data-wid="${w.id}">Wählen</button></div>`).join('')}`:''}
    ${over?`<p class="muted" style="font-size:13px;margin-top:10px">${over} Produkt${over>1?'e':''} über dem Budget ausgeblendet.</p>`:''}
