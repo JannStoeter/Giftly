@@ -4,6 +4,7 @@ import { art } from '../lib/art.js';
 import { CATS, OCC, cat, crea, cprod, occL, occTip, PRIO } from '../data/content.js';
 import { ownedOf, excluded, recommend } from '../logic.js';
 import { WishArt, densSeg } from './wishes.js';
+import { normUrl, searchUrl, linkChip } from '../lib/shops.js';
 
 export function Schenken(){
   const u=S.ui,p=S.people[u.person];
@@ -39,7 +40,7 @@ export function GWishes(p){
     return `<article class="wcard ${(w.res==='other'||r===0)?'dim':''}"><div style="position:relative">${WishArt(w)}<div class="top"><span class="tag">${cat(w.c).n}</span><span class="dots" aria-label="Priorität: ${PRIO[w.prio]}">${[1,2,3].map(n=>`<i class="${n<=w.prio?'on':''}"></i>`).join('')}</span></div></div>
      <div class="bd"><h3>${esc(w.t)}</h3>${w.note?`<p class="note">${esc(w.note)}</p>`:''}
       <div class="chips">${w.via?`<span class="chip gold">Tipp von ${esc(crea(w.via).handle)}</span>`:''}${r===2&&w.occ.length?`<span class="chip gold">Für ${occL(oc)}</span>`:''}${r===0?`<span class="chip">Eher: ${w.occ.map(occL).join(', ')}</span>`:''}${isCat?`<span class="chip">Kategorie${w.budget?' bis '+money(w.budget):''}</span>`:''}</div>
-      ${st}<div class="acts">${btn}</div></div></article>`}).join('')}</div>
+      ${st}<div class="acts">${btn}</div>${wishLink(w)}</div></article>`}).join('')}</div>
   ${owned.length?`<section class="sect"><h3>Hat ${esc(p.name)} schon</h3><div class="chips">${owned.map(w=>`<span class="chip">${ic('check','sm')}${esc(w.t)}</span>`).join('')}</div></section>`:''}
   <section class="sect"><h3>Schon verschenkt</h3><div class="chips">${p.gifts.map(g=>`<span class="chip">${esc(g.what)} · ${esc(g.from)}</span>`).join('')}</div></section>`;
 }
@@ -72,7 +73,7 @@ export function RecCard(g){
   return `<article class="rec">${art(it.a,CATS.find(c=>c.id===it.c).t)}<div>
    <h3>${esc(it.t)}</h3>
    <p class="why">${why.slice(0,3).join(' ')}</p>
-   <div class="row" style="gap:6px"><span class="chip">${money(it.p)}</span><span class="chip ${it.k==='erlebnis'?'gold':''}">${it.k==='erlebnis'?'Erlebnis':'Geschenk'}</span><button class="chip ${saved?'on':''}" data-act="save" data-id="${it.id}" aria-pressed="${!!saved}">${saved?'Gemerkt':'Merken'}</button></div></div></article>`;
+   <div class="row" style="gap:6px"><span class="chip">${money(it.p)}</span><span class="chip ${it.k==='erlebnis'?'gold':''}">${it.k==='erlebnis'?'Erlebnis':'Geschenk'}</span>${it.k==='ding'?linkChip(searchUrl.idealo(it.t),'Preise'):''}<button class="chip ${saved?'on':''}" data-act="save" data-id="${it.id}" aria-pressed="${!!saved}">${saved?'Gemerkt':'Merken'}</button></div></div></article>`;
 }
 export function StyleBlock(p){
   const out=(p.style||[]).map(x=>{
@@ -99,4 +100,11 @@ export function Recs(p){
 export function GProfile(p){
   const row=(t,a,c='')=>`<section class="psec"><h3>${t}</h3><div class="chips">${a.map(x=>`<span class="chip ${c}">${esc(x)}</span>`).join('')}</div></section>`;
   return `${row('Interessen',p.interests)}<section class="psec"><h3>Welten</h3><div class="catrow">${p.cats.map(id=>{const c=cat(id);return `<div class="catmini">${art(c.a,c.t)}<div>${c.n}</div></div>`}).join('')}</div></section>${row('Lieblingsmarken',p.brands)}${row('Möchte ausprobieren',p.tries,'gold')}${row('Bitte nicht',p.nogos,'warn')}${row('Alternativen',p.alts,'ok')}`;
+}
+
+/* Link zum Wunsch: eigener Link der Person, sonst Preisvergleich zur Wunschbeschreibung. */
+export function wishLink(w){
+  if(w.kind==='erlebnis'||w.kind==='frei')return '';
+  const own=normUrl(w.link);
+  return `<div class="chips">${own?linkChip(own,'Zum Wunsch-Link'):linkChip(searchUrl.idealo(w.t),'Preise vergleichen')}</div>`;
 }

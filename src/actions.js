@@ -2,6 +2,7 @@ import { S, W, switchTo, resetState } from './state.js';
 import { $, toast, kwOf, nid, money } from './lib/util.js';
 import { LOOKS, PRODUCTS, PRIO, crea, cprod, cat } from './data/content.js';
 import { check } from './logic.js';
+import { searchUrl } from './lib/shops.js';
 import { render } from './render.js';
 
 export const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -68,7 +69,7 @@ export const A={
  occ(el){S.ui.occ=el.dataset.v;S.ui.budget=el.dataset.v==='danke'?40:100;render()},
  dens(el){S.ui.big=el.dataset.v==='1';render()},
  suggest(el){S.ui.pickId=el.dataset.id;S.ui.modal='pick';render()},
- buy(el){const p=S.people[S.ui.person],w=p.wishes.find(x=>x.id===el.dataset.wid),pr=PRODUCTS.find(x=>x.id===el.dataset.id);w.res='me';S.ui.modal=null;S.ui.ideaRes=null;toast(`Simuliert: Der Partnerlink zu „${pr.t}“ würde sich öffnen. Der Wunsch ist für dich reserviert.`);render()}
+ buy(el){const p=S.people[S.ui.person],w=p.wishes.find(x=>x.id===el.dataset.wid),pr=PRODUCTS.find(x=>x.id===el.dataset.id);w.res='me';S.ui.modal=null;S.ui.ideaRes=null;window.open(searchUrl.idealo(pr.search),'_blank','noopener');toast(`Reserviert. Der Preisvergleich für „${pr.t}“ wurde geöffnet.`);render()}
 };
 document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;const f=A[t.dataset.act];if(f)f(t,e)});
 document.addEventListener('input',e=>{if(e.target.id==='bud'){S.ui.budget=+e.target.value;$('#budv').textContent=money(S.ui.budget)}});

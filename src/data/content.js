@@ -98,11 +98,11 @@ export const OCCMAP={k1:['weihnachten','geburtstag'],k2:['weihnachten','geburtst
 CATALOG.forEach(i=>i.occ=OCCMAP[i.id]||[]);
 /* Beispieldaten für Kategorie-Wünsche. Später: Produkt-Feed eines Partnernetzwerks. */
 export const PRODUCTS=[
- {id:'p1',cat:'pfanne',t:'de Buyer Mineral B Eisenpfanne, 28 cm',brand:'de Buyer',p:69,q:5,a:'pan',tone:3,pros:['Schmiedeeisen, wird mit der Zeit von selbst antihaftend','Für Induktion und Backofen geeignet','Hält bei Pflege Jahrzehnte']},
- {id:'p2',cat:'pfanne',t:'Fissler Adamant Classic Bratpfanne, 28 cm',brand:'Fissler',p:99,q:4,a:'pan',tone:4,pros:['Beschichtet und pflegeleicht','Induktionsgeeignet','Spülmaschinenfest']},
- {id:'p3',cat:'pfanne',t:'Lodge Gusseisenpfanne, 26 cm',brand:'Lodge',p:42,q:4,a:'pan',tone:0,pros:['Robust und bereits eingebrannt','Ofenfest','Günstiger Einstieg in Gusseisen']},
- {id:'p4',cat:'pfanne',t:'Staub Gusseisen-Bratpfanne, 28 cm',brand:'Staub',p:149,q:5,a:'pot',tone:2,pros:['Emaillierter Boden, kratzfest','Sehr gleichmäßige Hitze','Lebenslang nutzbar']},
- {id:'p5',cat:'wasserkocher',t:'Fellow Stagg EKG Wasserkocher',brand:'Fellow',p:165,q:5,a:'teapot',tone:3,pros:['Temperatur auf das Grad genau einstellbar','Schwanenhals für kontrolliertes Gießen','Hält die Temperatur bis 60 Minuten']},
- {id:'p6',cat:'wasserkocher',t:'Bonavita Wasserkocher mit Temperaturwahl',brand:'Bonavita',p:79,q:4,a:'teapot',tone:4,pros:['Fünf Temperaturstufen','Schlankes Design aus Edelstahl','Gutes Preis-Leistungs-Verhältnis']},
- {id:'p7',cat:'wasserkocher',t:'Smeg Wasserkocher KLF03',brand:'Smeg',p:139,q:3,a:'teapot',tone:5,pros:['Auffälliges Retro-Design','Temperaturwahl','Mehrere Farben']}
+ {id:'p1',search:'de Buyer Mineral B Eisenpfanne 28 cm',cat:'pfanne',t:'de Buyer Mineral B Eisenpfanne, 28 cm',brand:'de Buyer',p:69,q:5,a:'pan',tone:3,pros:['Schmiedeeisen, wird mit der Zeit von selbst antihaftend','Für Induktion und Backofen geeignet','Hält bei Pflege Jahrzehnte']},
+ {id:'p2',search:'Fissler Adamant Classic Bratpfanne 28 cm',cat:'pfanne',t:'Fissler Adamant Classic Bratpfanne, 28 cm',brand:'Fissler',p:99,q:4,a:'pan',tone:4,pros:['Beschichtet und pflegeleicht','Induktionsgeeignet','Spülmaschinenfest']},
+ {id:'p3',search:'Lodge Gusseisenpfanne 26 cm',cat:'pfanne',t:'Lodge Gusseisenpfanne, 26 cm',brand:'Lodge',p:42,q:4,a:'pan',tone:0,pros:['Robust und bereits eingebrannt','Ofenfest','Günstiger Einstieg in Gusseisen']},
+ {id:'p4',search:'Staub Gusseisen Bratpfanne 28 cm',cat:'pfanne',t:'Staub Gusseisen-Bratpfanne, 28 cm',brand:'Staub',p:149,q:5,a:'pot',tone:2,pros:['Emaillierter Boden, kratzfest','Sehr gleichmäßige Hitze','Lebenslang nutzbar']},
+ {id:'p5',search:'Fellow Stagg EKG Wasserkocher',cat:'wasserkocher',t:'Fellow Stagg EKG Wasserkocher',brand:'Fellow',p:165,q:5,a:'teapot',tone:3,pros:['Temperatur auf das Grad genau einstellbar','Schwanenhals für kontrolliertes Gießen','Hält die Temperatur bis 60 Minuten']},
+ {id:'p6',search:'Bonavita Wasserkocher Temperaturwahl',cat:'wasserkocher',t:'Bonavita Wasserkocher mit Temperaturwahl',brand:'Bonavita',p:79,q:4,a:'teapot',tone:4,pros:['Fünf Temperaturstufen','Schlankes Design aus Edelstahl','Gutes Preis-Leistungs-Verhältnis']},
+ {id:'p7',search:'Smeg Wasserkocher KLF03',cat:'wasserkocher',t:'Smeg Wasserkocher KLF03',brand:'Smeg',p:139,q:3,a:'teapot',tone:5,pros:['Auffälliges Retro-Design','Temperaturwahl','Mehrere Farben']}
 ];
