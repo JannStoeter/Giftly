@@ -5,18 +5,33 @@
  */
 const enc = encodeURIComponent;
 
+/* Amazon-PartnerNet Tracking-ID. Wird als ?tag=... an alle amazon.de-Links gehängt. */
+export const AMAZON_TAG = 'jannst-21';
+
+/** Pflichthinweis laut Amazon-PartnerNet-Teilnahmebedingungen. */
+export const AMAZON_DISCLOSURE = 'Als Amazon-Partner verdiene ich an qualifizierten Verkäufen.';
+
+/** Hängt die Partner-ID an jede amazon.de-URL (auch an Direktlinks von Nutzern). */
+export function withAmazonTag(url) {
+  try {
+    const u = new URL(url);
+    if (/(^|\.)amazon\.de$/i.test(u.hostname)) u.searchParams.set('tag', AMAZON_TAG);
+    return u.href;
+  } catch { return url; }
+}
+
 /** Macht aus "shop.de/produkt" eine gültige https-URL; liefert null bei leerer/ungültiger Eingabe. */
 export function normUrl(raw) {
   const v = (raw || '').trim();
   if (!v) return null;
   const u = /^https?:\/\//i.test(v) ? v : 'https://' + v;
-  try { const p = new URL(u); return /\./.test(p.hostname) ? p.href : null; } catch { return null; }
+  try { const p = new URL(u); return /\./.test(p.hostname) ? withAmazonTag(p.href) : null; } catch { return null; }
 }
 
 export const searchUrl = {
   idealo: q => `https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=${enc(q)}`,
   google: q => `https://www.google.de/search?tbm=shop&q=${enc(q)}`,
-  amazon: q => `https://www.amazon.de/s?k=${enc(q)}`,
+  amazon: q => `https://www.amazon.de/s?k=${enc(q)}&tag=${AMAZON_TAG}`,
 };
 
 export const shopLinks = q => [

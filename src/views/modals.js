@@ -3,7 +3,7 @@ import { esc, ic, money } from '../lib/util.js';
 import { art } from '../lib/art.js';
 import { CATS, OCC, PRIO } from '../data/content.js';
 import { picks } from '../logic.js';
-import { shopChips } from '../lib/shops.js';
+import { AMAZON_DISCLOSURE, shopChips } from '../lib/shops.js';
 
 export function AcctModal(){
   const rows=Object.entries(S.accounts).map(([id,a])=>`<div class="altrow" style="grid-template-columns:44px 1fr auto"><span class="av t${a.tone}" style="width:44px;height:44px">${initials(a.name)}</span><div><strong>${esc(a.name)}${a.age?`, ${a.age}`:''}</strong><br><span class="muted" style="font-size:13.5px">${a.managed?`Kind-Konto, verwaltet von ${esc(S.accounts.me.name)}`:'Hauptkonto'}</span></div>${S.ui.acct===id?'<span class="chip ok">Aktiv</span>':`<button class="btn sec sm" data-act="acct" data-id="${id}">Wechseln</button>`}</div>`).join('');
@@ -32,7 +32,7 @@ export function PickModal(){
    ${rest.length?`<h3 style="font-size:22px;margin:18px 0 8px">Alternativen</h3>${rest.map(r=>`<div class="altrow">${art(r.x.a,r.x.tone)}<div><strong>${esc(r.x.t)}</strong><br><span class="muted" style="font-size:13.5px">${esc(r.x.brand)} · Richtwert ca. ${money(r.x.p)}</span></div><button class="btn sec sm" data-act="buy" data-id="${r.x.id}" data-wid="${w.id}">Wählen</button></div>`).join('')}`:''}
    ${over?`<p class="muted" style="font-size:13px;margin-top:10px">${over} Produkt${over>1?'e':''} über dem Budget ausgeblendet.</p>`:''}
    <p class="disc"><b>Anzeige, Partnerlinks:</b> Kaufst du über diese Links, erhält Giftly eventuell eine Provision. Für dich ändert sich der Preis nicht.</p>
-   <p class="disc">Preise sind Richtwerte und können abweichen. Die Links führen zu den Suchergebnissen der Shops, dort siehst du den aktuellen Preis.</p>
+   <p class="disc">Preise sind Richtwerte und können abweichen. Die Links führen zu den Suchergebnissen der Shops, dort siehst du den aktuellen Preis. ${AMAZON_DISCLOSURE}</p>
    <div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn ghost" data-act="close">Schließen</button></div></div></div>`;
 }
 export function Modal(){

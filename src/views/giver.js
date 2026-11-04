@@ -4,7 +4,7 @@ import { art } from '../lib/art.js';
 import { CATS, OCC, cat, crea, cprod, occL, occTip, PRIO } from '../data/content.js';
 import { ownedOf, excluded, recommend } from '../logic.js';
 import { WishArt, densSeg } from './wishes.js';
-import { normUrl, searchUrl, linkChip } from '../lib/shops.js';
+import { AMAZON_DISCLOSURE, normUrl, searchUrl, linkChip } from '../lib/shops.js';
 
 export function Schenken(){
   const u=S.ui,p=S.people[u.person];
@@ -42,6 +42,7 @@ export function GWishes(p){
       <div class="chips">${w.via?`<span class="chip gold">Tipp von ${esc(crea(w.via).handle)}</span>`:''}${r===2&&w.occ.length?`<span class="chip gold">Für ${occL(oc)}</span>`:''}${r===0?`<span class="chip">Eher: ${w.occ.map(occL).join(', ')}</span>`:''}${isCat?`<span class="chip">Kategorie${w.budget?' bis '+money(w.budget):''}</span>`:''}</div>
       ${st}<div class="acts">${btn}</div>${wishLink(w)}</div></article>`}).join('')}</div>
   ${owned.length?`<section class="sect"><h3>Hat ${esc(p.name)} schon</h3><div class="chips">${owned.map(w=>`<span class="chip">${ic('check','sm')}${esc(w.t)}</span>`).join('')}</div></section>`:''}
+  <p class="disc">Links zu Shops können Partnerlinks sein. ${AMAZON_DISCLOSURE}</p>
   <section class="sect"><h3>Schon verschenkt</h3><div class="chips">${p.gifts.map(g=>`<span class="chip">${esc(g.what)} · ${esc(g.from)}</span>`).join('')}</div></section>`;
 }
 export function Ideen(p){
