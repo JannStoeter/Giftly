@@ -1,7 +1,7 @@
 import { S, initials } from '../state.js';
 import { esc, ic, money, kwOf } from '../lib/util.js';
 import { art } from '../lib/art.js';
-import { CATS, OCC, cat, crea, cprod, occL, occTip, PRIO } from '../data/content.js';
+import { CATS, OCC, ABOUT, cat, crea, cprod, occL, occTip, PRIO } from '../data/content.js';
 import { ownedOf, excluded, recommend } from '../logic.js';
 import { WishArt, densSeg, slot } from './wishes.js';
 import { AMAZON_DISCLOSURE, searchUrl } from '../lib/shops.js';
@@ -9,28 +9,58 @@ import { EmptyBlock } from './product.js';
 
 export function Schenken(){
   const u=S.ui,p=S.people[u.person];
-  const tabs=[['wuensche','Wunschliste'],['ideen','Ideen-Check'],['profil','Profil']];
-  let body='';
-  if(u.tab==='wuensche')body=GWishes(p);
-  if(u.tab==='ideen')body=Ideen(p);
-  if(u.tab==='profil')body=GProfile(p);
+  const wl=WishList(p);
   return `<div class="wrap">
-   <div class="pagehead"><p class="eyebrow">Geschenk finden</p><h1>Für ${esc(p.name)} etwas finden, das wirklich passt.</h1></div>
-   <div class="people" role="group" aria-label="Person wählen">${Object.values(S.people).map(x=>`<button class="person ${x.id===p.id?'on':''}" data-act="person" data-id="${x.id}"><span class="av t${x.tone}">${initials(x.name)}</span>${esc(x.name)}${x.managed?'<small class="muted" style="font-weight:500">Kind</small>':''}</button>`).join('')}</div>
-   <div class="chips" style="margin:14px 0 4px">${p.managed?`<span class="chip gold">Kind-Konto${p.age?', '+p.age+' Jahre':''}</span>`:''}${p.interests.map(i=>`<span class="chip">${esc(i)}</span>`).join('')}${p.nogos.map(i=>`<span class="chip warn">Nicht: ${esc(i)}</span>`).join('')}</div>
-   <div class="occ"><p class="eyebrow">Anlass</p><div class="seg" role="group" aria-label="Anlass">${[['none','Ohne Anlass'],...OCC.map(o=>[o.id,o.l])].map(([k,l])=>`<button class="${u.occ===k?'on':''}" data-act="occ" data-v="${k}">${l}</button>`).join('')}</div><p class="muted tip">${occTip(u.occ)}</p></div>
-   <div class="seg" style="margin:14px 0 20px" role="tablist">${tabs.map(([k,l])=>`<button role="tab" aria-selected="${u.tab===k}" class="${u.tab===k?'on':''}" data-act="tab" data-v="${k}">${l}</button>`).join('')}</div>
-   ${body}
+   <div class="people" role="group" aria-label="Person wählen"><span class="muted" style="align-self:center;font-size:14px">Du schenkst:</span>${Object.values(S.people).map(x=>`<button class="person ${x.id===p.id?'on':''}" data-act="person" data-id="${x.id}"><span class="av t${x.tone}">${initials(x.name)}</span>${esc(x.name)}${x.managed?'<small class="muted" style="font-weight:500">Kind</small>':''}</button>`).join('')}</div>
+   ${ProfileHead(p)}
+   <div class="pgrid">
+    <div class="pmain">
+     ${wl.html}
+     ${Curated(p,wl.open)}
+     <section class="sect" id="ideen"><p class="eyebrow">Eigene Idee?</p><h3>Idee prüfen</h3><p class="muted" style="font-size:14.5px;margin:4px 0 12px">Wishtale gleicht sie mit Wünschen, Besitz, bisherigen Geschenken und No-Gos ab.</p>${Ideen(p)}</section>
+     <p class="disc">Links zu Shops sind Partnerlinks (Anzeige). ${AMAZON_DISCLOSURE} Preise können abweichen, maßgeblich ist der Preis bei Amazon.</p>
+    </div>
+    <aside class="paside" aria-label="Mehr über ${esc(p.name)}">${Facts(p)}</aside>
+   </div>
   </div>`;
 }
-export function GWishes(p){
+
+/* Kopfbereich: Über mich, Interessen, Marken und No-Gos auf einen Blick, daneben der Anlass. */
+export function ProfileHead(p){
+  const u=S.ui,about=p.about||ABOUT[p.id]||'';
+  const row=(l,items,cls='')=>items.length?`<div class="pfact"><span class="eyebrow">${l}</span><div class="chips">${items.map(x=>`<span class="chip ${cls}">${esc(x)}</span>`).join('')}</div></div>`:'';
+  return `<section class="phead" aria-label="Profil von ${esc(p.name)}">
+   <div>
+    <div class="top"><span class="av t${p.tone}">${initials(p.name)}</span><div><p class="eyebrow">${p.managed?`Kind-Konto${p.age?', '+p.age+' Jahre':''}`:'Wishtale-Profil'}</p><h1>${esc(p.name)}</h1></div></div>
+    ${about?`<p class="about"><span class="eyebrow" style="display:block;margin-bottom:4px">Über ${esc(p.name)}</span>${esc(about)}</p>`:''}
+    <div class="pfacts">${row('Interessen',p.interests)}${row('Lieblingsmarken',p.brands)}${row('Bitte nicht',p.nogos,'warn')}</div>
+   </div>
+   <div class="occ pocc"><p class="eyebrow">Wofür suchst du?</p><div class="seg" role="group" aria-label="Anlass">${[['none','Ohne Anlass'],...OCC.map(o=>[o.id,o.l])].map(([k,l])=>`<button class="${u.occ===k?'on':''}" data-act="occ" data-v="${k}">${l}</button>`).join('')}</div><p class="muted tip">${occTip(u.occ)}</p>
+    <button class="btn ghost sm" data-act="scroll" data-t="ideen" style="justify-self:start;padding-left:0">${ic('search','sm')}Eigene Idee prüfen</button></div>
+  </section>`;
+}
+
+/* Seitenleiste: was Schenkende zusätzlich wissen sollten. */
+export function Facts(p){
+  const owned=ownedOf(p).filter(w=>w.vis!=='privat');
+  const block=(t,inner)=>inner?`<section class="fact"><h3>${t}</h3>${inner}</section>`:'';
+  const chips=(a,c='')=>a.length?`<div class="chips">${a.map(x=>`<span class="chip ${c}">${esc(x)}</span>`).join('')}</div>`:'';
+  return block('Hat '+esc(p.name)+' schon',chips(owned.map(w=>w.t),'ok'))
+   +block('Schon verschenkt',chips(p.gifts.map(g=>`${g.what} · ${g.from}`)))
+   +block('Möchte ausprobieren',chips(p.tries,'gold'))
+   +block('Welten',p.cats.length?`<div class="catrow">${p.cats.map(id=>{const c=cat(id);return `<div class="catmini">${art(c.a,c.t)}<div>${c.n}</div></div>`}).join('')}</div>`:'')
+   +block('Wenn nichts passt',`<p class="muted" style="font-size:13.5px;margin-bottom:8px">${esc(p.name)} freut sich auch über:</p>`+chips(p.alts,'ok'));
+}
+
+/* Die Wunschliste: steht direkt unter dem Profilkopf. */
+export function WishList(p){
   const oc=S.ui.occ;
   const rel=w=>(!w.occ.length||oc==='none')?1:(w.occ.includes(oc)?2:0);
   const open=p.wishes.filter(w=>w.status==='offen'&&w.vis!=='privat').sort((a,b)=>rel(b)-rel(a)||b.prio-a.prio);
-  const owned=ownedOf(p).filter(w=>w.vis!=='privat');
-  return `<div class="banner" style="margin-bottom:16px">${ic('lock')}<span>${p.managed?`Kind-Konto: ${esc(p.parent||'Die Eltern')} pflegt die Wünsche und sieht Reservierungen, damit nichts doppelt kommt. ${esc(p.name)} sieht nichts.`:`Reservierungen sind anonym. ${esc(p.name)} sieht nie, was reserviert oder gekauft wurde.`}</span></div>
-  <div class="row" style="justify-content:space-between;margin-bottom:14px"><span class="muted" style="font-size:14px">${open.length} offene Wünsche${oc!=='none'?`, passende zu ${occL(oc)} zuerst`:''}</span>${densSeg()}</div>
-  <div class="wgrid ${S.ui.big?'big':''}">${open.map(w=>{
+  const html=`<section id="wunschliste" aria-label="Wunschliste von ${esc(p.name)}">
+   <div class="row" style="justify-content:space-between;margin-bottom:8px"><div><p class="eyebrow">Wunschliste</p><h2 style="font-size:clamp(30px,4vw,44px)">${open.length} Wünsche von ${esc(p.name)}</h2></div>${densSeg()}</div>
+   <p class="muted" style="font-size:14px;margin-bottom:14px">${ic('lock','sm')} ${p.managed?`${esc(p.parent||'Die Eltern')} pflegt die Wünsche und sieht Reservierungen. ${esc(p.name)} sieht nichts.`:`Reservierungen sind anonym. ${esc(p.name)} sieht nie, was reserviert oder gekauft wurde.`}${oc!=='none'?` Passende zu ${occL(oc)} stehen zuerst.`:''}</p>
+   <div class="wgrid ${S.ui.big?'big':''}">${open.map(w=>{
     const r=rel(w),isCat=w.kind==='kategorie';
     let st='',btn='';
     if(w.bought)st=`<div class="state me">${ic('check','sm')}Von dir gekauft. Bleibt eine Überraschung.</div>`;
@@ -40,11 +70,16 @@ export function GWishes(p){
     return `<article class="wcard ${(w.res==='other'||r===0)?'dim':''}"><div style="position:relative">${WishArt(w)}<div class="top"><span class="tag">${cat(w.c).n}</span><span class="dots" aria-label="Priorität: ${PRIO[w.prio]}">${[1,2,3].map(n=>`<i class="${n<=w.prio?'on':''}"></i>`).join('')}</span></div></div>
      <div class="bd"><h3>${esc(w.t)}</h3><p class="note">${esc(w.note||'')}</p>
       <div class="chips meta">${w.via?`<span class="chip gold">Tipp von ${esc(crea(w.via).handle)}</span>`:''}${r===2&&w.occ.length?`<span class="chip gold">Für ${occL(oc)}</span>`:''}${r===0?`<span class="chip">Eher: ${w.occ.map(occL).join(', ')}</span>`:''}${isCat?`<span class="chip">Kategorie${w.budget?' bis '+money(w.budget):''}</span>`:''}</div>
-      <div class="stateslot">${st}</div><div class="prodslot">${w.res==='other'||w.bought?EmptyBlock('Schon vergeben','Dieser Wunsch ist reserviert oder gekauft.'):slot(p,w)}</div><div class="acts">${btn}</div></div></article>`}).join('')}</div>
-  ${owned.length?`<section class="sect"><h3>Hat ${esc(p.name)} schon</h3><div class="chips">${owned.map(w=>`<span class="chip">${ic('check','sm')}${esc(w.t)}</span>`).join('')}</div></section>`:''}
-  ${RecSection(p,open.length)}
-  <p class="disc">Links zu Shops sind Partnerlinks (Anzeige). ${AMAZON_DISCLOSURE} Preise können abweichen, maßgeblich ist der Preis bei Amazon.</p>
-  <section class="sect"><h3>Schon verschenkt</h3><div class="chips">${p.gifts.map(g=>`<span class="chip">${esc(g.what)} · ${esc(g.from)}</span>`).join('')}</div></section>`;
+      <div class="stateslot">${st}</div><div class="prodslot">${w.res==='other'||w.bought?EmptyBlock('Schon vergeben','Dieser Wunsch ist reserviert oder gekauft.'):slot(p,w)}</div><div class="acts">${btn}</div></div></article>`}).join('')}</div></section>`;
+  return {html,open:open.length};
+}
+
+/* "Das würde auch gut passen": von uns kuratiert. Steht bewusst unter der Wunschliste. */
+export function Curated(p,openWishes){
+  const few=openWishes<4;
+  return `<section class="sect curated" id="passt"><p class="eyebrow">Von Wishtale kuratiert</p><h2 style="font-size:clamp(28px,3.6vw,40px)">Das würde auch gut passen</h2>
+   <p class="muted" style="font-size:14.5px;margin:6px 0 16px">${few?`${esc(p.name)} hat noch wenig auf der Liste, deshalb gleich mehr Ideen. `:'Falls nichts von der Wunschliste passt. '}Ausgewählt nach Interessen, Marken, Anlass und dem, was ${esc(p.name)} schon hat.</p>
+   ${Recs(p)}</section>`;
 }
 export function Ideen(p){
   const u=S.ui,r=u.ideaRes;
@@ -68,7 +103,7 @@ export function Ideen(p){
   }
   return `<form data-form="idea" class="ibar"><label for="idea" style="position:absolute;left:-9999px">Deine Geschenkidee</label><input id="idea" name="idea" class="inp" placeholder="Deine Idee, z. B. Kaffeemühle, Pfanne, Duftkerze" value="${esc(u.idea)}" autocomplete="off"><button class="btn pri" type="submit">${ic('search','sm')}Prüfen</button></form>
    <div class="chips" style="margin-bottom:6px"><span class="muted" style="font-size:13px;align-self:center">Probier:</span>${['Kaffeemühle','Pfanne','Duftkerze','Vase'].map(x=>`<button class="chip" data-act="try" data-v="${x}">${x}</button>`).join('')}</div>
-   ${out||`<p class="muted" style="margin-top:16px;max-width:520px">Wishtale gleicht deine Idee mit Wünschen, Besitz, bisherigen Geschenken und No-Gos von ${esc(p.name)} ab.</p>`}`;
+   ${out}`;
 }
 export function RecCard(g){
   const {it,why}=g,saved=S.ui.saved[it.id];
@@ -96,15 +131,9 @@ export function Recs(p){
     <div class="seg" role="group" aria-label="Art">${[['alle','Alle'],['ding','Geschenke'],['erlebnis','Erlebnisse']].map(([k,l])=>`<button class="${u.kind===k?'on':''}" data-act="kind" data-v="${k}">${l}</button>`).join('')}</div>
     <label class="range" for="bud">Preisrahmen bis <b style="color:var(--ink)" id="budv">${money(u.budget)}</b><input id="bud" type="range" min="20" max="100" step="5" value="${u.budget}"></label></div>
   <div class="recs grid">${list.map(RecCard).join('')||'<p class="muted">Nichts im Budget. Erhöhe es etwas.</p>'}</div>
-  ${skip.length?`<div class="skipped"><p class="eyebrow">Bewusst ausgelassen</p>${skip.slice(0,5).map(s=>`<span>${ic('x','sm')} ${esc(s.it.t)}: ${esc(s.why)}</span>`).join('')}</div>`:''}
-  <section class="sect"><h3>Keine Idee? Das mag ${esc(p.name)} als Alternative</h3><div class="chips">${p.alts.map(a=>`<span class="chip ok">${esc(a)}</span>`).join('')}</div></section>`;
-}
-export function GProfile(p){
-  const row=(t,a,c='')=>`<section class="psec"><h3>${t}</h3><div class="chips">${a.map(x=>`<span class="chip ${c}">${esc(x)}</span>`).join('')}</div></section>`;
-  return `${row('Interessen',p.interests)}<section class="psec"><h3>Welten</h3><div class="catrow">${p.cats.map(id=>{const c=cat(id);return `<div class="catmini">${art(c.a,c.t)}<div>${c.n}</div></div>`}).join('')}</div></section>${row('Lieblingsmarken',p.brands)}${row('Möchte ausprobieren',p.tries,'gold')}${row('Bitte nicht',p.nogos,'warn')}${row('Alternativen',p.alts,'ok')}`;
+  ${skip.length?`<div class="skipped"><p class="eyebrow">Bewusst ausgelassen</p>${skip.slice(0,5).map(s=>`<span>${ic('x','sm')} ${esc(s.it.t)}: ${esc(s.why)}</span>`).join('')}</div>`:''}`;
 }
 
-/* Profil-Ideen: nur Ergänzung. Offen, wenn es wenig Wünsche gibt, sonst eingeklappt. */
 export function RecSection(p,openWishes){
   const few=openWishes<4;
   return `<section class="sect recsec"><details ${few?'open':''}><summary><span class="eyebrow">${few?'Noch wenig auf der Liste':'Zusätzlich'}</span><h3>Produkte, die wir auf Basis der Vorlieben empfehlen</h3></summary>

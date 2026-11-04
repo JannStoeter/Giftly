@@ -355,3 +355,33 @@ input[type=range]{accent-color:var(--accent);width:140px}
 .azstep .addrow{margin-top:8px}
 .azprev{background:color-mix(in srgb,var(--gold) 8%,transparent);margin:0 -20px;padding:14px 20px}
 @media(max-width:560px){.addrow{flex-direction:column}}
+
+/* ---- Profilseite (Schenkende) ---- */
+.phead{display:grid;gap:20px;padding:20px 24px;border-radius:24px;background:var(--surface);border:1px solid var(--line);margin:14px 0 24px}
+.phead .top{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;margin-bottom:12px}
+.phead .av{width:72px;height:72px;font-size:40px}
+.phead h1{font-size:clamp(34px,5vw,54px)}
+.about{max-width:64ch;font-size:16px;margin-bottom:14px}
+.pfacts{display:grid;gap:10px}
+.pfact{display:grid;gap:4px}
+.pocc{display:grid;gap:8px;align-content:start;padding:16px;border-radius:18px;background:color-mix(in srgb,var(--accent) 6%,var(--bg))}
+.pocc .seg{flex-wrap:wrap;border-radius:18px;overflow:visible}
+.pgrid{display:grid;gap:34px}
+.pmain{min-width:0}
+.pmain .wgrid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.pmain .wgrid.big{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.pmain .recs{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.curated{border-top:1px solid var(--ink);padding-top:22px;margin-top:44px}
+.paside{display:grid;gap:18px;align-content:start}
+.fact{padding:16px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);display:grid;gap:10px}
+.fact h3{font-size:22px}
+@media(min-width:720px){.pfact{grid-template-columns:150px 1fr;align-items:baseline}}
+@media(min-width:960px){.phead{grid-template-columns:minmax(0,1fr) 300px;gap:32px}}
+@media(min-width:1040px){.pgrid{grid-template-columns:minmax(0,1fr) 300px;align-items:start}.paside{position:sticky;top:76px}}
+@media(max-width:719px){
+  .pocc{padding:10px 12px;gap:6px}
+  .pocc .seg{flex-wrap:nowrap;overflow-x:auto;border-radius:99px}
+  .pocc .tip{display:none}
+  .phead{padding:16px}
+  .phead .av{width:56px;height:56px;font-size:30px}
+}

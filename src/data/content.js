@@ -115,3 +115,10 @@ export const PRODUCTS=[
  {id:'p11',cat:'messerset',search:'zayiko Kasshoku Damastmesser Set',asin:'B0771X3QWQ',t:'zayiko Kasshoku Damastmesser-Set, 3-teilig',brand:'zayiko',est:90,price:null,q:4,a:'knife',tone:4,pros:['Japanischer Damaststahl mit VG10-Kern','Santoku, kleines Santoku und Officemesser','Mit Geschenkbox']},
  {id:'p12',cat:'wanderstöcke',search:'Black Diamond Distance Carbon Z Wanderstöcke',asin:'B0DYNLGC7H',t:'Black Diamond Distance Carbon Z Wanderstöcke',brand:'Black Diamond',est:130,price:128.8,q:5,a:'sticks',tone:1,pros:['Carbon, besonders leicht','Faltbar, passt in jeden Rucksack','Entlastet die Knie bergab']}
 ];
+
+/* Kurzvorstellung für die Profilseite (Beispieldaten). */
+export const ABOUT={
+  jonas:'Jonas ist 34, arbeitet als Produktdesigner und kocht am liebsten für Freunde. Seinen Kaffee brüht er selbst, und seine Wohnung richtet er Stück für Stück ein, am liebsten mit wenigen, guten Dingen.',
+  mira:'Mira ist 31 und plant jedes freie Wochenende eine Tour in die Berge. Sie packt leicht, liest unterwegs viel und freut sich über Dinge, die lange halten.',
+  noah:'Noah ist 5 und baut am liebsten riesige Türme. Er liebt Tiere, vor allem Ponys, und ist am liebsten draußen unterwegs.'
+};
