@@ -34,7 +34,7 @@ export function Entdecken(){
     const list=LOOKS.filter(l=>!u.cf||u.cf==='Alle'||crea(l.cid).scope===u.cf);
     return `<div class="wrap">
      <div class="pagehead"><p class="eyebrow">Inspiration</p><h1>Looks von Menschen mit gutem Geschmack.</h1>
-      <p class="muted" style="max-width:620px">Tippe auf die Punkte im Bild, übernimm Teile auf deine Wunschliste oder verweise im Notfall auf einen Stil. Wenn darüber gekauft wird, verdienen die Creator mit.</p></div>
+      <p class="muted" style="max-width:620px">Tippe auf die Nummern im Bild, übernimm Teile auf deine Wunschliste oder verweise im Notfall auf einen Stil. Wenn darüber gekauft wird, verdienen die Creator mit.</p></div>
      <div class="people" style="margin-bottom:14px">${CREATORS.map(x=>`<button class="person" data-act="creator" data-id="${x.id}"><span class="av t${x.tone}">${initials(x.name)}</span>${esc(x.name)}</button>`).join('')}</div>
      <div class="seg" role="group" aria-label="Bereich" style="margin-bottom:16px">${LOOKSCOPE.map(k=>`<button class="${(u.cf||'Alle')===k?'on':''}" data-act="cf" data-v="${k}">${k}</button>`).join('')}</div>
      <div class="lgrid">${list.map(l=>lookCard(l)).join('')}</div>
