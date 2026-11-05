@@ -11,6 +11,8 @@
 ## Ton (Tale)
 - warm, in ganzen Sätzen, du-Ansprache, leicht erzählend
 - keine Stichpunkt-Ketten, kein „Kein X, kein Y“, keine Ausrufezeichen-Serien
+- keine Kurzsätze aus ein, zwei Wörtern mit Punkt („Gewählt. Reserviert.“, „Das ist Jonas.“). Lieber ein fließender Satz mit Verbindung („Lena wählt, und für Jonas bleibt es eine Überraschung“)
+- Überschriften ohne Schlusspunkt, wenn sie ein ganzer Satz sind
 - keine Pronomen (er/sie) für Personen, deren Geschlecht nicht bekannt ist; Namen wiederholen
 - Genitiv von Namen mit `gen()` aus `src/lib/util.js` („Jonas’“, „Lenas“)
 

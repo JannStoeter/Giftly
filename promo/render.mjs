@@ -18,6 +18,8 @@ const OUT = join(here, 'out');
 const mainCss = readFileSync(join(here, '../src/styles/main.css'), 'utf8');
 mkdirSync(OUT, { recursive: true });
 
+/* Schriftgröße nach Titellänge, damit auch längere, fließende Titel passen. */
+const fs = (t, big = 124) => { const n = String(t).length; return n > 62 ? 70 : n > 48 ? 80 : n > 36 ? 92 : n > 26 ? 108 : big; };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const art = (k, t, cls = '') => `<span class="art t${t} ${cls}">${illustration(k)}</span>`;
 const chip = ([t, c = '']) => `<span class="chip ${c}">${esc(t)}</span>`;
@@ -55,43 +57,43 @@ function slideBody(s, i, n) {
    </div>`;
   if (s.kind === 'cover') return frame(`
     <p class="eyebrow">${esc(s.eyebrow)}</p>
-    <h1 style="font-size:190px">${esc(s.title)}</h1>
+    <h1 style="font-size:${fs(s.title, 168)}px">${esc(s.title)}</h1>
     <p class="sub" style="max-width:860px">${esc(s.sub)}</p>
     <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:24px;margin-top:10px">${s.art.map(([k, t], j) => art(k, t, '') ).map((a, j) => `<div style="border-radius:32px;overflow:hidden;aspect-ratio:${j ? '1/1' : '1.4/1'}">${a.replace('class="art', 'style="height:100%" class="art')}</div>`).join('')}</div>`);
   if (s.kind === 'statement') return frame(`
     <p class="eyebrow">${esc(s.eyebrow)}</p>
-    <h1 style="font-size:156px">${esc(s.title)}</h1>
+    <h1 style="font-size:${fs(s.title, 150)}px">${esc(s.title)}</h1>
     <p class="sub" style="max-width:880px">${esc(s.sub)}</p>`);
   if (s.kind === 'duo') return frame(`
     <p class="eyebrow">${esc(s.eyebrow)}</p>
-    <h2 style="font-size:92px">${esc(s.title)}</h2>
+    <h2 style="font-size:${fs(s.title, 92)}px">${esc(s.title)}</h2>
     <div style="display:grid;gap:20px">${s.cols.map(c => `<div class="minic" style="padding:28px 32px;gap:14px;${c.plus ? 'border-color:var(--gold);background:color-mix(in srgb,var(--gold) 8%,var(--surface))' : ''}"><span class="eyebrow" style="color:${c.plus ? 'var(--gold)' : 'var(--muted)'};font-size:24px">${esc(c.tag)}</span><b style="font-size:54px">${esc(c.title)}</b><div class="chips">${c.chips.map(chip).join('')}</div></div>`).join('')}</div>`);
   if (s.kind === 'chips') return frame(`
     <p class="eyebrow">${esc(s.eyebrow)}</p>
-    <h2 style="font-size:116px">${esc(s.title)}</h2>
+    <h2 style="font-size:${fs(s.title, 116)}px">${esc(s.title)}</h2>
     <p class="sub">${esc(s.sub)}</p>
     <div style="display:grid;gap:18px">${s.rows.map(r => `<div class="chips">${r.map(chip).join('')}</div>`).join('')}</div>`);
   if (s.kind === 'cards') return frame(`
     <p class="eyebrow">${esc(s.eyebrow)}</p>
-    <h2 style="font-size:116px">${esc(s.title)}</h2>
+    <h2 style="font-size:${fs(s.title, 116)}px">${esc(s.title)}</h2>
     <p class="sub">${esc(s.sub)}</p>
     <div class="cardrow">${s.cards.map(([k, t, a, b]) => `<div class="minic">${art(k, t)}<b>${esc(a)}</b><small>${esc(b)}</small></div>`).join('')}</div>`);
   if (s.kind === 'tale') return frame(`
     <p class="eyebrow">${esc(s.eyebrow)}</p>
-    <h2 style="font-size:84px">${esc(s.title)}</h2>
+    <h2 style="font-size:${Math.min(84, fs(s.title, 84))}px">${esc(s.title)}</h2>
     <p class="quote" style="font-size:44px">${esc(s.quote)}</p>
     <div class="cardrow">${s.cards.map(([k, t, a, b]) => `<div class="minic" style="padding:16px"><div style="aspect-ratio:1/.72;border-radius:24px;overflow:hidden">${art(k, t).replace('class="art','style="height:100%" class="art')}</div><b style="font-size:36px">${esc(a)}</b><small>${esc(b)}</small></div>`).join('')}</div>
     <p class="note" style="font-size:28px">${esc(s.note)}</p>`);
   if (s.kind === 'done') return frame(`
     <p class="eyebrow">${esc(s.eyebrow)}</p>
-    <h2 style="font-size:124px">${esc(s.title)}</h2>
+    <h2 style="font-size:${fs(s.title, 124)}px">${esc(s.title)}</h2>
     <p class="sub">${esc(s.sub)}</p>
     <div class="chips"><span class="chip ok">✓ ${esc(s.chip)}</span></div>`);
   /* cta */
   return `<div style="position:absolute;inset:0;background:var(--accent);color:var(--accent-ink);padding:${PAD}px;display:flex;flex-direction:column;justify-content:space-between">
     <div class="logo" style="color:var(--accent-ink)">${BRAND.name}<i></i></div>
     <div style="display:grid;gap:36px">
-     <h1 style="font-size:168px;color:var(--accent-ink)">${esc(s.title)}</h1>
+     <h1 style="font-size:${fs(s.title, 150)}px;color:var(--accent-ink)">${esc(s.title)}</h1>
      <p class="sub" style="color:#C9D3BD">${esc(s.sub)}</p>
      <p style="font-size:44px;margin:0;color:var(--accent-ink)"><b>${esc(BRAND.handle)}</b> · ${esc(BRAND.domain)}</p>
     </div>
@@ -120,13 +122,13 @@ const reelHtml = () => {
   `;
   const body = `
    <div class="rtag" style="z-index:3"><div class="logo">${BRAND.name}<i></i></div></div>
-   ${sc(0, `<p class="eyebrow rup">Eine kleine Tale</p><h1 class="rbig rup">Das ist<br>Jonas.</h1>`)}
-   ${sc(1, `<h2 class="rmid rup">Am Sonntag brüht Jonas sich den perfekten Kaffee.</h2><div class="chips">${['Kaffee brühen|on', 'Kochen', 'Einrichten'].map(x => { const [t, c] = x.split('|'); return `<span class="chip rpop ${c || ''}">${t}</span>` }).join('')}</div>`)}
-   ${sc(2, `<h2 class="rmid rup">Das wünscht sich Jonas.</h2><div class="cardrow">${mini('grinder', 0, 'Handkaffeemühle', 'mit Keramik-Mahlwerk')}${mini('teapot', 3, 'Wasserkocher', 'mit Temperaturwahl')}</div>`)}
-   ${sc(3, `<h2 class="rmid rup">Das hat Jonas schon.</h2><div class="chips">${['Siebträgermaschine', 'Gusseisenpfanne', 'Pastamaschine'].map(t => `<span class="chip ok rpop">${t}</span>`).join('')}</div><p class="sub rup">Damit nichts doppelt geschenkt wird.</p>`)}
-   ${sc(4, `<h2 class="rmid rup" style="font-size:100px">Lena sucht ein Geschenk. Wishtale schlägt vor, was passt.</h2><p class="quote rup">Um den perfekten Kaffee zu erzeugen, könnten Jonas diese Produkte noch gefallen:</p><div class="cardrow">${mini('scale', 4, 'Digitale Kaffeewaage', 'mit Timer')}${mini('ticket', 2, 'Barista-Kurs', 'in Jonas’ Nähe')}</div><p class="note rup" style="font-size:34px">Die Siebträgermaschine fehlt mit Absicht. Die hat Jonas schon.</p>`)}
-   ${sc(5, `<h2 class="rbig rup" style="font-size:150px">Gewählt.<br>Die Überraschung bleibt.</h2><div class="chips"><span class="chip ok rpop">✓ Von Lena reserviert</span></div><p class="sub rup">Jonas sieht davon nichts.</p>`)}
-   ${sc(6, `<div style="position:absolute;inset:0;background:var(--accent)"></div><div style="position:relative;display:grid;gap:40px;padding:0 90px;color:var(--accent-ink)"><h1 class="rbig rup" style="color:var(--accent-ink);font-size:170px">Dein<br>Wishtale<br>wartet.</h1><p class="sub rup" style="color:#C9D3BD">${esc(BRAND.tagline)}</p><p class="rup" style="font-size:50px;margin:0"><b>${esc(BRAND.handle)}</b> · ${esc(BRAND.domain)}</p></div>`)}`;
+   ${sc(0, `<p class="eyebrow rup">Eine kleine Tale</p><h1 class="rbig rup" style="font-size:150px">Lernen wir<br>Jonas<br>kennen</h1>`)}
+   ${sc(1, `<h2 class="rmid rup" style="font-size:104px">Am Sonntag nimmt sich Jonas Zeit für den perfekten Kaffee</h2><div class="chips">${['Kaffee brühen|on', 'Kochen', 'Einrichten'].map(x => { const [t, c] = x.split('|'); return `<span class="chip rpop ${c || ''}">${t}</span>` }).join('')}</div>`)}
+   ${sc(2, `<h2 class="rmid rup" style="font-size:108px">Darüber würde sich Jonas sehr freuen</h2><div class="cardrow">${mini('grinder', 0, 'Handkaffeemühle', 'mit Keramik-Mahlwerk')}${mini('teapot', 3, 'Wasserkocher', 'mit Temperaturwahl')}</div>`)}
+   ${sc(3, `<h2 class="rmid rup" style="font-size:108px">Und das steht schon bei Jonas im Schrank</h2><div class="chips">${['Siebträgermaschine', 'Gusseisenpfanne', 'Pastamaschine'].map(t => `<span class="chip ok rpop">${t}</span>`).join('')}</div><p class="sub rup">Damit nichts doppelt geschenkt wird, nicht einmal aus Versehen.</p>`)}
+   ${sc(4, `<h2 class="rmid rup" style="font-size:84px">Lena sucht ein Geschenk, und Wishtale zeigt, was zu Jonas passt</h2><p class="quote rup">Um den perfekten Kaffee zu erzeugen, könnten Jonas diese Produkte noch gefallen:</p><div class="cardrow">${mini('scale', 4, 'Digitale Kaffeewaage', 'mit Timer')}${mini('ticket', 2, 'Barista-Kurs', 'in Jonas’ Nähe')}</div><p class="note rup" style="font-size:34px">Die Siebträgermaschine fehlt mit Absicht, denn die hat Jonas schon.</p>`)}
+   ${sc(5, `<h2 class="rbig rup" style="font-size:104px">Lena wählt, und für Jonas bleibt es eine Überraschung</h2><div class="chips"><span class="chip ok rpop">✓ Von Lena reserviert</span></div><p class="sub rup">Jonas sieht davon nichts, und alle anderen Freunde wissen, dass sich schon jemand kümmert.</p>`)}
+   ${sc(6, `<div style="position:absolute;inset:0;background:var(--accent)"></div><div style="position:relative;display:grid;gap:40px;padding:0 90px;color:var(--accent-ink)"><h1 class="rbig rup" style="color:var(--accent-ink);font-size:150px">Dein<br>Wishtale<br>wartet schon<br>auf dich</h1><p class="sub rup" style="color:#C9D3BD">${esc(BRAND.tagline)}</p><p class="rup" style="font-size:50px;margin:0"><b>${esc(BRAND.handle)}</b> · ${esc(BRAND.domain)}</p></div>`)}`;
   const js = `
    const TOTAL=${TOTAL}, SC=${JSON.stringify(SCENES)}, tl=[];
    const E='cubic-bezier(.2,.8,.2,1)';

@@ -8,39 +8,34 @@ Link unten
 ## Karussell „Mehr als eine Wunschliste“ (8 Folien, 4:5)
 
 **Text unter dem Beitrag**
-Eine Wunschliste sagt, was du dir wünschst. Aber nicht, warum. Und sie vergisst, was du schon hast.
+Eine Wunschliste sagt dir, was du dir wünschst, aber sie erzählt nicht, warum, und sie weiß auch nicht, was du längst zu Hause hast.
 
-Wishtale ist deine Wunschliste und ein bisschen mehr: Neben deinen Wünschen erzählt es, was du gern machst, welche Marken du liebst, was schon bei dir steht und was du lieber nicht geschenkt bekommst. Daraus entstehen Vorschläge, auf die selbst du nicht gekommen wärst.
+Wishtale ist deine Wunschliste und ein bisschen mehr. Neben deinen Wünschen erzählt es, was du gern machst, welche Marken du liebst, was schon bei dir steht und was du lieber nicht geschenkt bekommen möchtest. Daraus entstehen Vorschläge, auf die du selbst vielleicht nie gekommen wärst.
 
-So müssen deine Freunde nicht raten, und du bekommst nichts doppelt.
-
-Link in der Bio.
+So müssen deine Freunde nicht mehr raten, und du bekommst nichts doppelt. Den Link findest du in der Bio.
 
 **Hashtags**
 #wishtale #wunschliste #geschenkideen #weihnachtsgeschenke #geschenke #blackfriday #geschenkideenfürsie #geschenkideenfürihn
 
-
-## Karussell „Das ist Jonas“ (8 Folien, 4:5)
+## Karussell „Lernen wir Jonas kennen“ (8 Folien, 4:5)
 
 **Text unter dem Beitrag**
-Das ist Jonas. Am Sonntag brüht Jonas sich den perfekten Kaffee, und wenn Zeit bleibt, kocht Jonas gern für Freunde.
+Am Sonntag nimmt sich Jonas Zeit für den perfekten Kaffee, und wenn danach noch Zeit bleibt, kocht Jonas gern für Freunde.
 
-Wischen, und du siehst, wie Lena für Jonas ein Geschenk findet, das wirklich passt: ohne zu raten, ohne etwas doppelt zu kaufen und mit einer Überraschung, die eine bleibt.
+Wische durch die Folien und sieh, wie Lena für Jonas ein Geschenk findet, das wirklich passt: ohne zu raten, ohne etwas doppelt zu kaufen und mit einer Überraschung, die auch eine bleibt.
 
-Wishtale sammelt, was dir Freude macht. Deine Wünsche, deine Interessen, das, was du schon hast. Deine Freunde sehen alles auf einer Seite.
+Wishtale sammelt deine Wünsche und erzählt dazu die kleine Geschichte hinter dir. Deine Freunde sehen beides auf einer Seite. Den Link findest du in der Bio.
 
-Jeder Wunsch hat eine Geschichte. Wie sieht deine aus? Link in der Bio.
-
-**Hashtags (fünf bis acht reichen)**
-#wishtale #geschenkideen #wunschliste #weihnachtsgeschenke #geschenke #blackfriday #kaffeeliebhaber #geschenkideenfüreuch
+**Hashtags**
+#wishtale #geschenkideen #wunschliste #weihnachtsgeschenke #geschenke #blackfriday #kaffeeliebhaber
 
 **Alternativtext Folie 1**
-Illustration einer Handkaffeemühle, eines Wasserkessels und einer Tasse auf beigem Hintergrund mit der Überschrift „Das ist Jonas.“
+Illustration einer Handkaffeemühle, eines Wasserkessels und einer Tasse auf beigem Hintergrund mit der Überschrift „Lernen wir Jonas kennen“.
 
 ## Reel „Jonas“ (27 Sekunden, 9:16, ohne Ton)
 
 **Text**
-Das ist Jonas. Und das ist Lena, die ein Geschenk sucht. Wishtale zeigt, was Jonas sich wünscht, was Jonas schon hat und was dazu noch passen könnte. Die Überraschung bleibt. Jeder Wunsch hat eine Geschichte. Link in der Bio.
+Lena sucht ein Geschenk für Jonas. Wishtale zeigt ihr, was sich Jonas wünscht, was Jonas schon hat und was dazu noch passen könnte, und für Jonas bleibt es trotzdem eine Überraschung. Den Link findest du in der Bio.
 
 **Musik:** ruhig, warm, ohne Gesang, zum Beispiel Piano oder Akustikgitarre. Nutze nur lizenzfreie Musik oder die Audiothek für Unternehmen von Instagram.
 
