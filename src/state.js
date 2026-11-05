@@ -90,6 +90,22 @@ export function switchTo(id){const u=S.ui;u.acct=id;u.wf='offen';u.wc='alle';u.p
 /* ============ Persistenz (localStorage) ============ */
 const KEY='wishtale:v1';
 const PERSIST_UI=['acct','occ','person','big','budget','saved','cf','onlyOpen','chosen'];
+const DRAFT_KEY='wishtale:draft';
+
+/* ---- Entwurf: Wer ohne Konto sein Wishtale einrichtet, arbeitet in einem eigenen Entwurf (nie in den Demo-Daten). ---- */
+export const blankDraft=()=>({id:'draft',name:'',tone:2,interests:[],cats:[],brands:[],tries:[],nogos:[],alts:[],style:[],
+ vis:{interests:'giver',cats:'giver',brands:'giver',tries:'giver',nogos:'giver',alts:'giver'},wishes:[],history:[],inbox:[],invited:[],about:''});
+export const draftHasData=()=>{const d=S.accounts.draft;return !!d&&(d.interests.length+d.cats.length+d.brands.length+d.tries.length+d.nogos.length+d.alts.length>0||!!d.name)};
+export function ensureDraft(){
+  if(!S.accounts.draft){
+    let d=null;
+    try{d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null')}catch{}
+    S.accounts.draft=d&&Array.isArray(d.interests)?{...blankDraft(),...d,id:'draft'}:blankDraft();
+  }
+  return S.accounts.draft;
+}
+export function clearDraft(){delete S.accounts.draft;try{localStorage.removeItem(DRAFT_KEY)}catch{}if(S.ui.acct==='draft')S.ui.acct='me'}
+export function setDemo(on){S.auth.demo=on;try{on?sessionStorage.setItem('wishtale:demo','1'):sessionStorage.removeItem('wishtale:demo')}catch{}}
 
 export function loadState(){
   try{S.auth.demo=sessionStorage.getItem('wishtale:demo')==='1'}catch{}
@@ -99,14 +115,18 @@ export function loadState(){
     if(d.accounts&&d.accounts.me)S.accounts=d.accounts;
     if(d.people&&Object.keys(d.people).length)S.people=d.people;
     PERSIST_UI.forEach(k=>{if(d.ui&&k in d.ui)S.ui[k]=d.ui[k]});
-    if(!S.accounts[S.ui.acct])S.ui.acct='me';
+    delete S.accounts.draft;
+    if(!S.accounts[S.ui.acct]||S.ui.acct==='draft')S.ui.acct='me';
   }catch{/* defekte oder blockierte Speicherung: mit Beispieldaten starten */}
 }
 export function saveState(){
   if(S.auth.user)return; // angemeldet: Quelle der Wahrheit ist Supabase
   try{
+    const {draft,...accounts}=S.accounts;
+    if(draft&&draftHasData())localStorage.setItem(DRAFT_KEY,JSON.stringify(draft));
     const ui=Object.fromEntries(PERSIST_UI.map(k=>[k,S.ui[k]]));
-    localStorage.setItem(KEY,JSON.stringify({accounts:S.accounts,people:S.people,ui}));
+    if(ui.acct==='draft')ui.acct='me';
+    localStorage.setItem(KEY,JSON.stringify({accounts,people:S.people,ui}));
   }catch{/* Speicher voll (z. B. große Bilder) oder nicht verfügbar */}
 }
 export function resetState(){

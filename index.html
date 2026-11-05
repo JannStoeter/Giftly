@@ -18,7 +18,7 @@
 <header class="hdr"><div class="wrap">
   <a class="mark" href="./" aria-label="Wishtale Startseite">wishtale<i></i></a>
   <nav class="nav" aria-label="Hauptnavigation"><a class="navlink" href="app/#p/jonas" data-edit="nav.nav1">Beispielprofil</a><a class="navlink" href="#funktionen" data-edit="nav.nav2">Funktionen</a></nav>
-  <div class="right"><a class="btn pri sm" href="app/#start">Wishtale erstellen</a></div>
+  <div class="right"><a class="btn ghost sm" data-auth="out" href="app/#anmelden">Anmelden</a><a class="btn pri sm" data-auth="out" href="app/#start">Wishtale erstellen</a><a class="btn pri sm" data-auth="in" href="app/#profil">Zu meinem Wishtale</a></div>
 </div></header>
 <main id="main">
   <section class="hero"><div class="wrap hero-grid">
@@ -121,10 +121,11 @@
 
   <section class="cta dark"><div class="wrap">
     <h2 data-edit="cta.h21">Mach es deinen Liebsten leichter, dir eine Freude zu machen.</h2>
-    <div class="row" style="justify-content:center"><a class="btn gold" href="app/#start">Mein Wishtale erstellen</a><a class="btn sec" style="border-color:var(--accent-ink);color:var(--accent-ink)" href="app/#profil">App erkunden</a></div>
+    <div class="row" style="justify-content:center"><a class="btn gold" href="app/#start">Mein Wishtale erstellen</a><a class="btn sec" style="border-color:var(--accent-ink);color:var(--accent-ink)" href="app/#demo">App erkunden</a></div>
   </div></section>
 </main>
 <footer class="foot"><div class="wrap"><span data-edit="footer.text1">Wishtale ist noch im Aufbau, und die Beispielprofile sind erfunden. Als Amazon-Partner verdiene ich an qualifizierten Verkäufen.</span> Fotos von <a href="https://unsplash.com" rel="noopener">Unsplash</a> und <a href="https://www.pexels.com" rel="noopener">Pexels</a>. <a href="#bearbeiten" id="cms-open" class="cms-link">Seite bearbeiten</a></div></footer>
+<script>try{if(Object.keys(localStorage).some(function(k){return /^sb-.*-auth-token$/.test(k)}))document.documentElement.classList.add("has-session")}catch(e){}</script>
 <script>(function(){try{var c=JSON.parse(localStorage.getItem('wishtale:cms')||'null');if(!c||!c.map)return;var esc=function(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')};var raw=function(n){var t=document.createElement('span');t.innerHTML=n.innerHTML.replace(/<em>/g,'*').replace(/<\/em>/g,'*').replace(/<br\s*\/?>/g,'\n');return t.textContent};document.querySelectorAll('[data-edit]').forEach(function(n){var v=c.map[n.getAttribute('data-edit')];if(!n.hasAttribute('data-def'))n.setAttribute('data-def',raw(n));if(v)n.innerHTML=esc(v).replace(/\*([^*\n]+)\*/g,'<em>$1</em>').replace(/\n/g,'<br>')})}catch(e){}})();</script>
 <script type="module" src="/src/landing.js"></script>
 </body>

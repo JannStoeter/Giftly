@@ -561,3 +561,8 @@ input[type=range]{accent-color:var(--accent);width:140px}
 .cms-title{font-weight:700;font-size:14px}.cms-count{font-size:13.5px;color:#D9D2C3}.cms-hint{font-size:12.5px;color:#B8B0A0}
 .cms-ghost{color:var(--bg);border-color:#6a6358}
 .cms-ghost:hover{background:#3a352d}
+
+/* Landingpage: Zugang je nach Anmeldestatus */
+[data-auth="in"]{display:none}
+.has-session [data-auth="in"]{display:inline-flex}
+.has-session [data-auth="out"]{display:none}

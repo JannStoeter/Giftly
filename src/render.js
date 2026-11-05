@@ -1,4 +1,4 @@
-import { S, saveState } from './state.js';
+import { S, saveState, setDemo, ensureDraft } from './state.js';
 import { $, esc } from './lib/util.js';
 import { Header, BottomNav, GuestHeader, LoginHeader } from './views/shared.js';
 import { Start, Profil } from './views/profile.js';
@@ -36,6 +36,13 @@ export function render(top){
     window.scrollTo(0,0);
     return;
   }
+  if(v==='start'&&!S.auth.user){
+    // Einrichtung ohne Konto: ruhige Seite ohne App-Navigation, das Konto kommt erst danach
+    $('#app').innerHTML=LoginHeader()+`<main id="main" class="appmain">${body}</main>`;
+    window.scrollTo(0,top?0:y);
+    saveState();
+    return;
+  }
   if(v==='gast'){
     $('#app').innerHTML=GuestHeader()+`<main id="main" class="appmain">${body}</main>`+Modal();
     window.scrollTo(0,top?0:y);
@@ -59,14 +66,23 @@ export function render(top){
 }
 
 export function route(){
-  const h=location.hash.replace('#','');
+  let h=location.hash.replace('#','');
+  if(h==='login')h='anmelden';  // alter Link
   const guest=h.match(/^p\/([\w-]+)$/);
+  const anon=!S.auth.user;
+  if(!(anon&&h==='start')&&S.ui.acct==='draft')S.ui.acct='me';
   if(guest){
     S.ui.person=guest[1];S.ui.view='gast';startGuest(guest[1]);
   }
-  else if(!S.auth.user&&!S.auth.demo){S.ui.view='login'}
+  else if(anon&&h==='demo'){setDemo(true);history.replaceState(null,'',location.pathname+'#profil');S.ui.view='profil'}
+  else if(anon&&h==='start'){setDemo(false);ensureDraft();S.ui.acct='draft';S.ui.view='start'}
+  else if(anon&&(h==='registrieren'||h==='anmelden'||!S.auth.demo)){
+    // Anmelden und Registrieren sind eigene Seiten und beenden die Demo
+    setDemo(false);ensureDraft();
+    S.ui.authTab=h==='registrieren'?'up':'in';S.ui.view='login';
+  }
   else if(h==='schenken'){location.hash='#p/jonas';return}  // alter Link
-  else S.ui.view=(h in VIEWS&&h!=='gast'&&h!=='login')?h:DEFAULT_VIEW;
+  else S.ui.view=(h in VIEWS&&h!=='gast'&&h!=='login'&&!(anon&&h==='start'))?h:DEFAULT_VIEW;
   S.ui.modal=null;
   render(true);
 }

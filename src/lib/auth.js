@@ -1,5 +1,5 @@
 import { sb } from './supabase.js';
-import { S } from '../state.js';
+import { S, draftHasData, ensureDraft, clearDraft } from '../state.js';
 import { loadMine } from './remote.js';
 
 export const redirectUrl = () => location.origin + location.pathname;
@@ -30,4 +30,23 @@ export async function enter(user) {
   S.auth.error = '';
   try { await loadMine(user); }
   catch (e) { S.auth.error = friendly(e); console.error(e); }
+}
+
+/**
+ * Hat jemand sein Wishtale ohne Konto eingerichtet, wandert der Entwurf nach der Anmeldung ins neue Konto.
+ * Ein Konto, das schon Inhalte hat, wird nie überschrieben. Gibt true zurück, wenn etwas übernommen wurde.
+ */
+export function adoptDraft() {
+  ensureDraft();
+  if (!draftHasData()) { clearDraft(); return false; }
+  const d = S.accounts.draft, a = S.accounts.me;
+  const empty = a && !a.interests.length && !a.cats.length && !a.brands.length && !a.wishes.length;
+  let took = false;
+  if (empty) {
+    if (d.name && d.name.trim()) a.name = d.name.trim();
+    for (const k of ['interests', 'cats', 'brands', 'tries', 'nogos', 'alts']) a[k] = [...d[k]];
+    took = d.interests.length + d.cats.length + d.brands.length + d.tries.length + d.nogos.length + d.alts.length > 0;
+  }
+  clearDraft();
+  return took;
 }

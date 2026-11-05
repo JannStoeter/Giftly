@@ -2,7 +2,8 @@ import './styles/main.css';
 import { loadState } from './state.js';
 import { S } from './state.js';
 import { sb } from './lib/supabase.js';
-import { enter } from './lib/auth.js';
+import { enter, adoptDraft } from './lib/auth.js';
+import { toast } from './lib/util.js';
 import { route } from './render.js';
 import './actions.js';
 
@@ -14,12 +15,16 @@ async function boot(){
   const fromLink=/access_token|error_description/.test(location.hash);
   if(session){
     await enter(session.user);
-    if(fromLink||!location.hash||location.hash==='#login'){
+    const adopted=adoptDraft();
+    if(adopted){
+      history.replaceState(null,'',location.pathname+'#wuensche');
+      setTimeout(()=>toast('Dein Wishtale ist angelegt. Jetzt fehlen nur noch deine Wünsche.'),400);
+    }else if(fromLink||!location.hash||['#login','#anmelden','#registrieren','#demo'].includes(location.hash)){
       const a=S.accounts.me;
       history.replaceState(null,'',location.pathname+(a&&!a.interests.length&&!a.wishes.length?'#start':'#profil'));
     }
   }else if(fromLink){
-    history.replaceState(null,'',location.pathname+'#login');
+    history.replaceState(null,'',location.pathname+'#anmelden');
   }
   window.addEventListener('hashchange',route);
   route();
@@ -29,11 +34,13 @@ async function boot(){
     setTimeout(async()=>{
       if(event==='SIGNED_IN'&&sess&&!S.auth.user){
         await enter(sess.user);
+        const adopted=adoptDraft();
         const a=S.accounts.me;
-        location.hash=a&&!a.interests.length&&!a.wishes.length?'#start':'#profil';
+        location.hash=adopted?'#wuensche':a&&!a.interests.length&&!a.wishes.length?'#start':'#profil';
         route();
+        if(adopted)toast('Dein Wishtale ist angelegt. Jetzt fehlen nur noch deine Wünsche.');
       }else if(event==='SIGNED_OUT'&&S.auth.user){
-        S.auth.user=null;location.hash='#login';location.reload();
+        S.auth.user=null;location.hash='#anmelden';location.reload();
       }
     },0);
   });

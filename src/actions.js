@@ -37,8 +37,12 @@ const A={
  scroll(el){document.getElementById(el.dataset.t)?.scrollIntoView({behavior:'smooth',block:'start'})},
  go(el){const v=el.dataset.v;if(v==='entdecken'){S.ui.look=null;S.ui.creator=null}if(v==='start')S.ui.step=0;location.hash='#'+v;if(location.hash==='#'+v&&S.ui.view===v)render(true)},
  pick(el){const k=el.dataset.k,v=el.dataset.v,a=S.me[k],i=a.indexOf(v);i>-1?a.splice(i,1):a.push(v);render()},
- next(){S.ui.step++;render(true)},prev(){S.ui.step--;render(true)},
- finish(){toast('Geschafft! Dein Wishtale ist startklar.');location.hash='#profil'},
+ next(){
+  if(!S.auth.user&&S.ui.step===0&&!(S.me.name||'').trim()){toast('Magst du uns zuerst deinen Vornamen verraten?');document.getElementById('dn')?.focus();return}
+  S.ui.step++;render(true)},prev(){S.ui.step--;render(true)},
+ finish(){
+  if(!S.auth.user){S.me.name=(S.me.name||'').trim();saveState();S.ui.step=0;location.hash='#registrieren';return}
+  toast('Geschafft! Dein Wishtale ist startklar.');location.hash='#profil'},
  edit(){S.ui.step=0;location.hash='#start'},
  preview(el){S.ui.preview=el.dataset.v==='1';render()},
  vis(el){const o=['alle','giver','privat'],k=el.dataset.k;S.me.vis[k]=o[(o.indexOf(S.me.vis[k]||'giver')+1)%3];render()},
@@ -48,9 +52,10 @@ const A={
  delw(el){S.ui.modal=null;S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
  modal(el){S.ui.modal=el.dataset.v;render();setTimeout(()=>document.querySelector('.sheet input,.sheet select')?.focus({preventScroll:true}),30)},
  close(){S.ui.modal=null;render()},
- authtab(el){S.ui.authTab=el.dataset.v;S.ui.authMsg=null;render()},
- demo(){try{sessionStorage.setItem('wishtale:demo','1')}catch{}S.auth.demo=true;S.ui.authMsg=null;location.hash='#profil';route()},
- tologin(){try{sessionStorage.removeItem('wishtale:demo')}catch{}S.auth.demo=false;S.ui.modal=null;location.hash='#login';route()},
+ authtab(el){S.ui.authMsg=null;location.hash=el.dataset.v==='up'?'#registrieren':'#anmelden'},
+ demo(){S.ui.authMsg=null;location.hash='#demo'},
+ tologin(){S.ui.modal=null;S.ui.authMsg=null;location.hash='#start'},
+ exitdemo(){S.ui.modal=null;S.ui.authMsg=null;location.hash='#start'},
  logout(){signOut().finally(()=>{location.hash='';location.reload()})},
  guestretry(){S.guest=null;route()},
  share(){
@@ -172,6 +177,7 @@ document.addEventListener('submit',e=>{
     }).catch(e=>{S.ui.authBusy=false;S.ui.authMsg={type:'error',text:friendly(e)};render()});
     return;
   }
+  if(kind==='draftname'){A.next();return}
   if(kind==='social'){
     const p=parsePinterest(fd.get('pinterest')),i=parseInstagram(fd.get('instagram'));
     if(!p.ok){toast(p.error);return}

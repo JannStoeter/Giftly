@@ -14,10 +14,17 @@ export const STEPS=[
  {k:'nogos',t:'Gibt es etwas, das du lieber nicht geschenkt bekommen möchtest?',h:'Das sehen nur Menschen, die dir etwas schenken wollen. So ersparst du ihnen und dir manche Enttäuschung.',opts:()=>NOGOS},
  {k:'alts',t:'Und wenn deinen Freunden gar nichts einfällt?',h:'Dann freuen sie sich vielleicht über einen Gutschein, einen Besuch in deinem Lieblingsladen oder eine Spende. Sag uns, was dir davon gefallen würde.',opts:()=>ALTS}
 ];
+const NAME_STEP={k:'name',t:'Wie dürfen wir dich nennen?',h:'Dein Vorname reicht völlig. So begrüßen wir dich in deinem Wishtale, und deine Freunde sehen später, bei wem sie gerade stöbern.',name:true};
+/* Ohne Konto beginnt die Einrichtung mit dem Namen, das Konto kommt erst am Ende. */
+export const steps=()=>S.auth.user?STEPS:[NAME_STEP,...STEPS];
 export function Start(){
-  const i=S.ui.step,st=STEPS[i],last=i===STEPS.length-1;
+  const list0=steps(),anon=!S.auth.user;
+  S.ui.step=Math.max(0,Math.min(S.ui.step,list0.length-1));
+  const i=S.ui.step,st=list0[i],last=i===list0.length-1;
   let body='';
-  if(st.tiles){
+  if(st.name){
+    body=`<form data-form="draftname" class="addrow" style="margin-top:22px"><label class="sr" for="dn" style="position:absolute;left:-9999px">Dein Vorname</label><input id="dn" class="inp" data-prof="name" value="${esc(S.me.name)}" maxlength="60" placeholder="Zum Beispiel Lena" autocomplete="given-name"></form>`;
+  }else if(st.tiles){
     body=`<div class="tiles">${CATS.map(c=>{const on=S.me.cats.includes(c.id);return `<button class="tile ${on?'on':''}" data-act="pick" data-k="cats" data-v="${c.id}" aria-pressed="${on}">${art(c.a,c.t)}<span>${c.n}<i class="tick">${ic('check','sm')}</i></span></button>`}).join('')}</div>`;
   }else{
     const list=[...new Set([...st.opts(),...S.me[st.k]])];
@@ -25,13 +32,13 @@ export function Start(){
     <form data-form="custom" class="addrow"><input type="hidden" name="k" value="${st.k}"><label class="sr" for="cust" style="position:absolute;left:-9999px">Eigene Angabe</label><input id="cust" name="v" class="inp" placeholder="Fehlt etwas? Schreib es einfach dazu" autocomplete="off"><button class="btn sec sm" type="submit">${ic('plus','sm')}Hinzufügen</button></form>`;
   }
   return `<div class="wrap"><div class="ob">
-   <div class="prog" aria-label="Schritt ${i+1} von ${STEPS.length}">${STEPS.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join('')}</div>
-   <p class="eyebrow">Dein Wishtale · ${i+1} von ${STEPS.length}</p>
+   <div class="prog" aria-label="Schritt ${i+1} von ${list0.length}">${list0.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join('')}</div>
+   <p class="eyebrow">Dein Wishtale · ${i+1} von ${list0.length}</p>
    ${S.me.managed?`<div class="banner green" style="margin-top:10px">${ic('user')}<span>Du richtest gerade das Profil für ${esc(S.me.name)} ein. Am schönsten wird es, wenn ihr es zusammen macht.</span></div>`:''}
    <h1>${st.t}</h1><p class="muted" style="font-size:17px">${st.h}</p>
    ${body}
-   <div class="obnav"><button class="btn ghost" data-act="${i?'prev':'go'}" data-v="profil">${ic('back','sm')}${i?'Zurück':'Abbrechen'}</button>
-   <button class="btn pri" data-act="${last?'finish':'next'}">${last?'Fertig, zeig mir mein Profil':'Weiter'} ${ic('arrow','sm')}</button></div>
+   <div class="obnav">${i?`<button class="btn ghost" data-act="prev">${ic('back','sm')}Zurück</button>`:anon?`<a class="btn ghost" href="../">${ic('back','sm')}Zur Startseite</a>`:`<button class="btn ghost" data-act="go" data-v="profil">${ic('back','sm')}Abbrechen</button>`}
+   <button class="btn pri" data-act="${last?'finish':'next'}">${last?(anon?'Fertig, weiter zu meinem Konto':'Fertig, zeig mir mein Profil'):'Weiter'} ${ic('arrow','sm')}</button></div>
   </div></div>`;
 }
 
