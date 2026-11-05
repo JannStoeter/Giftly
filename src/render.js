@@ -13,8 +13,13 @@ import { Modal } from './views/modals.js';
 export const VIEWS={start:Start,profil:Profil,wuensche:Wuensche,historie:Historie,entdecken:Entdecken,gast:Gast,login:Login};
 const DEFAULT_VIEW='profil';
 
+let lastModalKey='';
 export function render(top){
   const y=window.scrollY,v=S.ui.view;
+  // Scrollposition im Fenster merken: gleiches Fenster bleibt, wo es war, ein neues beginnt ganz oben.
+  const oldSheet=document.querySelector('.sheet');
+  const sheetY=oldSheet?oldSheet.scrollTop:0;
+  const modalKey=S.ui.modal?`${S.ui.modal}:${S.ui.pickId||''}:${S.ui.worldId||''}`:'';
   const body=VIEWS[v]();
   if(v==='login'){
     $('#app').innerHTML=LoginHeader()+`<main id="main" class="appmain">${body}</main>`;
@@ -24,6 +29,9 @@ export function render(top){
   if(v==='gast'){
     $('#app').innerHTML=GuestHeader()+`<main id="main" class="appmain">${body}</main>`+Modal();
     window.scrollTo(0,top?0:y);
+    const gs=document.querySelector('.sheet');
+    if(gs)gs.scrollTop=(modalKey&&modalKey===lastModalKey)?sheetY:0;
+    lastModalKey=modalKey;
     return;
   }
   $('#app').innerHTML=Header(v)
@@ -31,6 +39,9 @@ export function render(top){
     +`<main id="main" class="appmain">${body}</main>`
     +BottomNav(v)+Modal();
   window.scrollTo(0,top?0:y);
+  const sheet=document.querySelector('.sheet');
+  if(sheet)sheet.scrollTop=(modalKey&&modalKey===lastModalKey)?sheetY:0;
+  lastModalKey=modalKey;
   saveState();
   scheduleSync();
 }
