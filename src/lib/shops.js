@@ -46,6 +46,18 @@ export const linkChip = (href, label) =>
 
 export const shopChips = q => shopLinks(q).map(s => linkChip(s.u, s.n)).join('');
 
+/** Die Amazon-App teilt „Titel + Link“. Der Text vor dem Link ist oft der Produktname. */
+export function shareTitle(text, link) {
+  let t = String(text || '').split(link)[0].replace(/["„“”]/g, '').replace(/\s+/g, ' ').trim();
+  const m = t.match(/^(?:schau dir|sieh dir)\b(.*?)\ban\s*:?\s*(.*)$/i);
+  if (m) {
+    const rest = m[2].trim();
+    t = rest || m[1].replace(/\b(mal|diesen|dieses|diese|artikel|produkt|das|den|die)\b/gi, '').trim();
+  }
+  t = t.replace(/[:\-–|\s]+$/, '').trim();
+  return t.length >= 4 ? t.slice(0, 90) : '';
+}
+
 /**
  * Liest einen von Amazon kopierten Link (oder Teilen-Text) und macht daraus ASIN, Titel und Partnerlink.
  * Der Titel stammt aus dem Link-Text der Produktseite. Er ist nur ein Vorschlag und bleibt editierbar.
@@ -56,7 +68,7 @@ export function parseAmazonInput(text) {
   let url;
   try { url = new URL(m[0].replace(/[).,;]+$/, '')); } catch { return { error: 'Der Link ist ungültig.' }; }
   const host = url.hostname.toLowerCase();
-  if (/^(amzn\.(to|eu)|a\.co)$/.test(host)) return { error: 'Das ist ein Kurzlink. Öffne ihn im Browser und kopiere dort die lange Adresse (amazon.de/…/dp/…).' };
+  if (/^(amzn\.(to|eu)|a\.co)$/.test(host)) return { short: true, shortUrl: url.href, hint: shareTitle(text, m[0]) };
   if (!/(^|\.)amazon\.de$/.test(host)) return { error: 'Bitte einen Link von amazon.de verwenden.' };
   const a = url.pathname.match(/\/(?:dp|gp\/product|gp\/aw\/d|exec\/obidos\/asin)\/([A-Z0-9]{10})/i);
   if (!a) return { error: 'Das ist keine Produktseite (es fehlt /dp/…). Öffne das Produkt und kopiere dann den Link.' };
@@ -68,6 +80,7 @@ export function parseAmazonInput(text) {
   if (seg && !/^(-|gp|exec|obidos|aw|de|en|s)$/i.test(seg)) {
     try { title = decodeURIComponent(seg).replace(/-/g, ' ').replace(/\s+/g, ' ').trim(); } catch { /* ignorieren */ }
   }
+  if (!title) title = shareTitle(text, m[0]);
   return { asin, title: title.slice(0, 90), url: `https://www.amazon.de/dp/${asin}?tag=${AMAZON_TAG}` };
 }
 

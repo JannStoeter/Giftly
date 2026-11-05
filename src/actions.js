@@ -1,8 +1,9 @@
 import { S, W, switchTo, resetState, guestPerson, saveState } from './state.js';
 import { $, toast, kwOf, nid, money, overlap } from './lib/util.js';
-import { LOOKS, CATALOG, PRIO, crea, cprod, cat } from './data/content.js';
+import { CATALOG, PRIO, cat } from './data/content.js';
 import { check } from './logic.js';
-import { offersFor } from './lib/products.js';
+import { offersFor, worldOffers } from './lib/products.js';
+import { guessCategory } from './lib/category.js';
 import { parseAmazonInput, searchUrl } from './lib/shops.js';
 import { parsePinterest, parseInstagram, givePinConsent } from './lib/social.js';
 import { render, route, refreshGuest } from './render.js';
@@ -13,15 +14,31 @@ export const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','Aug
 export 
 /* ---- Amazon stöbern ---- */
 const parsePrice=v=>{const n=parseFloat(String(v||'').replace(/\./g,'').replace(',','.'));return Number.isFinite(n)&&n>0?n:null};
-function azParse(text){
-  const z=S.ui.az,r=parseAmazonInput(text);
-  z.text=text;z.res=r;
+function azApply(r){
+  const z=S.ui.az;
+  z.res=r;z.busy=false;
   if(!r.error){
-    z.title=z.title||r.title;
-    const guess=CATALOG.find(i=>overlap(kwOf(r.title),i.kw));
-    z.c=guess?guess.c:(z.c||'wohnen');
+    z.title=z.title||r.title||'';
+    z.c=guessCategory(z.title||r.title,'wohnen');
+    z.catAuto=true;
   }
   render();
+}
+function azParse(text){
+  const z=S.ui.az,r=parseAmazonInput(text);
+  z.text=text;
+  if(r.short){
+    // Kurzlink: der Server verfolgt die Weiterleitung, damit niemand den Link selbst umwandeln muss
+    z.res=null;z.busy=true;z.title=z.title||r.hint||'';render();
+    fetch('/api/resolve?u='+encodeURIComponent(r.shortUrl)).then(x=>x.json()).then(d=>{
+      if(!d.url)throw new Error('x');
+      const r2=parseAmazonInput(d.url);
+      if(!r2.error&&!r2.title)r2.title=r.hint||'';
+      azApply(r2);
+    }).catch(()=>azApply({error:'Diesen Kurzlink konnten wir leider nicht öffnen. Tippe in der Amazon-App auf „Teilen“ und wähle „Link kopieren“, oder öffne das Produkt im Browser und kopiere die Adresse.'}));
+    return;
+  }
+  azApply(r);
 }
 
 /* Reservieren: entweder über die Datenbank (echtes Profil) oder lokal (Demo). Liefert true bei Erfolg. */
@@ -35,7 +52,7 @@ function reserveFlow(p,w){
 }
 const A={
  scroll(el){document.getElementById(el.dataset.t)?.scrollIntoView({behavior:'smooth',block:'start'})},
- go(el){const v=el.dataset.v;if(v==='entdecken'){S.ui.look=null;S.ui.creator=null}if(v==='start')S.ui.step=0;location.hash='#'+v;if(location.hash==='#'+v&&S.ui.view===v)render(true)},
+ go(el){const v=el.dataset.v;if(v==='start')S.ui.step=0;location.hash='#'+v;if(location.hash==='#'+v&&S.ui.view===v)render(true)},
  pick(el){const k=el.dataset.k,v=el.dataset.v,a=S.me[k],i=a.indexOf(v);i>-1?a.splice(i,1):a.push(v);render()},
  next(){
   if(!S.auth.user&&S.ui.step===0&&!(S.me.name||'').trim()){toast('Magst du uns zuerst deinen Vornamen verraten?');document.getElementById('dn')?.focus();return}
@@ -124,20 +141,15 @@ const A={
  aside(){S.ui.asideOpen=!S.ui.asideOpen;render()},
  wopen(el){S.ui.pickId=el.dataset.id;S.ui.wishCtx=el.dataset.ctx||'guest';S.ui.modal='wishdetail';render();setTimeout(()=>document.querySelector('.sheet [data-act=close]')?.focus({preventScroll:true}),30)},
  try(el){const p=guestPerson();S.ui.idea=el.dataset.v;S.ui.ideaRes=check(p,el.dataset.v);render()},
+ oadd(el){
+  const o=worldOffers(S.me,el.dataset.cid,12).find(x=>String(x.id)===el.dataset.id);if(!o)return;
+  S.me.wishes.unshift(W({t:o.t,c:el.dataset.cid,kind:o.exp?'erlebnis':'produkt',prio:2,link:o.exp?'':o.url,price:o.price||null,a:o.a||cat(el.dataset.cid).a,tone:o.tone||0,kw:kwOf(o.t)}));
+  toast('Schön, das steht jetzt auf deiner Wunschliste.');render();
+ },
  save(el){const id=el.dataset.id;S.ui.saved[id]=!S.ui.saved[id];render()},
  kind(el){S.ui.kind=el.dataset.v;render()},
  acct(el){switchTo(el.dataset.id);render(true)},
  invite(){const m=S.me,n=['Onkel Tom','Patentante Sarah','Opa Heinz'].find(x=>!m.invited.includes(x));if(n){m.invited.push(n);toast('Simuliert: Einladung an '+n+' erstellt. Nur Eingeladene sehen das Profil.')}else toast('Alle Beispiel-Einladungen sind vergeben.');render()},
- creator(el){S.ui.creator=el.dataset.id;S.ui.look=null;S.ui.hot=null;if(el.dataset.go&&S.ui.view!=='entdecken'){location.hash='#entdecken';return}render(true)},
- cback(){S.ui.creator=null;S.ui.look=null;render(true)},
- cf(el){S.ui.cf=el.dataset.v;render()},
- look(el){S.ui.look=el.dataset.id;S.ui.hot=null;if(!el.dataset.keep)S.ui.creator=null;render(true)},
- lookback(){S.ui.look=null;S.ui.hot=null;render(true)},
- hot(el){S.ui.hot=S.ui.hot===el.dataset.id?null:el.dataset.id;render()},
- lookall(){const l=LOOKS.find(x=>x.id===S.ui.look),c=crea(l.cid);let n=0;l.objs.filter(o=>o.pid).forEach(o=>{const x=cprod(o.pid);if(!S.me.wishes.some(w=>w.pid===x.id)){S.me.wishes.unshift(W({t:x.t,c:x.c,prio:2,a:x.a,tone:x.tone,note:`Tipp von ${c.handle}: ${x.note}`,via:c.id,pid:x.id,kw:kwOf(x.t)}));n++}});toast(n?`${n===1?'Ein Teil':n+' Teile'} aus diesem Look stehen jetzt auf deiner Wunschliste. Wenn jemand darüber einkauft, bekommt ${c.handle} eine kleine Provision, für dich ändert sich dadurch nichts.`:'Alles aus diesem Look steht schon auf deiner Wunschliste.');render()},
- style(el){const m=S.me;m.style=m.style||[];const id=el.dataset.id,i=m.style.findIndex(x=>x.id===id);if(i>-1){m.style.splice(i,1);toast('Das Stil-Vorbild ist wieder entfernt.')}else{m.style.push({id});toast(`Das hat geklappt: In deinem Profil steht jetzt „${crea(id).scope} von ${crea(id).handle}“. So wissen deine Freunde, woran sie sich orientieren können.`)}render()},
- cadd(el){const x=cprod(el.dataset.id),c=crea(el.dataset.cid);S.me.wishes.unshift(W({t:x.t,c:x.c,prio:2,a:x.a,tone:x.tone,note:`Tipp von ${c.handle}: ${x.note}`,via:c.id,pid:x.id,kw:kwOf(x.t)}));toast(`Schön, das steht jetzt auf deiner Wunschliste. Wenn jemand darüber einkauft, bekommt ${c.handle} eine kleine Provision, für dich ändert sich dadurch nichts.`);render()},
- cbuy(el){const c=crea(el.dataset.cid);toast(`Das ist eine Vorschau: Hier würde sich der Partnerlink öffnen, und ${c.handle} bekäme bei einem Kauf eine kleine Provision.`)},
  occ(el){S.ui.occ=el.dataset.v;S.ui.budget=el.dataset.v==='danke'?40:100;render()},
  onlyopen(el){S.ui.onlyOpen=el.dataset.v==='1';render()},
  dens(el){S.ui.big=el.dataset.v==='1';render()},
@@ -147,7 +159,16 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(
 document.addEventListener('input',e=>{if(e.target.id==='bud'){S.ui.budget=+e.target.value;$('#budv').textContent=money(S.ui.budget)}});
 document.addEventListener('change',e=>{if(e.target.id==='bud'){S.ui.budget=+e.target.value;render()}});
 document.addEventListener('input',e=>{const f=e.target.dataset?.az;if(f&&S.ui.az)S.ui.az[f]=e.target.value});
-document.addEventListener('change',e=>{const f=e.target.dataset?.az;if(f&&S.ui.az)S.ui.az[f]=e.target.value});
+document.addEventListener('change',e=>{
+  const f=e.target.dataset?.az;if(f&&S.ui.az)S.ui.az[f]=e.target.value;
+  if(f==='c'&&S.ui.az)S.ui.az.catAuto=false;
+  if(f==='title'&&S.ui.az?.catAuto){S.ui.az.c=guessCategory(e.target.value,S.ui.az.c);const s=document.getElementById('azc');if(s)s.value=S.ui.az.c}
+  if(f==='text'&&S.ui.az&&e.target.value.trim())azParse(e.target.value);
+  // Neuer Wunsch: Kategorie passend zum Titel vorschlagen, solange noch nichts anderes gewählt wurde
+  if(e.target.id==='wt'){const s=document.getElementById('wc2');if(s&&!s.dataset.touched)s.value=guessCategory(e.target.value,s.value)}
+  if(e.target.id==='wc2')e.target.dataset.touched='1';
+});
+document.addEventListener('paste',e=>{if(e.target.dataset?.az==='text'){const el=e.target;setTimeout(()=>{if(el.value.trim())azParse(el.value)},0)}});
 document.addEventListener('paste',e=>{
   if(e.target.id!=='azurl')return;
   e.preventDefault();azParse(e.clipboardData.getData('text'));

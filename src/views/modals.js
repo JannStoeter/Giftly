@@ -4,7 +4,7 @@ import { CATS, OCC, PRIO } from '../data/content.js';
 import { WishModal } from './wishmodal.js';
 import { WorldModal } from './world.js';
 import { PinsModal } from './pins.js';
-import { AMAZON_DISCLOSURE } from '../lib/shops.js';
+import { AMAZON_DISCLOSURE, searchUrl } from '../lib/shops.js';
 
 export function AcctModal(){
   const rows=Object.entries(S.accounts).map(([id,a])=>`<div class="altrow" style="grid-template-columns:44px 1fr auto"><span class="av t${a.tone}" style="width:44px;height:44px">${initials(a.name)}</span><div><strong>${esc(a.name)}${a.age?`, ${a.age}`:''}</strong><br><span class="muted" style="font-size:13.5px">${a.managed?`Kind-Konto, verwaltet von ${esc(S.accounts.me.name)}`:'Hauptkonto'}</span></div>${S.ui.acct===id?'<span class="chip ok">Aktiv</span>':`<button class="btn sec sm" data-act="acct" data-id="${id}">Wechseln</button>`}</div>`).join('');
@@ -32,14 +32,15 @@ export function AmazonModal(){
     <p class="disc" style="margin:8px 0 0">Amazon öffnet in einem neuen Tab. ${AMAZON_DISCLOSURE}</p></section>
    <section class="azstep"><p class="eyebrow">2 · Link einfügen</p>
     <form data-form="azlink" class="addrow"><label for="azurl" style="position:absolute;left:-9999px">Amazon-Link</label><input id="azurl" name="text" data-az="text" class="inp" value="${esc(z.text)}" placeholder="Link der Produktseite einfügen" autocomplete="off"><button class="btn sec" type="button" data-act="azclip">Aus Zwischenablage</button></form>
-    <p class="muted" style="font-size:13px;margin-top:6px">In der Amazon-App tippst du beim Produkt auf „Teilen“ und dann auf „Link kopieren“. Im Browser kopierst du einfach die Adresse aus der Adresszeile.</p>
+    <p class="muted" style="font-size:13px;margin-top:6px">In der Amazon-App tippst du beim Produkt auf „Teilen“ und fügst den Text hier einfach ein. Auch Kurzlinks (amzn.eu, amzn.to) und Adressen aus dem Browser sind in Ordnung, wir erkennen alles automatisch.</p>
+    ${z.busy?`<p class="muted" style="font-size:14px;margin-top:8px" role="status">Einen Moment, wir schauen uns das Produkt an …</p>`:''}
     ${r&&r.error?`<div class="banner" style="margin-top:10px">${ic('x')}<span>${esc(r.error)}</span></div>`:''}</section>
    ${ok?`<section class="azstep azprev"><p class="eyebrow">3 · Prüfen und speichern</p>
     <form data-form="azadd">
      <div class="fld"><label for="azt">Name des Wunsches</label><input id="azt" name="t" data-az="title" class="inp" required value="${esc(z.title)}" placeholder="Produktname"></div>
      <div class="fld"><label for="azp">Preis in Euro (optional, wie bei Amazon angezeigt)</label><input id="azp" name="price" data-az="price" class="inp" inputmode="decimal" value="${esc(z.price)}" placeholder="z. B. 69,90"></div>
-     <div class="fld"><label for="azc">Kategorie</label><select id="azc" name="c" data-az="c" class="sel">${CATS.map(c=>`<option value="${c.id}" ${z.c===c.id?'selected':''}>${c.n}</option>`).join('')}</select></div>
-     <p class="muted" style="font-size:13px;margin-bottom:10px">Amazon-Produkt ${esc(r.asin)} · der Link enthält unsere Partner-ID.</p>
+     <div class="fld"><label for="azc">Kategorie${z.catAuto?' (haben wir passend zum Namen gewählt)':''}</label><select id="azc" name="c" data-az="c" class="sel">${CATS.map(c=>`<option value="${c.id}" ${z.c===c.id?'selected':''}>${c.n}</option>`).join('')}</select></div>
+     <p class="muted" style="font-size:13px;margin-bottom:10px"><a href="${searchUrl.idealo(z.title||'')}" target="_blank" rel="noopener noreferrer" class="linkbtn">Aktuellen Preis bei idealo nachsehen</a><br>Amazon-Produkt ${esc(r.asin)} · der Link enthält unsere Partner-ID.</p>
      <div class="row"><button class="btn pri" type="submit">${ic('plus','sm')}Auf meine Wunschliste</button></div>
     </form></section>`:''}
    <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn ghost" data-act="close">Schließen</button></div>

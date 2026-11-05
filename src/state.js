@@ -7,7 +7,7 @@ export const S={
  me:{
   id:'me',name:'Lena',tone:2,
   interests:['Lesen','Wandern','Kochen'],cats:['buecher','outdoor','kochen','wohnen'],
-  brands:['Patagonia','Le Creuset','Aesop','Leuchtturm1917'],tries:['Keramikkurs','Segeln'],style:[{id:'nora'}],
+  brands:['Patagonia','Le Creuset','Aesop','Leuchtturm1917'],tries:['Keramikkurs','Segeln'],style:[],
   nogos:['Duftkerzen','Socken','Deko-Kitsch'],alts:['Buchhandlung vor Ort','Wunschgutschein','IKEA-Gutschein','Spende: Naturschutz'],
   vis:{interests:'alle',cats:'alle',brands:'alle',tries:'giver',nogos:'giver',alts:'giver'},
   wishes:[
@@ -32,7 +32,7 @@ export const S={
  people:{
   jonas:{id:'jonas',name:'Jonas',tone:5,
    interests:['Kaffee brühen','Kochen','Einrichten'],cats:['genuss','kochen','wohnen'],brands:['Hario','Stelton','Fellow','Muji'],
-   tries:['Kochkurs','Keramikkurs'],style:[{id:'nora'}],nogos:['Duftkerzen','Krimskrams'],alts:['Lokaler Kaffeeröster','Wunschgutschein','IKEA-Gutschein','Spende: Tierschutz'],
+   tries:['Kochkurs','Keramikkurs'],style:[],nogos:['Duftkerzen','Krimskrams'],alts:['Lokaler Kaffeeröster','Wunschgutschein','IKEA-Gutschein','Spende: Tierschutz'],
    wishes:[
     W({id:'j1',t:'Hochwertige Kaffeemühle',c:'genuss',prio:3,a:'grinder',tone:2,note:'Handmühle, gern mit Keramik-Mahlwerk.',kw:['mühle'],res:'other'}),
     W({id:'j2',t:'Wochenend-Kochkurs: frische Pasta',c:'erlebnisse',kind:'erlebnis',prio:2,occ:['geburtstag'],a:'cooking',tone:5,kw:['kochkurs']}),
