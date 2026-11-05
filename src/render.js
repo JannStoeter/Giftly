@@ -8,12 +8,22 @@ import { Entdecken } from './views/inspiration.js';
 import { Gast } from './views/giver.js';
 import { Login } from './views/auth.js';
 import { fetchPublic, scheduleSync } from './lib/remote.js';
+import { loadPinterest, pinConsent } from './lib/social.js';
 import { Modal } from './views/modals.js';
 
 export const VIEWS={start:Start,profil:Profil,wuensche:Wuensche,historie:Historie,entdecken:Entdecken,gast:Gast,login:Login};
 const DEFAULT_VIEW='profil';
 
 let lastModalKey='';
+function afterRender(){
+  if(S.ui.modal!=='pins'||!pinConsent())return;
+  const box=document.querySelector('.pinwrap');if(!box)return;
+  loadPinterest().then(ok=>{
+    if(!document.body.contains(box))return;
+    if(ok&&window.PinUtils){window.PinUtils.build(box)}
+    else{const a=box.querySelector('a');box.innerHTML=`<p class="muted">Die Pins konnten nicht geladen werden. Vielleicht blockiert ein Werbeblocker Pinterest. Du kannst sie ${a?`<a href="${a.href}" target="_blank" rel="noopener noreferrer">direkt auf Pinterest öffnen</a>`:'direkt auf Pinterest öffnen'}.</p>`}
+  });
+}
 export function render(top){
   const y=window.scrollY,v=S.ui.view;
   // Scrollposition im Fenster merken: gleiches Fenster bleibt, wo es war, ein neues beginnt ganz oben.
@@ -32,6 +42,7 @@ export function render(top){
     const gs=document.querySelector('.sheet');
     if(gs)gs.scrollTop=(modalKey&&modalKey===lastModalKey)?sheetY:0;
     lastModalKey=modalKey;
+    afterRender();
     return;
   }
   $('#app').innerHTML=Header(v)
@@ -42,6 +53,7 @@ export function render(top){
   const sheet=document.querySelector('.sheet');
   if(sheet)sheet.scrollTop=(modalKey&&modalKey===lastModalKey)?sheetY:0;
   lastModalKey=modalKey;
+  afterRender();
   saveState();
   scheduleSync();
 }

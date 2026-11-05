@@ -70,6 +70,7 @@ export function Profil(){
    ${sec('nogos','Bitte nicht',chips(m.nogos,'warn'))}
    ${sec('alts','Alternativen, wenn keine Idee passt',chips(m.alts,'ok'))}
    ${OwnedSec(m)}
+   ${SocialSec(m)}
    <section class="psec"><div class="hd"><h3>Dein Feedback</h3>${VisPill('nur')}</div><p class="muted">Wie dir ein Geschenk wirklich gefallen hat, bleibt unter uns. Wer dir etwas geschenkt hat, bekommt höchstens eine freundliche Nachricht.</p></section>
    ${Legend()}`}
   </div>`;
@@ -96,4 +97,17 @@ function OwnedSec(m){
    <p class="muted" style="font-size:14px">Was steht bei dir zu Hause schon im Schrank? Trag es hier ein, zum Beispiel eine Siebträgermaschine. Dann schlagen wir dir und deinen Freunden nichts vor, was du bereits hast.</p>
    ${owned.length?`<div class="chips">${owned.map(w=>`<span class="chip ok">${esc(w.t)}<button class="chipx" data-act="ownedel" data-id="${w.id}" aria-label="${esc(w.t)} entfernen">×</button></span>`).join('')}</div>`:''}
    <form data-form="owned" class="addrow"><label for="ownedt" style="position:absolute;left:-9999px">Was hast du schon?</label><input id="ownedt" name="t" class="inp" placeholder="z. B. Siebträgermaschine, Wanderrucksack" autocomplete="off" maxlength="120"><button class="btn sec sm" type="submit">${ic('plus','sm')}Hinzufügen</button></form></section>`;
+}
+
+/* Pinterest und Instagram verlinken. Freunde sehen auf der Profilseite, was dich inspiriert. */
+function SocialSec(m){
+  const s=m.social||{};
+  return `<section class="psec"><div class="hd"><h3>Was dich inspiriert</h3>${VisPill((m.vis&&m.vis.social)||'giver','social')}</div>
+   <p class="muted" style="font-size:14px">Wenn du magst, verlinkst du hier dein Pinterest oder dein Instagram. Deine Freunde können sich dort umsehen und bekommen ein Gefühl für deinen Geschmack, ohne selbst ein Konto zu brauchen. Bei Pinterest zeigen wir ihnen deine Pins sogar direkt hier an.</p>
+   <form data-form="social" class="authform">
+    <div class="fld"><label for="sp">Pinterest (dein Profil oder ein Board)</label><input id="sp" name="pinterest" class="inp" inputmode="url" autocomplete="off" placeholder="z. B. pinterest.de/dein-name/kaffee-ecke" value="${esc(s.pinterest||'')}"></div>
+    <div class="fld"><label for="si">Instagram (dein Name)</label><input id="si" name="instagram" class="inp" autocomplete="off" placeholder="@dein-name" value="${esc(s.instagram||'')}"></div>
+    <div class="row"><button class="btn sec sm" type="submit">Speichern</button></div>
+   </form>
+   <p class="disc" style="margin:0">Pins werden erst angezeigt, wenn deine Freunde dem Laden der Pinterest-Inhalte zustimmen. Einen Instagram-Kanal können wir nur verlinken, weil Instagram keine Einbettung ganzer Profile erlaubt.</p></section>`;
 }

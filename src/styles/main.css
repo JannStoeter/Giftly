@@ -531,3 +531,8 @@ input[type=range]{accent-color:var(--accent);width:140px}
 .js .tstep.in .chip,.js .tstep.in .mini{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.js .tstep,.js .tstep .chip,.js .tstep .mini{opacity:1!important;transform:none!important;transition:none!important}}
 .feat-icons .fcard:nth-child(n+6){grid-column:span 3}
+
+/* ---- Inspiration (Pinterest, Instagram) ---- */
+.social{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.social .chip{text-decoration:none}
+.pinwrap{min-height:180px;overflow:auto;margin:12px 0}

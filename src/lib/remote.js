@@ -8,9 +8,10 @@
 import { sb } from './supabase.js';
 import { S, W } from '../state.js';
 import { kwOf } from './util.js';
+import { safeSocial } from './social.js';
 
 /* ---------- Mapping App <-> Datenbank ---------- */
-const VIS_DEFAULT = { interests: 'giver', cats: 'giver', brands: 'giver', tries: 'giver', nogos: 'giver', alts: 'giver', style: 'giver' };
+const VIS_DEFAULT = { interests: 'giver', cats: 'giver', brands: 'giver', tries: 'giver', nogos: 'giver', alts: 'giver', style: 'giver', social: 'giver' };
 const num = v => (v == null ? null : +v);
 
 export const wishToRow = (w, profileId) => ({
@@ -32,6 +33,7 @@ const giftFromRow = (r, i) => ({
   a: 'gift', tone: i % 6, kw: r.kw && r.kw.length ? r.kw : kwOf(r.what),
 });
 const profileToRow = a => ({
+  ...(a.social && Object.keys(a.social).length ? { social: a.social } : (a.socialWas ? { social: {} } : {})),
   name: a.name, tone: a.tone || 0, about: a.about || '', age: a.age || null,
   interests: a.interests || [], cats: a.cats || [], brands: a.brands || [], tries: a.tries || [],
   nogos: a.nogos || [], alts: a.alts || [], style: a.style || [], vis: { ...VIS_DEFAULT, ...(a.vis || {}) },
@@ -40,6 +42,7 @@ const accountFromRow = (p, wishes, gifts) => ({
   dbId: p.id, handle: p.handle, name: p.name, age: p.age, managed: p.managed, tone: p.tone, about: p.about,
   interests: p.interests, cats: p.cats, brands: p.brands, tries: p.tries, nogos: p.nogos, alts: p.alts,
   style: p.style || [], vis: { ...VIS_DEFAULT, ...(p.vis || {}) },
+  social: safeSocial(p.social), socialWas: !!(p.social && Object.keys(p.social).length),
   invited: [], inbox: [],
   wishes: wishes.filter(w => w.profile_id === p.id).map(wishFromRow),
   history: gifts.filter(g => g.profile_id === p.id).map(giftFromRow),
@@ -187,6 +190,7 @@ export async function fetchPublic(handle) {
     parent: data.parent_name, tone: data.tone, about: data.about,
     interests: data.interests, cats: data.cats, brands: data.brands, tries: data.tries, nogos: data.nogos, alts: data.alts,
     style: data.style || [],
+    social: safeSocial(data.social),
     wishes: data.wishes.map(r => {
       const w = wishFromRow({ ...r, title: r.title, vis: 'alle' });
       w.res = r.reserved ? (r.mine ? 'me' : 'other') : null;

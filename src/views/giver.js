@@ -6,6 +6,7 @@ import { ownedOf, excluded, recommend } from '../logic.js';
 import { densSeg } from './wishes.js';
 import { WishCard } from './card.js';
 import { AMAZON_DISCLOSURE, searchUrl, voucherLink } from '../lib/shops.js';
+import { instagramUrl } from '../lib/social.js';
 
 /* Gast-Ansicht: ein Freund öffnet den Link und sieht nur dieses eine Profil. */
 export function Gast(){
@@ -59,8 +60,11 @@ export function Facts(p,{preview=false}={}){
   const chips=(a,c='')=>a.length?`<div class="chips">${a.map(x=>`<span class="chip ${c}">${esc(x)}</span>`).join('')}</div>`:'';
   const worlds=p.cats.length?`<p class="muted" style="font-size:13.5px;margin-bottom:8px">Tippe auf eine Welt, dann erzählen wir dir, was dazu passen könnte.</p><div class="catrow">${p.cats.map(id=>{const c=cat(id);return `<button class="catmini" data-act="world" data-id="${c.id}" data-ctx="${ctx}" aria-label="Welt ${esc(c.n)} öffnen">${art(c.a,c.t)}<div>${esc(c.n)}</div></button>`}).join('')}</div>`:'';
   const alts=p.alts.length?`<p class="muted" style="font-size:13.5px;margin-bottom:8px">${esc(p.name)} freut sich auch über:</p><div class="chips">${p.alts.map(a=>{const v=voucherLink(a);return `<a class="chip ok" href="${v.url}" target="_blank" rel="noopener noreferrer${v.ad?' sponsored nofollow':''}">${esc(a)} ↗</a>`}).join('')}</div>${p.alts.some(a=>voucherLink(a).ad)?'<span class="ad">Enthält Anzeige (Amazon-Partnerlink)</span>':''}`:'';
+  const soc=p.social||{};
+  const inspo=(soc.pinterest||soc.instagram)?`<p class="muted" style="font-size:13.5px;margin-bottom:10px">Hier sammelt ${esc(p.name)} Ideen und Fundstücke. Ein Blick darauf verrät oft mehr als jede Wunschliste.</p><div class="social">${soc.pinterest?`<button class="btn sec sm" data-act="pins" data-ctx="${ctx}">Pins hier ansehen</button><a class="chip" href="${esc(soc.pinterest)}" target="_blank" rel="noopener noreferrer">Auf Pinterest öffnen ↗</a>`:''}${soc.instagram?`<a class="chip" href="${esc(instagramUrl(soc.instagram))}" target="_blank" rel="noopener noreferrer">Instagram: @${esc(soc.instagram)} ↗</a>`:''}</div>`:'';
   return block('Hat '+esc(p.name)+' schon',chips(owned.map(w=>w.t),'ok'))
    +block('Schon verschenkt',chips((p.gifts||p.history||[]).map(g=>`${g.what} · ${g.from}`)))
+   +block('Das inspiriert '+esc(p.name),inspo)
    +block('Möchte ausprobieren',chips(p.tries,'gold'))
    +block('Welten',worlds)
    +block('Wenn nichts passt',alts);

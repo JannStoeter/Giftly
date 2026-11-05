@@ -4,6 +4,7 @@ import { LOOKS, CATALOG, PRIO, crea, cprod, cat } from './data/content.js';
 import { check } from './logic.js';
 import { offersFor } from './lib/products.js';
 import { parseAmazonInput, searchUrl } from './lib/shops.js';
+import { parsePinterest, parseInstagram, givePinConsent } from './lib/social.js';
 import { render, route, refreshGuest } from './render.js';
 import { guestRpc } from './lib/remote.js';
 import { signIn, signUp, magicLink, signOut, friendly } from './lib/auth.js';
@@ -113,6 +114,8 @@ const A={
  },
  world(el){S.ui.worldId=el.dataset.id;S.ui.worldCtx=el.dataset.ctx||'guest';S.ui.modal='world';render();setTimeout(()=>document.querySelector('.sheet [data-act=close]')?.focus({preventScroll:true}),30)},
  ownedel(el){S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
+ pins(el){S.ui.pinsCtx=el.dataset.ctx||'guest';S.ui.modal='pins';render()},
+ pinconsent(){givePinConsent();render()},
  aside(){S.ui.asideOpen=!S.ui.asideOpen;render()},
  wopen(el){S.ui.pickId=el.dataset.id;S.ui.wishCtx=el.dataset.ctx||'guest';S.ui.modal='wishdetail';render();setTimeout(()=>document.querySelector('.sheet [data-act=close]')?.focus({preventScroll:true}),30)},
  try(el){const p=guestPerson();S.ui.idea=el.dataset.v;S.ui.ideaRes=check(p,el.dataset.v);render()},
@@ -168,6 +171,13 @@ document.addEventListener('submit',e=>{
       render();
     }).catch(e=>{S.ui.authBusy=false;S.ui.authMsg={type:'error',text:friendly(e)};render()});
     return;
+  }
+  if(kind==='social'){
+    const p=parsePinterest(fd.get('pinterest')),i=parseInstagram(fd.get('instagram'));
+    if(!p.ok){toast(p.error);return}
+    if(!i.ok){toast(i.error);return}
+    S.me.social={...(p.value?{pinterest:p.value}:{}),...(i.value?{instagram:i.value}:{})};
+    toast(p.value||i.value?'Gespeichert. Deine Freunde sehen jetzt, was dich inspiriert.':'Die Links sind wieder entfernt.');render();return;
   }
   if(kind==='owned'){
     const t=(fd.get('t')||'').trim();if(!t)return;
