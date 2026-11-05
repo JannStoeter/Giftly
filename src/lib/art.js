@@ -71,3 +71,6 @@ export const pimg=x=>art(x.a,x.tone);
 
 /* Nur die Illustration (für statische Seiten als Fallback unter dem Foto). */
 export const illustration=kind=>`<svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${ART[kind]||ART.gift}</svg>`;
+
+/* Nur die Illustration, ohne Foto: für Angebote, bei denen ein Stockfoto zum Produkt nicht passen würde. */
+export const artIllu=(kind,tone=0)=>`<span class="art t${tone}" aria-hidden="true">${illustration(kind)}</span>`;

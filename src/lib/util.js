@@ -37,3 +37,6 @@ export function toast(msg){
   document.body.appendChild(d);
   clearTimeout(toastT);toastT=setTimeout(()=>d.remove(),3400);
 }
+
+/** Genitiv eines Vornamens: "Lena" -> "Lenas", "Jonas" -> "Jonas’". */
+export const gen=n=>/[sßxz]$/i.test(String(n))?n+'’':n+'s';

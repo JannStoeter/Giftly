@@ -1,7 +1,7 @@
 /* Detail-Fenster zu einem Wunsch: Vorschlag ansehen, Alternativen vergleichen, wählen oder weitersuchen. */
 import { S, guestPerson } from '../state.js';
 import { esc, ic } from '../lib/util.js';
-import { art } from '../lib/art.js';
+import { art, artIllu } from '../lib/art.js';
 import { offersFor } from '../lib/products.js';
 import { cat, crea, occL, PRIO } from '../data/content.js';
 import { priceLine } from './product.js';
@@ -14,8 +14,8 @@ function Offer(pr, w, ctx, role) {
   const label = amazon ? (pr.direct ? 'Bei Amazon ansehen' : 'Bei Amazon suchen') : `Zu ${esc(pr.host)}`;
   const chosen = S.ui.chosen && S.ui.chosen[w.id] && S.ui.chosen[w.id].t === pr.t;
   return `<div class="offer ${role === 'main' ? 'main' : ''} ${chosen ? 'chosen' : ''}">
-   ${pr.brand ? `<span class="otn brand" aria-hidden="true"><b>${esc(pr.brand.slice(0, 1))}</b><small>${esc(pr.brand)}</small></span>` : `<span class="otn">${art(pr.a || 'gift', pr.tone || 0)}</span>`}
-   <div class="ob">
+   ${pr.brand ? `<span class="otn brand" aria-hidden="true"><b>${esc(pr.brand.slice(0, 1))}</b><small>${esc(pr.brand)}</small></span>` : `<span class="otn">${artIllu(pr.a || 'gift', pr.tone || 0)}</span>`}
+   <div class="obody">
     ${role === 'main' ? `<span class="eyebrow">${pr.source === 'link' ? 'Gewünschtes Produkt' : pr.source === 'erzeugt' ? 'Vorschlag von Wishtale' : 'Unser Vorschlag'}</span>` : ''}
     <strong class="ot">${esc(pr.t)}</strong>
     ${priceLine(pr)}

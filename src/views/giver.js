@@ -1,11 +1,11 @@
 import { S, initials, guestPerson } from '../state.js';
-import { esc, ic, money, kwOf } from '../lib/util.js';
+import { esc, ic, money, kwOf, gen } from '../lib/util.js';
 import { art } from '../lib/art.js';
 import { CATS, OCC, ABOUT, cat, crea, cprod, occL, occTip } from '../data/content.js';
 import { ownedOf, excluded, recommend } from '../logic.js';
 import { densSeg } from './wishes.js';
 import { WishCard } from './card.js';
-import { AMAZON_DISCLOSURE, searchUrl } from '../lib/shops.js';
+import { AMAZON_DISCLOSURE, searchUrl, voucherLink } from '../lib/shops.js';
 
 /* Gast-Ansicht: ein Freund öffnet den Link und sieht nur dieses eine Profil. */
 export function Gast(){
@@ -20,15 +20,18 @@ export function Gast(){
 export function GuestPage(p,{preview=false}={}){
   const wl=WishList(p,{preview});
   return `<div class="${preview?'':'wrap'}">
-   ${ProfileHead(p,{preview})}
    <div class="pgrid">
+    <div class="pheadslot">${ProfileHead(p,{preview})}</div>
+    <aside class="paside ${S.ui.asideOpen?'open':''}" aria-label="Mehr über ${esc(p.name)}">
+     <button class="asidetoggle" data-act="aside" aria-expanded="${!!S.ui.asideOpen}"><span><b>Mehr über ${esc(p.name)}</b><small>Hat schon, schon verschenkt, Welten, Alternativen</small></span><i aria-hidden="true">${S.ui.asideOpen?'–':'+'}</i></button>
+     <div class="asidebody" tabindex="0">${Facts(p,{preview})}</div>
+    </aside>
     <div class="pmain">
      ${wl.html}
      ${Curated(p,wl.open)}
      ${preview?'':`<details class="sect ideacheck" id="ideen"><summary><h3>Eigene Idee prüfen</h3></summary><p class="muted" style="font-size:14.5px;margin:4px 0 12px">Wishtale gleicht sie mit Wünschen, Besitz, bisherigen Geschenken und No-Gos von ${esc(p.name)} ab.</p>${Ideen(p)}</details>`}
      <p class="disc">Links zu Shops sind Partnerlinks (Anzeige). ${AMAZON_DISCLOSURE} Preise können abweichen, maßgeblich ist der Preis bei Amazon.</p>
     </div>
-    <aside class="paside" tabindex="0" aria-label="Mehr über ${esc(p.name)}">${Facts(p)}</aside>
    </div>
   </div>`;
 }
@@ -49,15 +52,18 @@ export function ProfileHead(p,{preview=false}={}){
 }
 
 /* Seitenleiste: was Schenkende zusätzlich wissen sollten. */
-export function Facts(p){
+export function Facts(p,{preview=false}={}){
   const owned=ownedOf(p).filter(w=>w.vis!=='privat');
+  const ctx=preview?'own':'guest';
   const block=(t,inner)=>inner?`<section class="fact"><h3>${t}</h3>${inner}</section>`:'';
   const chips=(a,c='')=>a.length?`<div class="chips">${a.map(x=>`<span class="chip ${c}">${esc(x)}</span>`).join('')}</div>`:'';
+  const worlds=p.cats.length?`<p class="muted" style="font-size:13.5px;margin-bottom:8px">Tippe auf eine Welt für passende Ideen.</p><div class="catrow">${p.cats.map(id=>{const c=cat(id);return `<button class="catmini" data-act="world" data-id="${c.id}" data-ctx="${ctx}" aria-label="Welt ${esc(c.n)} öffnen">${art(c.a,c.t)}<div>${esc(c.n)}</div></button>`}).join('')}</div>`:'';
+  const alts=p.alts.length?`<p class="muted" style="font-size:13.5px;margin-bottom:8px">${esc(p.name)} freut sich auch über:</p><div class="chips">${p.alts.map(a=>{const v=voucherLink(a);return `<a class="chip ok" href="${v.url}" target="_blank" rel="noopener noreferrer${v.ad?' sponsored nofollow':''}">${esc(a)} ↗</a>`}).join('')}</div>${p.alts.some(a=>voucherLink(a).ad)?'<span class="ad">Enthält Anzeige (Amazon-Partnerlink)</span>':''}`:'';
   return block('Hat '+esc(p.name)+' schon',chips(owned.map(w=>w.t),'ok'))
    +block('Schon verschenkt',chips((p.gifts||p.history||[]).map(g=>`${g.what} · ${g.from}`)))
    +block('Möchte ausprobieren',chips(p.tries,'gold'))
-   +block('Welten',p.cats.length?`<div class="catrow">${p.cats.map(id=>{const c=cat(id);return `<div class="catmini">${art(c.a,c.t)}<div>${c.n}</div></div>`}).join('')}</div>`:'')
-   +block('Wenn nichts passt',`<p class="muted" style="font-size:13.5px;margin-bottom:8px">${esc(p.name)} freut sich auch über:</p>`+chips(p.alts,'ok'));
+   +block('Welten',worlds)
+   +block('Wenn nichts passt',alts);
 }
 
 /* Die Wunschliste: steht direkt unter dem Profilkopf. */
@@ -106,7 +112,7 @@ export function Ideen(p){
     let verdict='';
     if(!bad){
       const f=r.hitTags.length||r.fits.length;
-      verdict=`<div class="res-card ${f?'good':'info'}"><strong>${f?'Gute Idee':'Kein Konflikt gefunden'}</strong><p>${f?`Passt zu ${esc(p.name)}s Interessen${r.fits.length?`: ${r.fits.map(esc).join(', ')}`:''}. Nichts davon ist schon vorhanden oder gewünscht.`:`Nichts spricht dagegen, aber wir sehen keinen direkten Bezug zu ${esc(p.name)}s Interessen. Schau dir die Ideen unten an.`}</p></div>`;
+      verdict=`<div class="res-card ${f?'good':'info'}"><strong>${f?'Gute Idee':'Kein Konflikt gefunden'}</strong><p>${f?`Passt zu ${esc(gen(p.name))} Interessen${r.fits.length?`: ${r.fits.map(esc).join(', ')}`:''}. Nichts davon ist schon vorhanden oder gewünscht.`:`Nichts spricht dagegen, aber wir sehen keinen direkten Bezug zu ${esc(gen(p.name))} Interessen. Schau dir die Ideen unten an.`}</p></div>`;
     }
     const rc=recommend(p).good.filter(g=>!r.ctags.length||g.it.tags.some(t=>r.ctags.includes(t))||g.it.comp).slice(0,3);
     const sug=(rc.length?rc:recommend(p).good.slice(0,3));
@@ -148,6 +154,6 @@ export function Recs(p){
 export function RecSection(p,openWishes){
   const few=openWishes<4;
   return `<section class="sect recsec"><details ${few?'open':''}><summary><span class="eyebrow">${few?'Noch wenig auf der Liste':'Zusätzlich'}</span><h3>Produkte, die wir auf Basis der Vorlieben empfehlen</h3></summary>
-   <p class="muted" style="font-size:14.5px;margin:6px 0 16px">${few?`${esc(p.name)} hat wenig offene Wünsche. Diese Produkte passen zu Interessen, Marken und Anlass:`:`Nur falls nichts von der Wunschliste passt: Ideen aus ${esc(p.name)}s Profil.`}</p>
+   <p class="muted" style="font-size:14.5px;margin:6px 0 16px">${few?`${esc(p.name)} hat wenig offene Wünsche. Diese Produkte passen zu Interessen, Marken und Anlass:`:`Nur falls nichts von der Wunschliste passt: Ideen aus ${esc(gen(p.name))} Profil.`}</p>
    ${Recs(p)}</details></section>`;
 }

@@ -8,7 +8,7 @@
 import { same, overlap, norm, kwOf } from './util.js';
 import { PRODUCTS, CATALOG } from '../data/content.js';
 import { AMAZON_TAG, normUrl, searchUrl } from './shops.js';
-import { picks, excluded } from '../logic.js';
+import { picks, excluded, recommend } from '../logic.js';
 
 export const amazonUrl = p => p.asin ? `https://www.amazon.de/dp/${p.asin}?tag=${AMAZON_TAG}` : searchUrl.amazon(p.search || p.t);
 
@@ -67,4 +67,36 @@ export function offersFor(person, w) {
     ? ideasFor(person, w, 3).map(i => ({ t: i.t, url: searchUrl.amazon(i.t), host: 'amazon.de', range: i.p, a: i.a, source: 'idee', direct: false, id: i.id }))
     : [];
   return { main: main ? { ...main, id: 'main' } : null, alts, over: 0 };
+}
+
+/* ---------- Welten ---------- */
+const WORLD_OF_CAT = { pfanne: 'kochen', bräter: 'kochen', messerset: 'kochen', wasserkocher: 'genuss', mühle: 'genuss', wanderstöcke: 'outdoor' };
+const strip = t => String(t).replace(/<[^>]+>/g, '');
+const nearby = t => `https://www.google.de/search?q=${encodeURIComponent(t + ' in der Nähe')}`;
+
+/**
+ * Produkte und Erlebnisse zu einer Welt (z. B. "genuss") aus dem, was wir über die Person wissen:
+ * Interessen, Marken, Wünsche. Ausgeschlossen: was sie schon hat, schon bekam oder nicht möchte.
+ */
+export function worldOffers(person, cid, n = 6) {
+  const out = [];
+  PRODUCTS.filter(x => WORLD_OF_CAT[x.cat] === cid && !excluded(person, { kw: [...kwOf(x.t), x.cat] })).forEach(x => {
+    const why = [];
+    let sc = x.q;
+    if (person.brands.includes(x.brand)) { sc += 4; why.push(`${x.brand} gehört zu den Lieblingsmarken.`); }
+    if (person.wishes.some(w => w.status === 'offen' && w.kw.some(k => same(k, x.cat)))) { sc += 3; why.push('Passt zu einem Wunsch auf der Liste.'); }
+    out.push({ sc, offer: { ...fromProduct(x, 'katalog'), id: x.id, why } });
+  });
+  recommend(person).good.filter(g => g.it.c === cid).forEach(g => {
+    const exp = g.it.k === 'erlebnis';
+    out.push({
+      sc: g.sc,
+      offer: {
+        t: g.it.t, url: exp ? nearby(g.it.t) : searchUrl.amazon(g.it.t), host: exp ? 'google.de' : 'amazon.de', cta: exp ? 'In der Nähe suchen' : null,
+        range: exp ? null : g.it.p, a: g.it.a, source: 'idee', direct: false, id: g.it.id, exp, why: g.why.slice(0, 2).map(strip),
+      },
+    });
+  });
+  const seen = new Set();
+  return out.sort((a, b) => b.sc - a.sc).map(o => o.offer).filter(o => !seen.has(o.t) && seen.add(o.t)).slice(0, n);
 }

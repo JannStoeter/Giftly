@@ -4,6 +4,7 @@ import { art } from '../lib/art.js';
 import { ACT, CATS, BRANDS, TRIES, NOGOS, ALTS, cat, crea } from '../data/content.js';
 import { VisPill, Legend } from './shared.js';
 import { GuestPage } from './giver.js';
+import { completeness } from '../lib/tale.js';
 
 export const STEPS=[
  {k:'interests',t:'Was machst du gerne?',h:'Wähle alles, was zu deinem Alltag gehört.',opts:()=>ACT.map(a=>a.l)},
@@ -58,15 +59,17 @@ export function Profil(){
    </div>
    ${pv?`<div class="banner green" style="margin-top:12px">${ic('eye')}<span>Vorschau: Private Bereiche und dein Feedback sind für Schenkende nicht sichtbar.</span></div>`:`<p class="muted" style="font-size:14px;margin-top:8px">Tippe auf die Sichtbarkeit, um sie pro Bereich zu ändern.</p>`}
    ${pv?GuestPage(m,{preview:true}):`
+   ${Meter(m)}
    ${m.managed?MgPanel(m):''}
    ${AboutSec(m)}
    ${sec('interests','Interessen',chips(m.interests))}
-   ${sec('cats','Welten',`<div class="catrow">${m.cats.map(id=>{const c=cat(id);return `<div class="catmini">${art(c.a,c.t)}<div>${c.n}</div></div>`}).join('')||'<p class="muted">Noch nichts hinterlegt.</p>'}</div>`)}
+   ${sec('cats','Welten',`<div class="catrow">${m.cats.map(id=>{const c=cat(id);return `<button class="catmini" data-act="world" data-id="${c.id}" data-ctx="own" aria-label="Welt ${c.n} öffnen">${art(c.a,c.t)}<div>${c.n}</div></button>`}).join('')||'<p class="muted">Noch nichts hinterlegt.</p>'}</div>`)}
    ${(m.style||[]).length?sec('style','Im Notfall',`<div class="chips">${m.style.map(x=>`<button class="chip gold" data-act="creator" data-id="${x.id}" data-go="1">${esc(crea(x.id).scope)} von ${esc(crea(x.id).handle)}</button>`).join('')}</div><p class="muted" style="font-size:14px">Wenn nichts Konkretes passt, orientieren sich Schenkende an diesen Listen.</p>`):''}
    ${sec('brands','Lieblingsmarken',chips(m.brands))}
    ${sec('tries','Möchte ich ausprobieren',chips(m.tries,'gold'))}
    ${sec('nogos','Bitte nicht',chips(m.nogos,'warn'))}
    ${sec('alts','Alternativen, wenn keine Idee passt',chips(m.alts,'ok'))}
+   ${OwnedSec(m)}
    <section class="psec"><div class="hd"><h3>Dein Feedback</h3>${VisPill('nur')}</div><p class="muted">Wie dir Geschenke gefallen haben, sehen nur du und Wishtale. Schenkende erhalten höchstens eine freundliche Nachricht.</p></section>
    ${Legend()}`}
   </div>`;
@@ -76,4 +79,21 @@ function AboutSec(m){
   return `<section class="psec"><div class="hd"><h3>Über mich</h3>${VisPill('alle')}</div>
    <label for="about" class="muted" style="font-size:14px">Zwei, drei Sätze für Freunde, die etwas schenken wollen. Sie stehen ganz oben auf deiner Profilseite.</label>
    <textarea id="about" class="ta" data-prof="about" maxlength="320" placeholder="z. B. Ich koche gern für Freunde, trinke meinen Kaffee selbst gebrüht und richte meine Wohnung Stück für Stück ein.">${esc(m.about||'')}</textarea></section>`;
+}
+
+/* Wie gut kennen wir dich? Je mehr im Profil steht, desto besser die Vorschläge. */
+function Meter(m){
+  const c=completeness(m);
+  return `<section class="meter" aria-label="Wie gut kennen wir dich"><div class="row" style="justify-content:space-between;gap:10px"><strong>Dein Wishtale ist zu ${c.pct} % fertig</strong><span class="muted" style="font-size:13px">${c.pct>=80?'Sehr gut':c.pct>=50?'Gutes Fundament':'Noch viel Luft nach oben'}</span></div>
+   <div class="bar" role="progressbar" aria-valuenow="${c.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${c.pct}%"></i></div>
+   <p class="muted" style="font-size:13.5px">Je besser wir dich kennen, desto besser werden die Vorschläge für deine Freunde.${c.next.length?` Als Nächstes: <b>${esc(c.next[0])}</b>`:''}</p></section>`;
+}
+
+/* Produkte, die man schon hat. Sie fließen in die Empfehlungen ein, damit nichts doppelt gekauft wird. */
+function OwnedSec(m){
+  const owned=m.wishes.filter(w=>w.status==='selbst');
+  return `<section class="psec"><div class="hd"><h3>Das habe ich schon</h3>${VisPill('alle')}</div>
+   <p class="muted" style="font-size:14px">Trag ein, was du schon besitzt, zum Beispiel „Siebträgermaschine“. Dann schlagen wir dir und deinen Freunden nichts doppelt vor.</p>
+   ${owned.length?`<div class="chips">${owned.map(w=>`<span class="chip ok">${esc(w.t)}<button class="chipx" data-act="ownedel" data-id="${w.id}" aria-label="${esc(w.t)} entfernen">×</button></span>`).join('')}</div>`:''}
+   <form data-form="owned" class="addrow"><label for="ownedt" style="position:absolute;left:-9999px">Was hast du schon?</label><input id="ownedt" name="t" class="inp" placeholder="z. B. Siebträgermaschine, Wanderrucksack" autocomplete="off" maxlength="120"><button class="btn sec sm" type="submit">${ic('plus','sm')}Hinzufügen</button></form></section>`;
 }

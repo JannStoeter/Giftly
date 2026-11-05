@@ -70,3 +70,22 @@ export function parseAmazonInput(text) {
   }
   return { asin, title: title.slice(0, 90), url: `https://www.amazon.de/dp/${asin}?tag=${AMAZON_TAG}` };
 }
+
+/**
+ * Links für "Wenn nichts passt" (Gutscheine, lokale Läden, Spenden). Noch ohne Partnerprogramm: Der Nutzer
+ * soll trotzdem sofort ans Ziel kommen. Später können hier Affiliate-Links hinterlegt werden.
+ * Alles mit Suche statt festen Unterseiten, weil sich Shop-Adressen oft ändern.
+ */
+const VOUCHERS = {
+  'amazon-gutschein': { url: () => `https://www.amazon.de/s?k=${enc('Amazon.de Gutschein')}&tag=${AMAZON_TAG}`, tag: 'Anzeige' },
+  'wunschgutschein': { url: () => 'https://www.wunschgutschein.de/' },
+  'buchhandlung vor ort': { url: () => 'https://www.genialokal.de/' },
+  'lokaler kaffeeröster': { url: () => `https://www.google.de/maps/search/${enc('Kaffeerösterei in der Nähe')}` },
+  'spende: naturschutz': { url: () => 'https://www.nabu.de/' },
+  'spende: tierschutz': { url: () => 'https://www.tierschutzbund.de/' },
+};
+export function voucherLink(label) {
+  const v = VOUCHERS[String(label).toLowerCase()];
+  if (v) return { url: v.url(), ad: !!v.tag };
+  return { url: `https://www.google.de/search?q=${enc(String(label).replace(/^Spende:\s*/i, 'Spenden für ') + ' kaufen')}`, ad: false };
+}

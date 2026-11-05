@@ -1,4 +1,4 @@
-import { esc, norm, kwOf, same, overlap, money } from './lib/util.js';
+import { esc, norm, kwOf, same, overlap, money, gen } from './lib/util.js';
 import { S } from './state.js';
 import { ACT, CATALOG, PRODUCTS, cat, occL } from './data/content.js';
 
@@ -6,7 +6,7 @@ export const tagsOf=p=>p.interests.map(l=>ACT.find(a=>a.l===l)?.t).filter(Boolea
 export const ownedOf=p=>p.wishes.filter(w=>w.status==='selbst');
 export function excluded(p,item){
   const known=[];
-  p.wishes.filter(w=>w.vis!=='privat').forEach(w=>known.push({k:w.kw,why:w.status==='selbst'?`${p.name} hat das schon (${w.t}).`:`Steht schon auf ${p.name}s Liste (${w.t}).`}));
+  p.wishes.filter(w=>w.vis!=='privat').forEach(w=>known.push({k:w.kw,why:w.status==='selbst'?`${p.name} hat das schon (${w.t}).`:`Steht schon auf ${gen(p.name)} Liste (${w.t}).`}));
   (p.gifts||p.history||[]).forEach(g=>known.push({k:g.kw||[],why:`Wurde schon geschenkt (${g.what}).`}));
   const hit=known.find(x=>overlap(item.kw,x.k));
   if(hit) return hit.why;
@@ -25,7 +25,7 @@ export function recommend(p){
     if(mt.length){sc+=2*mt.length;const labels=p.interests.filter(l=>mt.includes(ACT.find(a=>a.l===l)?.t));why.push(`${p.name} interessiert sich für <b>${labels.map(esc).join(' und ')}</b>.`)}
     if(it.tr&&p.tries.some(t=>norm(t).includes(norm(it.tr)))){sc+=3;why.push(`${p.name} möchte <b>${esc(it.tr)}</b> gern einmal ausprobieren.`)}
     if(it.brand&&p.brands.includes(it.brand)){sc+=2;why.push(`Lieblingsmarke: <b>${esc(it.brand)}</b>.`)}
-    if(p.cats.includes(it.c)){sc+=1;if(!why.length)why.push(`Passt zu ${p.name}s Welt <b>${esc(cat(it.c).n)}</b>.`)}
+    if(p.cats.includes(it.c)){sc+=1;if(!why.length)why.push(`Passt zu ${gen(p.name)} Welt <b>${esc(cat(it.c).n)}</b>.`)}
     const oc=S.ui.occ;
     if(oc!=='none'&&sc>0){if(it.occ.includes(oc)){sc+=2;why.push(`Passt zu <b>${occL(oc)}</b>.`)}else sc-=1}
     if(sc>0) good.push({it,sc,why});
@@ -36,7 +36,7 @@ export function recommend(p){
 export function picks(p,w){
   const b=w.budget||1e9,all=PRODUCTS.filter(x=>w.kw.some(k=>same(k,x.cat))),inb=all.filter(x=>(x.price??x.est)<=b);
   const list=inb.map(x=>{let sc=x.q*2;const why=[];
-    if(p.brands.includes(x.brand)){sc+=4;why.push(`${esc(x.brand)} gehört zu ${esc(p.name)}s Lieblingsmarken.`)}
+    if(p.brands.includes(x.brand)){sc+=4;why.push(`${esc(x.brand)} gehört zu ${esc(gen(p.name))} Lieblingsmarken.`)}
     why.push(w.budget?`Liegt nach unserer Einschätzung im Budget bis ${money(w.budget)}. Den aktuellen Preis siehst du bei Amazon.`:'Den aktuellen Preis siehst du bei Amazon.');
     return {x,sc,why}}).sort((a,b)=>b.sc-a.sc);
   return {list,over:all.length-inb.length};

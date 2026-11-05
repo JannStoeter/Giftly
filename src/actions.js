@@ -111,6 +111,9 @@ const A={
   if(p.remote){guestRpc('mark_bought',w.id).then(()=>{done();return refreshGuest()}).catch(()=>toast('Das hat nicht geklappt.'));return}
   w.bought=true;done();render();
  },
+ world(el){S.ui.worldId=el.dataset.id;S.ui.worldCtx=el.dataset.ctx||'guest';S.ui.modal='world';render();setTimeout(()=>document.querySelector('.sheet [data-act=close]')?.focus(),30)},
+ ownedel(el){S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
+ aside(){S.ui.asideOpen=!S.ui.asideOpen;render()},
  wopen(el){S.ui.pickId=el.dataset.id;S.ui.wishCtx=el.dataset.ctx||'guest';S.ui.modal='wishdetail';render();setTimeout(()=>document.querySelector('.sheet [data-act=close]')?.focus(),30)},
  try(el){const p=guestPerson();S.ui.idea=el.dataset.v;S.ui.ideaRes=check(p,el.dataset.v);render()},
  save(el){const id=el.dataset.id;S.ui.saved[id]=!S.ui.saved[id];render()},
@@ -165,6 +168,12 @@ document.addEventListener('submit',e=>{
       render();
     }).catch(e=>{S.ui.authBusy=false;S.ui.authMsg={type:'error',text:friendly(e)};render()});
     return;
+  }
+  if(kind==='owned'){
+    const t=(fd.get('t')||'').trim();if(!t)return;
+    const g=CATALOG.find(i=>overlap(kwOf(t),i.kw));const c=g?g.c:'wohnen';
+    S.me.wishes.unshift(W({t,c,kind:'produkt',prio:1,status:'selbst',vis:'alle',a:cat(c).a,tone:cat(c).t,kw:kwOf(t)}));
+    toast(`„${t}“ ist eingetragen. Das schlagen wir nicht mehr vor.`);render();return;
   }
   if(kind==='azsearch'){
     const q=(fd.get('q')||'').trim();S.ui.az.q=q;S.ui.az.searched=true;

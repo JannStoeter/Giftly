@@ -2,6 +2,7 @@ import { S, initials } from '../state.js';
 import { esc, ic } from '../lib/util.js';
 import { CATS, OCC, PRIO } from '../data/content.js';
 import { WishModal } from './wishmodal.js';
+import { WorldModal } from './world.js';
 import { AMAZON_DISCLOSURE } from '../lib/shops.js';
 
 export function AcctModal(){
@@ -47,6 +48,7 @@ export function Modal(){
   const m=S.ui.modal;if(!m)return '';
   if(m==='amazon')return AmazonModal();
   if(m==='wishdetail')return WishModal();
+  if(m==='world')return WorldModal();
   if(m==='accounts')return AcctModal();
   if(m==='wish')return `<div class="scrim" data-act="closebg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mt">
    <h2 id="mt">Neuer Wunsch</h2>
