@@ -28,7 +28,7 @@ export function GuestPage(p,{preview=false}={}){
      ${preview?'':`<details class="sect ideacheck" id="ideen"><summary><h3>Eigene Idee prüfen</h3></summary><p class="muted" style="font-size:14.5px;margin:4px 0 12px">Wishtale gleicht sie mit Wünschen, Besitz, bisherigen Geschenken und No-Gos von ${esc(p.name)} ab.</p>${Ideen(p)}</details>`}
      <p class="disc">Links zu Shops sind Partnerlinks (Anzeige). ${AMAZON_DISCLOSURE} Preise können abweichen, maßgeblich ist der Preis bei Amazon.</p>
     </div>
-    <aside class="paside" aria-label="Mehr über ${esc(p.name)}">${Facts(p)}</aside>
+    <aside class="paside" tabindex="0" aria-label="Mehr über ${esc(p.name)}">${Facts(p)}</aside>
    </div>
   </div>`;
 }

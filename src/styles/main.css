@@ -456,3 +456,18 @@ input[type=range]{accent-color:var(--accent);width:140px}
 .otn.brand{display:grid;place-content:center;justify-items:center;aspect-ratio:1;background:var(--bg);border:1px solid var(--line);text-align:center;padding:6px}
 .otn.brand b{font-family:var(--disp);font-weight:400;font-size:34px;line-height:1}
 .otn.brand small{font-size:11px;color:var(--muted);line-height:1.2;margin-top:2px;word-break:break-word}
+
+/* Seitenleiste als eigenes Scroll-Fenster neben der Wunschliste */
+@media(min-width:1040px){
+  .paside{
+    position:sticky;top:76px;
+    max-height:calc(100vh - 92px);
+    overflow-y:auto;overscroll-behavior:contain;
+    padding-right:6px;margin-right:-6px;
+    scrollbar-width:thin;scrollbar-color:var(--line) transparent;
+  }
+  .paside::-webkit-scrollbar{width:8px}
+  .paside::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+  .paside::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+  .paside:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:12px}
+}
