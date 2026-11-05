@@ -10,7 +10,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { illustration } from '../src/lib/art.js';
-import { BRAND, SETS } from './content.mjs';
+import { BRAND, SETS, PH } from './content.mjs';
 
 const { chromium } = createRequire(import.meta.url)('playwright');
 const here = dirname(fileURLToPath(import.meta.url));
@@ -21,7 +21,16 @@ mkdirSync(OUT, { recursive: true });
 /* Schriftgröße nach Titellänge, damit auch längere, fließende Titel passen. */
 const fs = (t, big = 124) => { const n = String(t).length; return n > 62 ? 70 : n > 48 ? 80 : n > 36 ? 92 : n > 26 ? 108 : big; };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const art = (k, t, cls = '') => `<span class="art t${t} ${cls}">${illustration(k)}</span>`;
+const PHOTOS_DIR = join(here, 'photos');
+/* Foto aus promo/photos/ als eingebettetes Bild, sonst die Illustration. */
+function photoTag(name) {
+  if (!name) return '';
+  const f = join(PHOTOS_DIR, name);
+  if (!existsSync(f)) { console.warn('Foto fehlt:', name); return ''; }
+  const ext = name.split('.').pop().toLowerCase().replace('jpg', 'jpeg');
+  return `<img alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="data:image/${ext};base64,${readFileSync(f).toString('base64')}">`;
+}
+const art = (k, t, cls = '', photo = '') => `<span class="art t${t} ${cls}">${illustration(k)}${photoTag(photo)}</span>`;
 const chip = ([t, c = '']) => `<span class="chip ${c}">${esc(t)}</span>`;
 const FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">';
 
@@ -77,12 +86,12 @@ function slideBody(s, i, n) {
     <p class="eyebrow">${esc(s.eyebrow)}</p>
     <h2 style="font-size:${fs(s.title, 116)}px">${esc(s.title)}</h2>
     <p class="sub">${esc(s.sub)}</p>
-    <div class="cardrow">${s.cards.map(([k, t, a, b]) => `<div class="minic">${art(k, t)}<b>${esc(a)}</b><small>${esc(b)}</small></div>`).join('')}</div>`);
+    <div class="cardrow">${s.cards.map(([k, t, a, b, ph]) => `<div class="minic">${art(k, t, '', ph)}<b>${esc(a)}</b><small>${esc(b)}</small></div>`).join('')}</div>`);
   if (s.kind === 'tale') return frame(`
     <p class="eyebrow">${esc(s.eyebrow)}</p>
     <h2 style="font-size:${Math.min(84, fs(s.title, 84))}px">${esc(s.title)}</h2>
     <p class="quote" style="font-size:44px">${esc(s.quote)}</p>
-    <div class="cardrow">${s.cards.map(([k, t, a, b]) => `<div class="minic" style="padding:16px"><div style="aspect-ratio:1/.72;border-radius:24px;overflow:hidden">${art(k, t).replace('class="art','style="height:100%" class="art')}</div><b style="font-size:36px">${esc(a)}</b><small>${esc(b)}</small></div>`).join('')}</div>
+    <div class="cardrow">${s.cards.map(([k, t, a, b, ph]) => `<div class="minic" style="padding:16px"><div style="aspect-ratio:1/.72;border-radius:24px;overflow:hidden">${art(k, t, '', ph).replace('class="art','style="height:100%" class="art')}</div><b style="font-size:36px">${esc(a)}</b><small>${esc(b)}</small></div>`).join('')}</div>
     <p class="note" style="font-size:28px">${esc(s.note)}</p>`);
   if (s.kind === 'done') return frame(`
     <p class="eyebrow">${esc(s.eyebrow)}</p>
@@ -108,7 +117,7 @@ const SCENES = [
 const TOTAL = SCENES[SCENES.length - 1].e;
 const reelHtml = () => {
   const sc = (i, inner, extra = '') => `<section class="rscene" data-i="${i}" style="${extra}"><div class="rstack">${inner}</div></section>`;
-  const mini = (k, t, a, b) => `<div class="minic rpop">${art(k, t)}<b>${esc(a)}</b><small>${esc(b)}</small></div>`;
+  const mini = (k, t, a, b, ph) => `<div class="minic rpop">${art(k, t, '', ph)}<b>${esc(a)}</b><small>${esc(b)}</small></div>`;
   const css = `
    .rscene{position:absolute;inset:0;opacity:0;display:flex;align-items:center;justify-content:center}
    .rstack{width:100%;padding:0 90px;display:grid;gap:46px;margin-top:-30px}
@@ -124,9 +133,9 @@ const reelHtml = () => {
    <div class="rtag" style="z-index:3"><div class="logo">${BRAND.name}<i></i></div></div>
    ${sc(0, `<p class="eyebrow rup">Eine kleine Tale</p><h1 class="rbig rup" style="font-size:150px">Lernen wir<br>Jonas<br>kennen</h1>`)}
    ${sc(1, `<h2 class="rmid rup" style="font-size:104px">Am Sonntag nimmt sich Jonas Zeit für den perfekten Kaffee</h2><div class="chips">${['Kaffee brühen|on', 'Kochen', 'Einrichten'].map(x => { const [t, c] = x.split('|'); return `<span class="chip rpop ${c || ''}">${t}</span>` }).join('')}</div>`)}
-   ${sc(2, `<h2 class="rmid rup" style="font-size:108px">Darüber würde sich Jonas sehr freuen</h2><div class="cardrow">${mini('grinder', 0, 'Handkaffeemühle', 'mit Keramik-Mahlwerk')}${mini('teapot', 3, 'Wasserkocher', 'mit Temperaturwahl')}</div>`)}
+   ${sc(2, `<h2 class="rmid rup" style="font-size:108px">Darüber würde sich Jonas sehr freuen</h2><div class="cardrow">${mini('grinder', 0, 'Handkaffeemühle', 'mit Keramik-Mahlwerk', PH.grinder)}${mini('teapot', 3, 'Wasserkocher', 'mit Temperaturwahl', PH.kettle)}</div>`)}
    ${sc(3, `<h2 class="rmid rup" style="font-size:108px">Und das steht schon bei Jonas im Schrank</h2><div class="chips">${['Siebträgermaschine', 'Gusseisenpfanne', 'Pastamaschine'].map(t => `<span class="chip ok rpop">${t}</span>`).join('')}</div><p class="sub rup">Damit nichts doppelt geschenkt wird, nicht einmal aus Versehen.</p>`)}
-   ${sc(4, `<h2 class="rmid rup" style="font-size:84px">Lena sucht ein Geschenk, und Wishtale zeigt, was zu Jonas passt</h2><p class="quote rup">Um den perfekten Kaffee zu erzeugen, könnten Jonas diese Produkte noch gefallen:</p><div class="cardrow">${mini('scale', 4, 'Digitale Kaffeewaage', 'mit Timer')}${mini('ticket', 2, 'Barista-Kurs', 'in Jonas’ Nähe')}</div><p class="note rup" style="font-size:34px">Die Siebträgermaschine fehlt mit Absicht, denn die hat Jonas schon.</p>`)}
+   ${sc(4, `<h2 class="rmid rup" style="font-size:84px">Lena sucht ein Geschenk, und Wishtale zeigt, was zu Jonas passt</h2><p class="quote rup">Um den perfekten Kaffee zu erzeugen, könnten Jonas diese Produkte noch gefallen:</p><div class="cardrow">${mini('scale', 4, 'Kaffeewaage', 'für den perfekten Espresso', PH.scale)}${mini('ticket', 2, 'Barista-Kurs', 'in Jonas’ Nähe', PH.course)}</div><p class="note rup" style="font-size:34px">Die Siebträgermaschine fehlt mit Absicht, denn die hat Jonas schon.</p>`)}
    ${sc(5, `<h2 class="rbig rup" style="font-size:104px">Lena wählt, und für Jonas bleibt es eine Überraschung</h2><div class="chips"><span class="chip ok rpop">✓ Von Lena reserviert</span></div><p class="sub rup">Jonas sieht davon nichts, und alle anderen Freunde wissen, dass sich schon jemand kümmert.</p>`)}
    ${sc(6, `<div style="position:absolute;inset:0;background:var(--accent)"></div><div style="position:relative;display:grid;gap:40px;padding:0 90px;color:var(--accent-ink)"><h1 class="rbig rup" style="color:var(--accent-ink);font-size:150px">Dein<br>Wishtale<br>wartet schon<br>auf dich</h1><p class="sub rup" style="color:#C9D3BD">${esc(BRAND.tagline)}</p><p class="rup" style="font-size:50px;margin:0"><b>${esc(BRAND.handle)}</b> · ${esc(BRAND.domain)}</p></div>`)}`;
   const js = `
