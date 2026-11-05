@@ -536,3 +536,15 @@ input[type=range]{accent-color:var(--accent);width:140px}
 .social{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .social .chip{text-decoration:none}
 .pinwrap{min-height:180px;overflow:auto;margin:12px 0}
+
+/* ---- Landingpage: Wünsche + Geschmack ---- */
+.duo-sec{border-top:1px solid var(--line)}
+.duo-lead{font-size:18px;color:var(--muted);max-width:640px;margin-bottom:28px}
+.duo{display:grid;gap:16px}
+@media(min-width:820px){.duo{grid-template-columns:1fr 1fr;gap:20px}}
+.duo-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:26px;display:grid;gap:12px;align-content:start}
+.duo-card.plus{border-color:color-mix(in srgb,var(--gold) 55%,var(--line));background:color-mix(in srgb,var(--gold) 7%,var(--surface))}
+.duo-card h3{font-size:34px}
+.duo-tag{justify-self:start;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:var(--muted)}
+.duo-tag.gold{color:var(--gold)}
+.duo-sum{margin-top:34px;font-family:var(--disp);font-size:clamp(24px,3vw,32px);line-height:1.2;max-width:820px}

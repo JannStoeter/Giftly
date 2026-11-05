@@ -1,5 +1,22 @@
 # Texte für Instagram
 
+**Profiltext (Bio):** Die Wunschliste, die dich kennt. · Deine Wünsche und alles, was dich ausmacht. · Jeder Wunsch hat eine Geschichte. · Link unten
+
+## Karussell „Mehr als eine Wunschliste“ (8 Folien, 4:5)
+
+**Text unter dem Beitrag**
+Eine Wunschliste sagt, was du dir wünschst. Aber nicht, warum. Und sie vergisst, was du schon hast.
+
+Wishtale ist deine Wunschliste und ein bisschen mehr: Neben deinen Wünschen erzählt es, was du gern machst, welche Marken du liebst, was schon bei dir steht und was du lieber nicht geschenkt bekommst. Daraus entstehen Vorschläge, auf die selbst du nicht gekommen wärst.
+
+So müssen deine Freunde nicht raten, und du bekommst nichts doppelt.
+
+Link in der Bio.
+
+**Hashtags**
+#wishtale #wunschliste #geschenkideen #weihnachtsgeschenke #geschenke #blackfriday #geschenkideenfürsie #geschenkideenfürihn
+
+
 ## Karussell „Das ist Jonas“ (8 Folien, 4:5)
 
 **Text unter dem Beitrag**
