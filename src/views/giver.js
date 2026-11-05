@@ -69,14 +69,12 @@ export function WishList(p,{preview=false}={}){
   const shown=only?vw.filter(w=>w.res!=='other'):vw;
   const cardOf=w=>{
     const r=rel(w),isMine=w.res==='me',taken=w.res==='other';
-    let status=null,actions='';
+    let status=null;
     if(w.bought)status={text:'Von dir gekauft',tone:'me'};
-    else if(isMine){status={text:'Von dir reserviert',tone:'me'};actions=`<button class="btn pri sm" data-act="bought" data-id="${w.id}">Gekauft</button><button class="btn ghost sm" data-act="release" data-id="${w.id}">Freigeben</button>`}
-    else if(taken){status={text:'Reserviert',tone:'res'};actions=`<button class="btn sec sm" disabled>Bereits reserviert</button>`}
-    else actions=`<button class="btn pri sm" data-act="reserve" data-id="${w.id}">Reservieren</button>`;
-    if(preview)actions='';
-    const meta=(w.via?`<span class="chip gold">Tipp von ${esc(crea(w.via).handle)}</span>`:'')+(r===2&&w.occ.length?`<span class="chip gold">Für ${occL(oc)}</span>`:'')+(r===0?`<span class="chip">Eher: ${w.occ.map(occL).join(', ')}</span>`:'')+(w.kind==='kategorie'?`<span class="chip">Kategorie${w.budget?' bis '+money(w.budget):''}</span>`:'');
-    return WishCard(w,p,{meta,status,actions,taken:taken||(w.bought&&!isMine),dim:r===0&&!taken,more:(w.kind==='kategorie'&&!taken&&!w.bought)?w.id:null});
+    else if(isMine)status={text:'Von dir reserviert',tone:'me'};
+    else if(taken)status={text:'Reserviert',tone:'res'};
+    const meta=(w.via?`<span class="chip gold">Tipp</span>`:'')+(r===2&&w.occ.length?`<span class="chip gold">Für ${occL(oc)}</span>`:'')+(r===0?`<span class="chip">Eher: ${w.occ.map(occL).join(', ')}</span>`:'')+(w.kind==='kategorie'?`<span class="chip">bis ${w.budget?money(w.budget):'offen'}</span>`:'');
+    return WishCard(w,p,{ctx:preview?'preview':'guest',meta,status,taken:taken||(w.bought&&!isMine),dim:r===0&&!taken});
   };
   const free=vw.filter(w=>w.res!=='other').length;
   const html=`<section id="wunschliste" aria-label="Wunschliste von ${esc(p.name)}">

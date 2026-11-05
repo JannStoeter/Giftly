@@ -68,7 +68,7 @@ export const S={
     W({id:'n3',t:'Gummistiefel',c:'outdoor',a:'sneaker',tone:2,status:'selbst',kw:['gummistiefel']})
    ],gifts:[]}
  },
- ui:{creator:null,acct:'me',occ:'weihnachten',big:false,pickId:null,view:'home',step:0,person:'jonas',tab:'wuensche',wf:'offen',wc:'alle',preview:false,modal:null,swap:null,swapSel:[],idea:'',ideaRes:null,kind:'alle',budget:100,saved:{}}
+ ui:{creator:null,acct:'me',occ:'weihnachten',big:false,pickId:null,view:'home',step:0,person:'jonas',tab:'wuensche',wf:'offen',wc:'alle',preview:false,modal:null,swap:null,swapSel:[],idea:'',ideaRes:null,kind:'alle',budget:100,saved:{},chosen:{},wishCtx:'guest'}
 };
 export const initials=n=>n.slice(0,1).toUpperCase();
 S.accounts={me:S.me};delete S.me;
@@ -89,7 +89,7 @@ export function switchTo(id){const u=S.ui;u.acct=id;u.wf='offen';u.wc='alle';u.p
 
 /* ============ Persistenz (localStorage) ============ */
 const KEY='wishtale:v1';
-const PERSIST_UI=['acct','occ','person','big','budget','saved','cf','onlyOpen'];
+const PERSIST_UI=['acct','occ','person','big','budget','saved','cf','onlyOpen','chosen'];
 
 export function loadState(){
   try{S.auth.demo=sessionStorage.getItem('wishtale:demo')==='1'}catch{}

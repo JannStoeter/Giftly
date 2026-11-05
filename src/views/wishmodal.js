@@ -1,0 +1,78 @@
+/* Detail-Fenster zu einem Wunsch: Vorschlag ansehen, Alternativen vergleichen, wählen oder weitersuchen. */
+import { S, guestPerson } from '../state.js';
+import { esc, ic } from '../lib/util.js';
+import { art } from '../lib/art.js';
+import { offersFor } from '../lib/products.js';
+import { cat, crea, occL, PRIO } from '../data/content.js';
+import { priceLine } from './product.js';
+
+const REL = 'noopener noreferrer sponsored nofollow';
+
+function Offer(pr, w, ctx, role) {
+  const guestFree = ctx === 'guest' && !w.res && !w.bought;
+  const amazon = pr.host === 'amazon.de' || pr.host.endsWith('.amazon.de');
+  const label = amazon ? (pr.direct ? 'Bei Amazon ansehen' : 'Bei Amazon suchen') : `Zu ${esc(pr.host)}`;
+  const chosen = S.ui.chosen && S.ui.chosen[w.id] && S.ui.chosen[w.id].t === pr.t;
+  return `<div class="offer ${role === 'main' ? 'main' : ''} ${chosen ? 'chosen' : ''}">
+   ${pr.brand ? `<span class="otn brand" aria-hidden="true"><b>${esc(pr.brand.slice(0, 1))}</b><small>${esc(pr.brand)}</small></span>` : `<span class="otn">${art(pr.a || 'gift', pr.tone || 0)}</span>`}
+   <div class="ob">
+    ${role === 'main' ? `<span class="eyebrow">${pr.source === 'link' ? 'Gewünschtes Produkt' : pr.source === 'erzeugt' ? 'Vorschlag von Wishtale' : 'Unser Vorschlag'}</span>` : ''}
+    <strong class="ot">${esc(pr.t)}</strong>
+    ${priceLine(pr)}
+    ${(pr.why || []).slice(0, 2).map(t => `<span class="why">${esc(t)}</span>`).join('')}
+    ${chosen ? `<span class="chip ok">${ic('check', 'sm')}Deine Wahl</span>` : ''}
+   </div>
+   <div class="oa">
+    <a class="btn amz sm" href="${pr.url}" target="_blank" rel="${REL}">${label} ${ic('arrow', 'sm')}</a>
+    ${guestFree ? `<button class="btn pri sm" data-act="choose" data-wid="${w.id}" data-pid="${esc(pr.id)}">Diesen wählen</button>` : ''}
+   </div>
+  </div>`;
+}
+
+export function WishModal() {
+  const ctx = S.ui.wishCtx || 'guest';
+  const p = ctx === 'guest' ? guestPerson() : S.me;
+  const w0 = p && p.wishes.find(x => x.id === S.ui.pickId);
+  if (!w0) return '';
+  const w = ctx === 'preview' ? { ...w0, res: null, bought: false } : w0;
+  const o = offersFor(p, w);
+  const mine = w.res === 'me', taken = w.res === 'other';
+  const chosen = S.ui.chosen && S.ui.chosen[w.id];
+  const meta = [cat(w.c).n, ...(w.occ || []).map(occL), w.kind === 'kategorie' && w.budget ? `bis ${w.budget} €` : ''].filter(Boolean);
+
+  let state = '';
+  if (ctx === 'guest') {
+    if (w.bought) state = `<div class="banner green">${ic('check')}<span>Von dir gekauft. Bleibt eine Überraschung.</span></div>`;
+    else if (mine) state = `<div class="banner green">${ic('lock')}<span>Von dir reserviert.${chosen ? ` Deine Wahl: <b>${esc(chosen.t)}</b>.` : ''} ${esc(p.name)} sieht davon nichts.</span></div>`;
+    else if (taken) state = `<div class="banner">${ic('lock')}<span>Dieser Wunsch ist schon von jemandem reserviert.</span></div>`;
+  }
+
+  let footer = '';
+  if (ctx === 'guest') {
+    if (mine && !w.bought) footer = `<button class="btn pri" data-act="bought" data-id="${w.id}">Gekauft</button><button class="btn sec" data-act="release" data-id="${w.id}">Freigeben</button>`;
+    else if (!taken && !w.bought && !o.main) footer = `<button class="btn pri" data-act="reserve" data-id="${w.id}">Reservieren</button>`;
+  } else if (ctx === 'own') {
+    footer = `<button class="btn sec" data-act="selbst" data-id="${w.id}">${w.status === 'selbst' ? 'Wieder offen' : 'Selbst gekauft'}</button>
+      <button class="btn sec" data-act="prio" data-id="${w.id}">Priorität: ${PRIO[w.prio]}</button>
+      <button class="btn ghost" data-act="delw" data-id="${w.id}">${ic('trash', 'sm')}Löschen</button>`;
+  }
+
+  return `<div class="scrim" data-act="closebg"><div class="sheet wide" role="dialog" aria-modal="true" aria-labelledby="mt">
+   <div class="wm-top">
+    <span class="wm-img">${art((o.main && o.main.a) || w.a || cat(w.c).a, (o.main && o.main.tone) != null ? o.main.tone : (w.tone || 0))}</span>
+    <div>
+     <p class="eyebrow">${esc(meta.join(' · '))}</p>
+     <h2 id="mt">${esc(w.t)}</h2>
+     ${w.note ? `<p class="muted" style="margin-top:6px">${esc(w.note)}</p>` : ''}
+     ${w.via ? `<span class="chip gold" style="margin-top:8px">Tipp von ${esc(crea(w.via).handle)}</span>` : ''}
+    </div>
+   </div>
+   ${ctx === 'preview' ? `<div class="banner green">${ic('eye')}<span>So sehen Schenkende diesen Wunsch.</span></div>` : ''}
+   ${state}
+   ${o.main ? `<section class="wm-sec">${Offer(o.main, w, ctx, 'main')}</section>` : (w.kind === 'erlebnis' ? `<p class="muted" style="margin:14px 0">Ein Erlebnis braucht kein Amazon-Produkt. Plane es gemeinsam und reserviere es hier.</p>` : '')}
+   ${o.alts.length ? `<section class="wm-sec"><p class="eyebrow" style="margin-bottom:8px">${w.kind === 'frei' ? 'Ideen zu diesem Wunsch' : 'Alternativen'}</p>${o.alts.map(a => Offer(a, w, ctx, 'alt')).join('')}</section>` : ''}
+   ${o.over ? `<p class="muted" style="font-size:13px">${o.over} Produkt${o.over > 1 ? 'e' : ''} über dem Budget ausgeblendet.</p>` : ''}
+   <p class="disc">Anzeige: Links zu Amazon sind Partnerlinks. Preise können abweichen, maßgeblich ist der Preis bei Amazon.</p>
+   <div class="row wm-foot">${footer}<span style="flex:1"></span><button class="btn ghost" data-act="close">Schließen</button></div>
+  </div></div>`;
+}

@@ -1,9 +1,8 @@
-import { S, initials, guestPerson } from '../state.js';
-import { esc, ic, money } from '../lib/util.js';
-import { art } from '../lib/art.js';
-import { CATS, OCC, PRIO, PRICE_DATE } from '../data/content.js';
-import { picks } from '../logic.js';
-import { AMAZON_DISCLOSURE, shopChips } from '../lib/shops.js';
+import { S, initials } from '../state.js';
+import { esc, ic } from '../lib/util.js';
+import { CATS, OCC, PRIO } from '../data/content.js';
+import { WishModal } from './wishmodal.js';
+import { AMAZON_DISCLOSURE } from '../lib/shops.js';
 
 export function AcctModal(){
   const rows=Object.entries(S.accounts).map(([id,a])=>`<div class="altrow" style="grid-template-columns:44px 1fr auto"><span class="av t${a.tone}" style="width:44px;height:44px">${initials(a.name)}</span><div><strong>${esc(a.name)}${a.age?`, ${a.age}`:''}</strong><br><span class="muted" style="font-size:13.5px">${a.managed?`Kind-Konto, verwaltet von ${esc(S.accounts.me.name)}`:'Hauptkonto'}</span></div>${S.ui.acct===id?'<span class="chip ok">Aktiv</span>':`<button class="btn sec sm" data-act="acct" data-id="${id}">Wechseln</button>`}</div>`).join('');
@@ -18,22 +17,6 @@ export function AcctModal(){
     <div class="row" style="justify-content:flex-end"><button type="button" class="btn ghost" data-act="close">Schließen</button><button class="btn pri" type="submit">Anlegen und einrichten</button></div>
    </form>
    ${S.auth.user?`<div class="row" style="justify-content:space-between;margin-top:18px"><span class="disc" style="margin:0">Deine Daten liegen in deinem Wishtale-Konto.</span><button class="btn sec sm" data-act="logout">Abmelden</button></div>`:`<p class="disc" style="margin-top:18px">Alle Daten liegen nur in deinem Browser. <button class="chip" data-act="reset">Demodaten zurücksetzen</button></p>`}</div></div>`;
-}
-export function PickModal(){
-  const p=guestPerson(),w=p.wishes.find(x=>x.id===S.ui.pickId);if(!w)return '';
-  const {list,over}=picks(p,w),top=list[0],rest=list.slice(1,3);
-  return `<div class="scrim" data-act="closebg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mt">
-   <p class="eyebrow">Produktvorschlag für ${esc(p.name)}</p><h2 id="mt" style="font-size:32px;margin-top:6px">${esc(w.t)}</h2>
-   ${top?`<article class="pickmain">${art(top.x.a,top.x.tone)}<div class="pm"><span class="chip gold">Unsere Empfehlung · Anzeige</span><h3>${esc(top.x.t)}</h3>
-    <ul class="pros">${[...top.why,...top.x.pros].map(t=>`<li>${ic('check','sm')}<span>${t.includes('<')?t:esc(t)}</span></li>`).join('')}</ul>
-    <button class="btn pri" data-act="buy" data-id="${top.x.id}" data-wid="${w.id}">Reservieren und bei Amazon ansehen ${ic('arrow','sm')}</button>
-    <div class="chips" style="align-items:center"><span class="muted" style="font-size:13px">Preise vergleichen:</span>${shopChips(top.x.search)}</div></div></article>`
-   :`<p class="muted">Im Budget gibt es keinen passenden Vorschlag. Schau in die Empfehlungen.</p>`}
-   ${rest.length?`<h3 style="font-size:22px;margin:18px 0 8px">Alternativen</h3>${rest.map(r=>`<div class="altrow">${art(r.x.a,r.x.tone)}<div><strong>${esc(r.x.t)}</strong><br><span class="muted" style="font-size:13.5px">${esc(r.x.brand)} · ${r.x.price?money(r.x.price)+' (Stand '+PRICE_DATE+')':'Preis bei Amazon prüfen'}</span></div><button class="btn sec sm" data-act="buy" data-id="${r.x.id}" data-wid="${w.id}">Wählen</button></div>`).join('')}`:''}
-   ${over?`<p class="muted" style="font-size:13px;margin-top:10px">${over} Produkt${over>1?'e':''} über dem Budget ausgeblendet.</p>`:''}
-   <p class="disc"><b>Anzeige, Partnerlinks:</b> Kaufst du über diese Links, erhält Wishtale eventuell eine Provision. Für dich ändert sich der Preis nicht.</p>
-   <p class="disc">Preise stammen aus Beobachtungen bei Amazon und können abweichen; wo kein Preis steht, ist er uns nicht bekannt. Die Links führen zu den Suchergebnissen der Shops, dort siehst du den aktuellen Preis. ${AMAZON_DISCLOSURE}</p>
-   <div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn ghost" data-act="close">Schließen</button></div></div></div>`;
 }
 export function AmazonModal(){
   const z=S.ui.az,r=z.res,ok=r&&!r.error;
@@ -63,7 +46,7 @@ export function AmazonModal(){
 export function Modal(){
   const m=S.ui.modal;if(!m)return '';
   if(m==='amazon')return AmazonModal();
-  if(m==='pick')return PickModal();
+  if(m==='wishdetail')return WishModal();
   if(m==='accounts')return AcctModal();
   if(m==='wish')return `<div class="scrim" data-act="closebg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mt">
    <h2 id="mt">Neuer Wunsch</h2>

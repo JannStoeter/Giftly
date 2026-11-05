@@ -45,3 +45,26 @@ export function ideasFor(person, w, n = 3) {
   return CATALOG.filter(i => i.k === 'ding' && !excluded(person, i) && (i.c === w.c || i.tags.some(t => stop.has(t))))
     .slice(0, n);
 }
+
+/**
+ * Angebote zu einem Wunsch für das Detail-Fenster: ein Hauptvorschlag und Alternativen.
+ * Jedes Angebot hat eine id, damit der Gast eines davon wählen kann.
+ */
+export function offersFor(person, w) {
+  const main = productFor(person, w);
+  if (w.kind === 'kategorie') {
+    const { list, over } = picks(person, w);
+    const offers = list.map(e => ({ ...fromProduct(e.x, 'vorschlag'), id: e.x.id, why: e.why }));
+    return { main: offers[0] || (main && { ...main, id: 'main' }) || null, alts: offers.slice(1, 4), over };
+  }
+  const pool = PRODUCTS.filter(x => w.kw.some(k => same(k, x.cat)));
+  if (main && pool.length && w.kind !== 'frei') {
+    const mp = pool.find(x => x.t === main.t);
+    const alts = pool.filter(x => x !== mp).sort((a, b) => b.q - a.q).slice(0, 3).map(x => ({ ...fromProduct(x, 'katalog'), id: x.id }));
+    return { main: { ...main, id: mp ? mp.id : 'main' }, alts, over: 0 };
+  }
+  const alts = w.kind === 'frei'
+    ? ideasFor(person, w, 3).map(i => ({ t: i.t, url: searchUrl.amazon(i.t), host: 'amazon.de', range: i.p, a: i.a, source: 'idee', direct: false, id: i.id }))
+    : [];
+  return { main: main ? { ...main, id: 'main' } : null, alts, over: 0 };
+}

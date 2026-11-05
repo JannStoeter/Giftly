@@ -1,8 +1,8 @@
 import { S, W, switchTo, resetState, guestPerson, saveState } from './state.js';
 import { $, toast, kwOf, nid, money, overlap } from './lib/util.js';
-import { LOOKS, PRODUCTS, CATALOG, PRIO, crea, cprod, cat } from './data/content.js';
+import { LOOKS, CATALOG, PRIO, crea, cprod, cat } from './data/content.js';
 import { check } from './logic.js';
-import { amazonUrl } from './lib/products.js';
+import { offersFor } from './lib/products.js';
 import { parseAmazonInput, searchUrl } from './lib/shops.js';
 import { render, route, refreshGuest } from './render.js';
 import { guestRpc } from './lib/remote.js';
@@ -22,6 +22,16 @@ function azParse(text){
   }
   render();
 }
+
+/* Reservieren: entweder über die Datenbank (echtes Profil) oder lokal (Demo). Liefert true bei Erfolg. */
+function reserveFlow(p,w){
+  if(p.remote){
+    return guestRpc('reserve_wish',w.id)
+      .then(r=>{if(!r.ok){toast('Dieser Wunsch ist leider schon vergeben.');}return refreshGuest().then(()=>!!r.ok)})
+      .catch(()=>{toast('Das hat nicht geklappt. Bitte versuche es noch einmal.');return false});
+  }
+  w.res='me';return Promise.resolve(true);
+}
 const A={
  scroll(el){document.getElementById(el.dataset.t)?.scrollIntoView({behavior:'smooth',block:'start'})},
  go(el){const v=el.dataset.v;if(v==='entdecken'){S.ui.look=null;S.ui.creator=null}if(v==='start')S.ui.step=0;location.hash='#'+v;if(location.hash==='#'+v&&S.ui.view===v)render(true)},
@@ -34,7 +44,7 @@ const A={
  wf(el){S.ui.wf=el.dataset.v;render()},wc(el){S.ui.wc=el.dataset.v;render()},
  selbst(el){const w=S.me.wishes.find(x=>x.id===el.dataset.id);w.status=w.status==='selbst'?'offen':'selbst';toast(w.status==='selbst'?'Als selbst gekauft markiert. Schenkende sehen, dass du es schon hast.':'Wieder offen.');render()},
  prio(el){const w=S.me.wishes.find(x=>x.id===el.dataset.id);w.prio=w.prio%3+1;toast('Priorität: '+PRIO[w.prio]);render()},
- delw(el){S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
+ delw(el){S.ui.modal=null;S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
  modal(el){S.ui.modal=el.dataset.v;render();setTimeout(()=>document.querySelector('.sheet input,.sheet select')?.focus(),30)},
  close(){S.ui.modal=null;render()},
  authtab(el){S.ui.authTab=el.dataset.v;S.ui.authMsg=null;render()},
@@ -78,22 +88,30 @@ const A={
   S.ui.swap=null;toast(`Simuliert: ${g.from} bekommt eine freundliche Nachricht, ohne Bewertung.`);render();
  },
  reserve(el){
-  const gp=guestPerson();
-  if(gp?.remote){
-   guestRpc('reserve_wish',el.dataset.id).then(r=>{toast(r.ok?`Reserviert. ${gp.name} sieht davon nichts, andere Schenkende sehen nur „reserviert“.`:'Dieser Wunsch ist leider schon vergeben.');return refreshGuest()}).catch(()=>toast('Das hat nicht geklappt. Bitte versuche es noch einmal.'));
-   return;
-  }
-
-  const p=guestPerson(),w=p.wishes.find(x=>x.id===el.dataset.id);w.res='me';
-  toast(`Reserviert. ${p.name} sieht davon nichts, andere Schenkende sehen nur „reserviert“.`);
-  if(el.dataset.stay){S.ui.ideaRes=null;S.ui.tab='wuensche'}render();
+  const p=guestPerson(),w=p&&p.wishes.find(x=>x.id===el.dataset.id);if(!w)return;
+  reserveFlow(p,w).then(ok=>{if(ok)toast(`Reserviert. ${p.name} sieht davon nichts, andere Schenkende sehen nur „reserviert“.`);render()});
+ },
+ choose(el){
+  const p=guestPerson(),w=p&&p.wishes.find(x=>x.id===el.dataset.wid);if(!w)return;
+  const o=offersFor(p,w),pick=[o.main,...o.alts].filter(Boolean).find(x=>String(x.id)===el.dataset.pid);
+  reserveFlow(p,w).then(ok=>{
+   if(ok&&pick){S.ui.chosen[w.id]={t:pick.t,url:pick.url,price:pick.price||null};toast(`Reserviert: ${pick.t}. Du findest ihn jederzeit hier wieder.`)}
+   render();
+  });
  },
  release(el){
-  if(guestPerson()?.remote){guestRpc('release_wish',el.dataset.id).then(refreshGuest).catch(()=>toast('Das hat nicht geklappt.'));return}
-const w=guestPerson().wishes.find(x=>x.id===el.dataset.id);w.res=null;render()},
+  const p=guestPerson(),w=p&&p.wishes.find(x=>x.id===el.dataset.id);if(!w)return;
+  delete S.ui.chosen[w.id];
+  if(p.remote){guestRpc('release_wish',w.id).then(refreshGuest).catch(()=>toast('Das hat nicht geklappt.'));return}
+  w.res=null;render();
+ },
  bought(el){
-  if(guestPerson()?.remote){guestRpc('mark_bought',el.dataset.id).then(()=>{toast('Als gekauft markiert. Die Überraschung bleibt erhalten.');return refreshGuest()}).catch(()=>toast('Das hat nicht geklappt.'));return}
-const w=guestPerson().wishes.find(x=>x.id===el.dataset.id);w.bought=true;toast('Als gekauft markiert. Die Überraschung bleibt erhalten.');render()},
+  const p=guestPerson(),w=p&&p.wishes.find(x=>x.id===el.dataset.id);if(!w)return;
+  const done=()=>{toast('Als gekauft markiert. Die Überraschung bleibt erhalten.')};
+  if(p.remote){guestRpc('mark_bought',w.id).then(()=>{done();return refreshGuest()}).catch(()=>toast('Das hat nicht geklappt.'));return}
+  w.bought=true;done();render();
+ },
+ wopen(el){S.ui.pickId=el.dataset.id;S.ui.wishCtx=el.dataset.ctx||'guest';S.ui.modal='wishdetail';render();setTimeout(()=>document.querySelector('.sheet [data-act=close]')?.focus(),30)},
  try(el){const p=guestPerson();S.ui.idea=el.dataset.v;S.ui.ideaRes=check(p,el.dataset.v);render()},
  save(el){const id=el.dataset.id;S.ui.saved[id]=!S.ui.saved[id];render()},
  kind(el){S.ui.kind=el.dataset.v;render()},
@@ -112,18 +130,7 @@ const w=guestPerson().wishes.find(x=>x.id===el.dataset.id);w.bought=true;toast('
  occ(el){S.ui.occ=el.dataset.v;S.ui.budget=el.dataset.v==='danke'?40:100;render()},
  onlyopen(el){S.ui.onlyOpen=el.dataset.v==='1';render()},
  dens(el){S.ui.big=el.dataset.v==='1';render()},
- suggest(el){S.ui.pickId=el.dataset.id;S.ui.modal='pick';render()},
- buy(el){
-  const gp=guestPerson();
-  if(gp?.remote){
-   const pr=PRODUCTS.find(x=>x.id===el.dataset.id);
-   guestRpc('reserve_wish',el.dataset.wid).then(r=>{
-    if(!r.ok){toast('Dieser Wunsch ist leider schon vergeben.');return}
-    S.ui.modal=null;window.open(amazonUrl(pr),'_blank','noopener');toast(`Reserviert. „${pr.t}“ wurde bei Amazon geöffnet.`);return refreshGuest();
-   }).catch(()=>toast('Das hat nicht geklappt.'));
-   return;
-  }
-const p=guestPerson(),w=p.wishes.find(x=>x.id===el.dataset.wid),pr=PRODUCTS.find(x=>x.id===el.dataset.id);w.res='me';S.ui.modal=null;S.ui.ideaRes=null;window.open(amazonUrl(pr),'_blank','noopener');toast(`Reserviert. „${pr.t}“ wurde bei Amazon geöffnet.`);render()}
+ suggest(el){S.ui.pickId=el.dataset.id;S.ui.wishCtx='guest';S.ui.modal='wishdetail';render()}
 };
 document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;const f=A[t.dataset.act];if(f)f(t,e)});
 document.addEventListener('input',e=>{if(e.target.id==='bud'){S.ui.budget=+e.target.value;$('#budv').textContent=money(S.ui.budget)}});
@@ -141,6 +148,7 @@ window.addEventListener('focus',()=>{
   navigator.clipboard.readText().then(t=>{if(/amazon\.de\//i.test(t))azParse(t)}).catch(()=>{});
 });
 document.addEventListener('input',e=>{const f=e.target.dataset?.prof;if(f){S.me[f]=e.target.value;saveState()}});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches?.('[role=button][data-act]')){e.preventDefault();e.target.click()}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.ui.modal)A.close()});
 document.addEventListener('submit',e=>{
   const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();

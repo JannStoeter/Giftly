@@ -25,10 +25,7 @@ export function Wuensche(){
       meta:(w.kind==='kategorie'?`<span class="chip gold">Kategorie${w.budget?' bis '+money(w.budget):''}</span>`:'')+(w.kind==='erlebnis'?'<span class="chip">Erlebnis</span>':'')+(w.kind==='frei'?'<span class="chip">Freier Wunsch</span>':'')+(w.via?`<span class="chip gold">via ${esc(crea(w.via).handle)}</span>`:'')+w.occ.map(o=>`<span class="chip">${occL(o)}</span>`).join(''),
       status:m.managed&&(w.res||w.bought)?{text:w.bought?'Gekauft':'Reserviert',tone:w.bought?'me':'res'}:null,
       taken:false,
-      actions:`${VisIcon(w.vis)}<span style="flex:1"></span>
-        <button class="iconbtn" data-act="selbst" data-id="${w.id}" title="${w.status==='selbst'?'Wieder offen':'Selbst gekauft'}" aria-label="${w.status==='selbst'?'Wieder offen':'Als selbst gekauft markieren'}">${ic('check','sm')}</button>
-        <button class="iconbtn" data-act="prio" data-id="${w.id}" title="Priorität ändern" aria-label="Priorität ändern">${ic('star','sm')}</button>
-        <button class="iconbtn" data-act="delw" data-id="${w.id}" title="Löschen" aria-label="Wunsch löschen">${ic('trash','sm')}</button>`
+      ctx:'own'
     })).join('')||`<p class="muted">Hier ist nichts. Füge einen Wunsch hinzu.</p>`}</div>
    <div class="fab"><button class="btn amz" data-act="azopen">Bei Amazon stöbern</button><button class="btn pri" data-act="modal" data-v="wish">${ic('plus','sm')}Wunsch hinzufügen</button></div>
   </div>`;
