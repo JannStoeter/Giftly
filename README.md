@@ -32,3 +32,12 @@ Alle Daten sind Beispieldaten und liegen nur im Browser (localStorage). Zahlunge
 
 ## Pinterest und Instagram
 Profile können Pinterest (Profil oder Board) und Instagram verlinken. Pinterest-Pins werden erst nach ausdrücklicher Zustimmung des Besuchers eingebettet (das Skript von assets.pinterest.com wird vorher nicht geladen). Adressen werden in `src/lib/social.js` beim Speichern und beim Anzeigen geprüft. In der Datenschutzerklärung muss das Pinterest-Widget erwähnt werden.
+
+## Texte der Landingpage direkt auf der Seite bearbeiten
+- Jeder Text mit `data-edit="schlüssel"` in `index.html` lässt sich überschreiben. Der Text im HTML ist der Standard.
+- Die geänderten Texte liegen in der Tabelle `site_content` (Migration `0003_site_content.sql`) und sind öffentlich lesbar. Schreiben dürfen nur Konten in `admins`.
+- Administrator wird, wer sich mit einer E-Mail anmeldet, die in `admin_emails` steht und bestätigt ist. Einmalig freigeben:
+  `insert into public.admin_emails (email) values ('deine@mail.de');` (Kleinschreibung).
+- Bearbeiten: Auf der Seite unten auf „Seite bearbeiten“ klicken (oder `/?bearbeiten` aufrufen), anmelden, Text anklicken, ändern, „Speichern“. Mit `*wort*` wird ein Wort kursiv.
+- Jede Änderung steht in `site_content_history` (alter und neuer Wert), falls ein Text zurückgeholt werden muss.
+- Nicht enthalten: Texte in der App (`src/`), Bilder und neue Abschnitte.

@@ -21,4 +21,5 @@
 - Daten: Supabase (Migrationen in `supabase/migrations/`), Demo-Modus mit localStorage.
 - Amazon-Partner-ID `jannst-21` in `src/lib/shops.js`, immer mit Hinweis „Anzeige“.
 - Instagram-Material wird mit `npm run promo` erzeugt (`promo/`).
+- Texte der Landingpage sind über `data-edit`-Schlüssel in der Datenbank überschreibbar (`src/cms/`). Neue Texte in `index.html` bekommen einen eigenen Schlüssel, bestehende Schlüssel nicht umbenennen oder umsortieren, sonst passen gespeicherte Änderungen nicht mehr.
 - Vor dem Pushen: `npx eslint src` und `npm run build`.

@@ -1,4 +1,5 @@
 import './styles/main.css';
+import { initContent } from './cms/content.js';
 import { illustration } from './lib/art.js';
 
 document.querySelectorAll('.art[data-kind]').forEach(el=>el.insertAdjacentHTML('afterbegin',illustration(el.dataset.kind)));
@@ -22,3 +23,9 @@ if('IntersectionObserver' in window&&!matchMedia('(prefers-reduced-motion: reduc
   const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.35,rootMargin:'0px 0px -8% 0px'});
   steps.forEach(s=>io.observe(s));
 }else steps.forEach(s=>s.classList.add('in'));
+
+/* Texte aus der Datenbank, und der Einstieg in den Bearbeitungsmodus (wird erst bei Bedarf geladen). */
+initContent();
+const openCms=async e=>{e?.preventDefault();const m=await import('./cms/editor.js');m.openEditor()};
+document.getElementById('cms-open')?.addEventListener('click',openCms);
+if(location.search.includes('bearbeiten'))openCms();
