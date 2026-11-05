@@ -37,7 +37,7 @@ export function picks(p,w){
   const b=w.budget||1e9,all=PRODUCTS.filter(x=>w.kw.some(k=>same(k,x.cat))),inb=all.filter(x=>(x.price??x.est)<=b);
   const list=inb.map(x=>{let sc=x.q*2;const why=[];
     if(p.brands.includes(x.brand)){sc+=4;why.push(`${esc(x.brand)} gehört zu ${esc(gen(p.name))} Lieblingsmarken.`)}
-    why.push(w.budget?`Liegt nach unserer Einschätzung im Budget bis ${money(w.budget)}. Den aktuellen Preis siehst du bei Amazon.`:'Den aktuellen Preis siehst du bei Amazon.');
+    why.push(w.budget?`Das sollte nach unserer Einschätzung gut ins Budget bis ${money(w.budget)} passen. Den genauen Preis siehst du bei Amazon.`:'Den genauen Preis siehst du bei Amazon.');
     return {x,sc,why}}).sort((a,b)=>b.sc-a.sc);
   return {list,over:all.length-inb.length};
 }

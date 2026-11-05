@@ -12,7 +12,7 @@ const SOURCE = {
 
 export function priceLine(pr){
   if(pr.price)return `<div class="price"><b>${money(pr.price)}</b><span>${pr.priceBy==='user'?'Preis laut Eintrag':'Stand '+PRICE_DATE+', kann abweichen'}</span></div>`;
-  return `<div class="price"><b>Preis bei Amazon prüfen</b><span>${pr.range?'Preisrahmen ca. '+money(pr.range)+' (Schätzung)':'Aktueller Preis auf der Produktseite'}</span></div>`;
+  return `<div class="price"><b>Preis bei Amazon</b><span>${pr.range?'Wir schätzen ca. '+money(pr.range)+'. Den genauen Preis siehst du dort.':'Dort siehst du den aktuellen Preis.'}</span></div>`;
 }
 
 /** Produktkarte unter einem Wunsch: Titel, Preis und Amazon-Button. opts.more: Wunsch-ID für weitere Vorschläge. */

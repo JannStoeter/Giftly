@@ -42,9 +42,9 @@ export function WishModal() {
 
   let state = '';
   if (ctx === 'guest') {
-    if (w.bought) state = `<div class="banner green">${ic('check')}<span>Von dir gekauft. Bleibt eine Überraschung.</span></div>`;
-    else if (mine) state = `<div class="banner green">${ic('lock')}<span>Von dir reserviert.${chosen ? ` Deine Wahl: <b>${esc(chosen.t)}</b>.` : ''} ${esc(p.name)} sieht davon nichts.</span></div>`;
-    else if (taken) state = `<div class="banner">${ic('lock')}<span>Dieser Wunsch ist schon von jemandem reserviert.</span></div>`;
+    if (w.bought) state = `<div class="banner green">${ic('check')}<span>Das hast du schon besorgt. Die Überraschung bleibt natürlich bestehen.</span></div>`;
+    else if (mine) state = `<div class="banner green">${ic('lock')}<span>Du hast diesen Wunsch reserviert.${chosen ? ` Deine Wahl: <b>${esc(chosen.t)}</b>.` : ''} ${esc(p.name)} erfährt davon nichts.</span></div>`;
+    else if (taken) state = `<div class="banner">${ic('lock')}<span>Um diesen Wunsch kümmert sich schon jemand anderes.</span></div>`;
   }
 
   let footer = '';
@@ -69,10 +69,10 @@ export function WishModal() {
    </div>
    ${ctx === 'preview' ? `<div class="banner green">${ic('eye')}<span>So sehen Schenkende diesen Wunsch.</span></div>` : ''}
    ${state}
-   ${o.main ? `<section class="wm-sec">${Offer(o.main, w, ctx, 'main')}</section>` : (w.kind === 'erlebnis' ? `<p class="muted" style="margin:14px 0">Ein Erlebnis braucht kein Amazon-Produkt. Plane es gemeinsam und reserviere es hier.</p>` : '')}
+   ${o.main ? `<section class="wm-sec">${Offer(o.main, w, ctx, 'main')}</section>` : (w.kind === 'erlebnis' ? `<p class="muted" style="margin:14px 0">Für ein Erlebnis brauchst du kein Produkt. Überlege am besten mit anderen Freunden, was sich organisieren lässt, und reserviere den Wunsch hier, damit niemand doppelt plant.</p>` : '')}
    ${o.alts.length ? `<section class="wm-sec"><p class="eyebrow" style="margin-bottom:8px">${w.kind === 'frei' ? 'Ideen zu diesem Wunsch' : 'Alternativen'}</p>${o.alts.map(a => Offer(a, w, ctx, 'alt')).join('')}</section>` : ''}
    ${o.over ? `<p class="muted" style="font-size:13px">${o.over} Produkt${o.over > 1 ? 'e' : ''} über dem Budget ausgeblendet.</p>` : ''}
-   <p class="disc">Anzeige: Links zu Amazon sind Partnerlinks. Preise können abweichen, maßgeblich ist der Preis bei Amazon.</p>
+   <p class="disc">Die Links zu Amazon sind Partnerlinks (Anzeige). Dir entstehen dadurch keine Mehrkosten. Maßgeblich ist immer der Preis bei Amazon.</p>
    <div class="row wm-foot">${footer}<span style="flex:1"></span><button class="btn ghost" data-act="close">Schließen</button></div>
   </div></div>`;
 }

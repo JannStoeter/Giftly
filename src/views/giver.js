@@ -10,9 +10,9 @@ import { AMAZON_DISCLOSURE, searchUrl, voucherLink } from '../lib/shops.js';
 /* Gast-Ansicht: ein Freund öffnet den Link und sieht nur dieses eine Profil. */
 export function Gast(){
   if(S.guest&&S.guest.handle===S.ui.person&&S.guest.status==='loading')return `<div class="wrap"><p class="muted" style="padding:60px 0;text-align:center" role="status">Profil wird geladen …</p></div>`;
-  if(S.guest&&S.guest.handle===S.ui.person&&S.guest.status==='error')return `<div class="wrap"><div class="panel" style="max-width:520px;margin:40px auto;display:grid;gap:12px"><h2>Das hat nicht geklappt</h2><p class="muted">Das Profil konnte nicht geladen werden. Bitte prüfe deine Verbindung und versuche es noch einmal.</p><button class="btn pri" data-act="guestretry" style="justify-self:start">Erneut versuchen</button></div></div>`;
+  if(S.guest&&S.guest.handle===S.ui.person&&S.guest.status==='error')return `<div class="wrap"><div class="panel" style="max-width:520px;margin:40px auto;display:grid;gap:12px"><h2>Das hat nicht geklappt</h2><p class="muted">Das Profil lässt sich gerade nicht laden. Wirf bitte einen Blick auf deine Internetverbindung und versuche es gleich noch einmal.</p><button class="btn pri" data-act="guestretry" style="justify-self:start">Erneut versuchen</button></div></div>`;
   const p=guestPerson();
-  if(!p)return `<div class="wrap"><div class="panel" style="max-width:520px;margin:40px auto;display:grid;gap:12px"><h2>Profil nicht gefunden</h2><p class="muted">Dieser Link gehört zu keinem Profil in diesem Browser. Frag die Person nach einem neuen Link.</p><a class="btn pri" href="../" style="justify-self:start">Zu Wishtale</a></div></div>`;
+  if(!p)return `<div class="wrap"><div class="panel" style="max-width:520px;margin:40px auto;display:grid;gap:12px"><h2>Profil nicht gefunden</h2><p class="muted">Zu diesem Link finden wir leider kein Profil. Vielleicht hat sich beim Kopieren ein Zeichen verloren. Am einfachsten fragst du die Person noch einmal nach ihrem Link.</p><a class="btn pri" href="../" style="justify-self:start">Zu Wishtale</a></div></div>`;
   return GuestPage(p,{});
 }
 
@@ -23,14 +23,14 @@ export function GuestPage(p,{preview=false}={}){
    <div class="pgrid">
     <div class="pheadslot">${ProfileHead(p,{preview})}</div>
     <aside class="paside ${S.ui.asideOpen?'open':''}" aria-label="Mehr über ${esc(p.name)}">
-     <button class="asidetoggle" data-act="aside" aria-expanded="${!!S.ui.asideOpen}"><span><b>Mehr über ${esc(p.name)}</b><small>Hat schon, schon verschenkt, Welten, Alternativen</small></span><i aria-hidden="true">${S.ui.asideOpen?'–':'+'}</i></button>
+     <button class="asidetoggle" data-act="aside" aria-expanded="${!!S.ui.asideOpen}"><span><b>Mehr über ${esc(p.name)}</b><small>Was schon da ist, was schon geschenkt wurde, Welten und Ideen, falls nichts passt</small></span><i aria-hidden="true">${S.ui.asideOpen?'–':'+'}</i></button>
      <div class="asidebody" tabindex="0">${Facts(p,{preview})}</div>
     </aside>
     <div class="pmain">
      ${wl.html}
      ${Curated(p,wl.open)}
-     ${preview?'':`<details class="sect ideacheck" id="ideen"><summary><h3>Eigene Idee prüfen</h3></summary><p class="muted" style="font-size:14.5px;margin:4px 0 12px">Wishtale gleicht sie mit Wünschen, Besitz, bisherigen Geschenken und No-Gos von ${esc(p.name)} ab.</p>${Ideen(p)}</details>`}
-     <p class="disc">Links zu Shops sind Partnerlinks (Anzeige). ${AMAZON_DISCLOSURE} Preise können abweichen, maßgeblich ist der Preis bei Amazon.</p>
+     ${preview?'':`<details class="sect ideacheck" id="ideen"><summary><h3>Eigene Idee prüfen</h3></summary><p class="muted" style="font-size:14.5px;margin:4px 0 12px">Du hast selbst eine Idee? Wir schauen für dich nach, ob sie zu den Wünschen von ${esc(p.name)} passt und ob ${esc(p.name)} das schon hat oder lieber nicht möchte.</p>${Ideen(p)}</details>`}
+     <p class="disc">Die Links zu Shops sind Partnerlinks (Anzeige). ${AMAZON_DISCLOSURE} Preise können abweichen, maßgeblich ist immer der Preis bei Amazon.</p>
     </div>
    </div>
   </div>`;
@@ -47,7 +47,7 @@ export function ProfileHead(p,{preview=false}={}){
     ${about?`<p class="about"><span class="eyebrow" style="display:block;margin-bottom:4px">Über ${esc(p.name)}</span>${esc(about)}</p>`:''}
     <div class="pfacts">${hide('interests')?'':row('Interessen',p.interests)}${hide('brands')?'':row('Lieblingsmarken',p.brands)}${hide('nogos')?'':row('Bitte nicht',p.nogos,'warn')}</div>
    </div>
-   <div class="occ pocc"><p class="eyebrow">Wofür suchst du?</p><div class="seg" role="group" aria-label="Anlass">${[['none','Ohne Anlass'],...OCC.map(o=>[o.id,o.l])].map(([k,l])=>`<button class="${u.occ===k?'on':''}" data-act="occ" data-v="${k}">${l}</button>`).join('')}</div><p class="muted tip">${occTip(u.occ)}</p></div>
+   <div class="occ pocc"><p class="eyebrow">Wofür suchst du etwas?</p><div class="seg" role="group" aria-label="Anlass">${[['none','Ohne Anlass'],...OCC.map(o=>[o.id,o.l])].map(([k,l])=>`<button class="${u.occ===k?'on':''}" data-act="occ" data-v="${k}">${l}</button>`).join('')}</div><p class="muted tip">${occTip(u.occ)}</p></div>
   </section>`;
 }
 
@@ -57,7 +57,7 @@ export function Facts(p,{preview=false}={}){
   const ctx=preview?'own':'guest';
   const block=(t,inner)=>inner?`<section class="fact"><h3>${t}</h3>${inner}</section>`:'';
   const chips=(a,c='')=>a.length?`<div class="chips">${a.map(x=>`<span class="chip ${c}">${esc(x)}</span>`).join('')}</div>`:'';
-  const worlds=p.cats.length?`<p class="muted" style="font-size:13.5px;margin-bottom:8px">Tippe auf eine Welt für passende Ideen.</p><div class="catrow">${p.cats.map(id=>{const c=cat(id);return `<button class="catmini" data-act="world" data-id="${c.id}" data-ctx="${ctx}" aria-label="Welt ${esc(c.n)} öffnen">${art(c.a,c.t)}<div>${esc(c.n)}</div></button>`}).join('')}</div>`:'';
+  const worlds=p.cats.length?`<p class="muted" style="font-size:13.5px;margin-bottom:8px">Tippe auf eine Welt, dann erzählen wir dir, was dazu passen könnte.</p><div class="catrow">${p.cats.map(id=>{const c=cat(id);return `<button class="catmini" data-act="world" data-id="${c.id}" data-ctx="${ctx}" aria-label="Welt ${esc(c.n)} öffnen">${art(c.a,c.t)}<div>${esc(c.n)}</div></button>`}).join('')}</div>`:'';
   const alts=p.alts.length?`<p class="muted" style="font-size:13.5px;margin-bottom:8px">${esc(p.name)} freut sich auch über:</p><div class="chips">${p.alts.map(a=>{const v=voucherLink(a);return `<a class="chip ok" href="${v.url}" target="_blank" rel="noopener noreferrer${v.ad?' sponsored nofollow':''}">${esc(a)} ↗</a>`}).join('')}</div>${p.alts.some(a=>voucherLink(a).ad)?'<span class="ad">Enthält Anzeige (Amazon-Partnerlink)</span>':''}`:'';
   return block('Hat '+esc(p.name)+' schon',chips(owned.map(w=>w.t),'ok'))
    +block('Schon verschenkt',chips((p.gifts||p.history||[]).map(g=>`${g.what} · ${g.from}`)))
@@ -86,7 +86,7 @@ export function WishList(p,{preview=false}={}){
   const html=`<section id="wunschliste" aria-label="Wunschliste von ${esc(p.name)}">
    <div class="row" style="justify-content:space-between;margin-bottom:8px"><div><p class="eyebrow">Wunschliste</p><h2 style="font-size:clamp(30px,4vw,44px)">${only?`${shown.length} offene`:all.length} Wünsche von ${esc(p.name)}</h2></div>
     <div class="row" style="gap:8px">${preview?'':`<div class="seg" role="group" aria-label="Filter"><button class="${!only?'on':''}" data-act="onlyopen" data-v="0">Alle</button><button class="${only?'on':''}" data-act="onlyopen" data-v="1">Nur offene${free!==all.length?` (${free})`:''}</button></div>`}${densSeg()}</div></div>
-   <p class="muted" style="font-size:14px;margin-bottom:14px">${ic('lock','sm')} ${p.managed?`${esc(p.parent||'Die Eltern')} pflegt die Wünsche und sieht Reservierungen. ${esc(p.name)} sieht nichts.`:`Reservierungen sind anonym. ${esc(p.name)} sieht nie, was reserviert oder gekauft wurde.`}${oc!=='none'?` Passende zu ${occL(oc)} stehen zuerst.`:''}</p>
+   <p class="muted" style="font-size:14px;margin-bottom:14px">${ic('lock','sm')} ${p.managed?`${esc(p.parent||'Die Eltern')} pflegt die Wünsche und sieht, was reserviert ist. ${esc(p.name)} bekommt davon nichts mit.`:`Deine Reservierung bleibt anonym. ${esc(p.name)} erfährt nie, was reserviert oder gekauft wurde, damit die Überraschung bleibt.`}${oc!=='none'?` Wünsche, die gut zu ${occL(oc)} passen, stehen ganz oben.`:''}</p>
    <div class="wgrid ${S.ui.big?'big':''}">${shown.map(cardOf).join('')||`<p class="muted">Alle Wünsche sind schon vergeben. Schau dir unten die Ideen an.</p>`}</div></section>`;
   return {html,open:free};
 }
@@ -95,7 +95,7 @@ export function WishList(p,{preview=false}={}){
 export function Curated(p,openWishes){
   const few=openWishes<4;
   return `<section class="sect curated" id="passt"><p class="eyebrow">Von Wishtale kuratiert</p><h2 style="font-size:clamp(28px,3.6vw,40px)">Das würde auch gut passen</h2>
-   <p class="muted" style="font-size:14.5px;margin:6px 0 16px">${few?`${esc(p.name)} hat noch wenig auf der Liste, deshalb gleich mehr Ideen. `:'Falls nichts von der Wunschliste passt. '}Ausgewählt nach Interessen, Marken, Anlass und dem, was ${esc(p.name)} schon hat.</p>
+   <p class="muted" style="font-size:14.5px;margin:6px 0 16px">${few?`${esc(p.name)} hat noch nicht viele Wünsche eingetragen, deshalb haben wir hier ein paar Ideen mehr für dich. `:'Falls dir auf der Wunschliste nichts zusagt, haben wir hier noch ein paar Ideen. '}Wir haben sie aus den Interessen, Lieblingsmarken und dem Anlass zusammengestellt und dabei beachtet, was ${esc(p.name)} schon besitzt.</p>
    ${Recs(p)}</section>`;
 }
 export function Ideen(p){
@@ -105,14 +105,14 @@ export function Ideen(p){
     const bad=r.res.length>0;
     const cards=r.res.map(x=>{
       if(x.type==='wish')return `<div class="res-card bad"><strong>Steht schon auf der Liste</strong><p>${esc(x.w.t)}${x.w.res==='other'?' ist bereits von jemandem reserviert.':' ist noch frei.'}</p>${x.w.res?'':`<div class="row">${x.w.kind==='kategorie'?`<button class="btn gold sm" data-act="suggest" data-id="${x.w.id}">Produkt vorschlagen</button>`:''}<button class="btn pri sm" data-act="reserve" data-id="${x.w.id}" data-stay="1">Jetzt reservieren</button></div>`}</div>`;
-      if(x.type==='have')return `<div class="res-card bad"><strong>Gibt es schon</strong><p>${esc(p.name)} hat sich bereits selbst gekauft: ${esc(x.w.t)}.</p></div>`;
+      if(x.type==='have')return `<div class="res-card bad"><strong>Das hat ${esc(p.name)} schon</strong><p>${esc(p.name)} hat sich bereits selbst gekauft: ${esc(x.w.t)}.</p></div>`;
       if(x.type==='given')return `<div class="res-card bad"><strong>Wurde schon geschenkt</strong><p>${esc(x.g.what)} von ${esc(x.g.from)} (${esc(x.g.when)}).${x.g.liked==='nein'?' Es kam nicht gut an.':''}</p></div>`;
-      return `<div class="res-card bad"><strong>Besser nicht</strong><p>${esc(p.name)} möchte keine ${esc(x.n)} geschenkt bekommen.</p></div>`;
+      return `<div class="res-card bad"><strong>Lieber nicht</strong><p>${esc(p.name)} möchte keine ${esc(x.n)} geschenkt bekommen.</p></div>`;
     }).join('');
     let verdict='';
     if(!bad){
       const f=r.hitTags.length||r.fits.length;
-      verdict=`<div class="res-card ${f?'good':'info'}"><strong>${f?'Gute Idee':'Kein Konflikt gefunden'}</strong><p>${f?`Passt zu ${esc(gen(p.name))} Interessen${r.fits.length?`: ${r.fits.map(esc).join(', ')}`:''}. Nichts davon ist schon vorhanden oder gewünscht.`:`Nichts spricht dagegen, aber wir sehen keinen direkten Bezug zu ${esc(gen(p.name))} Interessen. Schau dir die Ideen unten an.`}</p></div>`;
+      verdict=`<div class="res-card ${f?'good':'info'}"><strong>${f?'Gute Idee':'Kein Konflikt gefunden'}</strong><p>${f?`Passt zu ${esc(gen(p.name))} Interessen${r.fits.length?`: ${r.fits.map(esc).join(', ')}`:''}. Außerdem steht es weder auf der Wunschliste, noch ist es schon vorhanden.`:`Nichts spricht dagegen, aber wir sehen keinen direkten Bezug zu ${esc(gen(p.name))} Interessen. Schau dir die Ideen unten an.`}</p></div>`;
     }
     const rc=recommend(p).good.filter(g=>!r.ctags.length||g.it.tags.some(t=>r.ctags.includes(t))||g.it.comp).slice(0,3);
     const sug=(rc.length?rc:recommend(p).good.slice(0,3));

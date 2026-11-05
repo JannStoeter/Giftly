@@ -8,13 +8,13 @@ import { AMAZON_DISCLOSURE } from '../lib/shops.js';
 export function AcctModal(){
   const rows=Object.entries(S.accounts).map(([id,a])=>`<div class="altrow" style="grid-template-columns:44px 1fr auto"><span class="av t${a.tone}" style="width:44px;height:44px">${initials(a.name)}</span><div><strong>${esc(a.name)}${a.age?`, ${a.age}`:''}</strong><br><span class="muted" style="font-size:13.5px">${a.managed?`Kind-Konto, verwaltet von ${esc(S.accounts.me.name)}`:'Hauptkonto'}</span></div>${S.ui.acct===id?'<span class="chip ok">Aktiv</span>':`<button class="btn sec sm" data-act="acct" data-id="${id}">Wechseln</button>`}</div>`).join('');
   return `<div class="scrim" data-act="closebg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mt">
-   <h2 id="mt">Konten</h2>${S.auth.user?`<p class="muted" style="font-size:14px;margin-bottom:10px">Angemeldet als <b>${esc(S.auth.user.email||'')}</b></p>`:`<div class="banner" style="margin-bottom:12px"><span>Demo-Modus: Daten bleiben nur in diesem Browser. <button class="chip" data-act="tologin">Konto anlegen oder anmelden</button></span></div>`}${rows}
+   <h2 id="mt">Konten</h2>${S.auth.user?`<p class="muted" style="font-size:14px;margin-bottom:10px">Angemeldet als <b>${esc(S.auth.user.email||'')}</b></p>`:`<div class="banner" style="margin-bottom:12px"><span>Du bist im Demo-Modus. Deine Eingaben bleiben nur in diesem Browser. <button class="chip" data-act="tologin">Konto anlegen oder anmelden</button></span></div>`}${rows}
    <h3 style="font-size:24px;margin:20px 0 6px">Kind-Konto anlegen</h3>
-   <p class="muted" style="font-size:14.5px;margin-bottom:12px">Für Kinder pflegst du Profil und Wünsche. Du siehst, was reserviert ist. Das Kind sieht es nicht.</p>
+   <p class="muted" style="font-size:14.5px;margin-bottom:12px">Für Kinder pflegst du Profil und Wünsche selbst. Du siehst, was reserviert ist, damit nichts doppelt kommt. Das Kind bekommt davon nichts mit, damit die Überraschung bleibt.</p>
    <form data-form="child">
     <div class="fld"><label for="cn">Vorname</label><input id="cn" name="name" class="inp" required autocomplete="off"></div>
     <div class="fld"><label for="ca">Alter</label><input id="ca" name="age" type="number" min="0" max="17" inputmode="numeric" class="inp"></div>
-    <p class="disc" style="margin:0 0 12px">Du legst das Konto als sorgeberechtigte Person an. Gespeichert werden nur Vorname und Alter.</p>
+    <p class="disc" style="margin:0 0 12px">Du legst das Konto als sorgeberechtigte Person an. Wir speichern dafür nur den Vornamen und das Alter.</p>
     <div class="row" style="justify-content:flex-end"><button type="button" class="btn ghost" data-act="close">Schließen</button><button class="btn pri" type="submit">Anlegen und einrichten</button></div>
    </form>
    ${S.auth.user?`<div class="row" style="justify-content:space-between;margin-top:18px"><span class="disc" style="margin:0">Deine Daten liegen in deinem Wishtale-Konto.</span><button class="btn sec sm" data-act="logout">Abmelden</button></div>`:`<p class="disc" style="margin-top:18px">Alle Daten liegen nur in deinem Browser. <button class="chip" data-act="reset">Demodaten zurücksetzen</button></p>`}</div></div>`;
@@ -24,14 +24,14 @@ export function AmazonModal(){
   const ideas=[...new Set([...S.me.interests,...S.me.wishes.filter(w=>w.status==='offen').map(w=>w.t.split(',')[0])])].slice(0,6);
   return `<div class="scrim" data-act="closebg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mt">
    <h2 id="mt">Bei Amazon stöbern</h2>
-   <p class="muted" style="font-size:14.5px;margin-bottom:14px">Suche bei Amazon, öffne ein Produkt und komm hierher zurück. Den Link fügst du ein, den Rest übernimmt Wishtale.</p>
+   <p class="muted" style="font-size:14.5px;margin-bottom:14px">Stöbere in Ruhe bei Amazon und öffne ein Produkt, das dir gefällt. Danach kommst du einfach hierher zurück und fügst den Link ein. Um den Rest kümmern wir uns.</p>
    <section class="azstep"><p class="eyebrow">1 · Suchen</p>
     <form data-form="azsearch" class="addrow"><label for="azq" style="position:absolute;left:-9999px">Suchbegriff</label><input id="azq" name="q" data-az="q" class="inp" value="${esc(z.q)}" placeholder="z. B. Kaffeemühle, Wanderstöcke" autocomplete="off"><button class="btn amz" type="submit">Bei Amazon suchen ${ic('arrow','sm')}</button></form>
     <div class="chips" style="margin-top:8px">${ideas.map(i=>`<button type="button" class="chip" data-act="azq" data-v="${esc(i)}">${esc(i)}</button>`).join('')}</div>
     <p class="disc" style="margin:8px 0 0">Amazon öffnet in einem neuen Tab. ${AMAZON_DISCLOSURE}</p></section>
    <section class="azstep"><p class="eyebrow">2 · Link einfügen</p>
     <form data-form="azlink" class="addrow"><label for="azurl" style="position:absolute;left:-9999px">Amazon-Link</label><input id="azurl" name="text" data-az="text" class="inp" value="${esc(z.text)}" placeholder="Link der Produktseite einfügen" autocomplete="off"><button class="btn sec" type="button" data-act="azclip">Aus Zwischenablage</button></form>
-    <p class="muted" style="font-size:13px;margin-top:6px">In der Amazon-App: Produkt öffnen, Teilen, Link kopieren. Im Browser: Adresszeile kopieren.</p>
+    <p class="muted" style="font-size:13px;margin-top:6px">In der Amazon-App tippst du beim Produkt auf „Teilen“ und dann auf „Link kopieren“. Im Browser kopierst du einfach die Adresse aus der Adresszeile.</p>
     ${r&&r.error?`<div class="banner" style="margin-top:10px">${ic('x')}<span>${esc(r.error)}</span></div>`:''}</section>
    ${ok?`<section class="azstep azprev"><p class="eyebrow">3 · Prüfen und speichern</p>
     <form data-form="azadd">

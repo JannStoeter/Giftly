@@ -19,8 +19,8 @@ export const ALTS=['IKEA-Gutschein','Amazon-Gutschein','Wunschgutschein','Buchha
 export const OCC=[{id:'weihnachten',l:'Weihnachten'},{id:'geburtstag',l:'Geburtstag'},{id:'hochzeit',l:'Hochzeit'},{id:'einzug',l:'Einzug'},{id:'danke',l:'Dankeschön'}];
 export const occL=id=>(OCC.find(o=>o.id===id)||{}).l||'';
 export function occTip(o){
-  if(o==='weihnachten'){const n=new Date(),d=Math.ceil((new Date(n.getFullYear(),11,24)-n)/864e5);return `${d>0?`Noch ${d} Tage. `:''}Zu Weihnachten passen Dinge zum Genießen, Gemütlichmachen und Auspacken.`}
-  return {none:'Ohne Anlass zeigen wir, was zu Interessen und Wünschen passt.',geburtstag:'Zum Geburtstag darf es persönlicher sein: Erlebnisse und Herzenswünsche.',hochzeit:'Zur Hochzeit: Dinge fürs gemeinsame Zuhause.',einzug:'Zum Einzug: Alltagsdinge, die ein Zuhause schöner machen.',danke:'Als Dankeschön: klein, persönlich, bis 40 Euro.'}[o];
+  if(o==='weihnachten'){const n=new Date(),d=Math.ceil((new Date(n.getFullYear(),11,24)-n)/864e5);return `${d>0?`Noch ${d} Tage. `:''}Zu Weihnachten passen Dinge, die es gemütlich machen, die man genießen und mit Vorfreude auspacken kann.`}
+  return {none:'Ohne besonderen Anlass zeigen wir einfach das, was am besten zu den Interessen und Wünschen passt.',geburtstag:'Zum Geburtstag darf es ruhig etwas Persönlicheres sein, zum Beispiel ein Erlebnis oder ein Herzenswunsch.',hochzeit:'Zur Hochzeit freut sich das Paar über Dinge, die das gemeinsame Zuhause schöner machen.',einzug:'Zum Einzug sind Alltagsdinge schön, die ein neues Zuhause gleich wohnlicher machen.',danke:'Als Dankeschön darf es etwas Kleines und Persönliches sein, gern bis etwa 40 Euro.'}[o];
 }
 export const CREATORS=[
  {id:'nora',handle:'@nora.wohnt',name:'Nora Linde',niche:'Interior',scope:'Interior',a:'vase',tone:0,bio:'Ruhige Räume, ehrliche Materialien. Ich zeige, was bei mir wirklich im Alltag steht.',items:['x1','x2','x3','x4','x5']},

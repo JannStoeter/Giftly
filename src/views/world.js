@@ -1,6 +1,6 @@
 /* Welt-Fenster: kleine Geschichte zur Person und passende Produkte, aus Wünschen, Marken und Vorlieben. */
 import { S, guestPerson } from '../state.js';
-import { esc, ic, gen } from '../lib/util.js';
+import { esc, ic } from '../lib/util.js';
 import { art, artIllu } from '../lib/art.js';
 import { worldOffers } from '../lib/products.js';
 import { worldTale } from '../lib/tale.js';
@@ -42,7 +42,7 @@ export function WorldModal() {
    </div>
    <div class="tale">${tale.paragraphs.map(t => `<p>${esc(t)}</p>`).join('')}<p class="ask">${esc(tale.ask)}</p></div>
    ${offers.length ? offers.map(Row).join('') : `<p class="muted" style="margin:14px 0">Dazu haben wir noch keine Idee, die nicht schon vorhanden oder gewünscht ist. Schau gern in die Wunschliste.</p>`}
-   <p class="disc"><b>Hinweis:</b> Wir stellen diese Auswahl aus ${esc(gen(p.name))} Wünschen, bevorzugten Marken und Vorlieben zusammen. Es ist nicht ausgeschlossen, dass ${esc(p.name)} ein Produkt schon hat. Links zu Amazon sind Partnerlinks (Anzeige), Preise können abweichen.</p>
+   <p class="disc"><b>Hinweis:</b> Wir haben diese Auswahl aus den Wünschen, Lieblingsmarken und Vorlieben von ${esc(p.name)} zusammengestellt. Es kann trotzdem sein, dass ${esc(p.name)} das eine oder andere schon besitzt. Die Links zu Amazon sind Partnerlinks (Anzeige), Preise können abweichen.</p>
    <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn ghost" data-act="close">Schließen</button></div>
   </div></div>`;
 }

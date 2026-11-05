@@ -7,8 +7,8 @@ export function Login(){
   const err=S.auth.error?`<div class="banner" style="margin-bottom:14px"><span>${esc(S.auth.error)}</span></div>`:'';
   return `<div class="wrap"><div class="authcard">
    <p class="eyebrow">Wishtale</p>
-   <h1>${tab==='up'?'Dein Wishtale anlegen':'Willkommen zurück'}</h1>
-   <p class="muted" style="margin:6px 0 18px">${tab==='up'?'Ein Konto, damit deine Wünsche gespeichert sind und Freunde sie über deinen Link sehen.':'Melde dich an, um deine Wünsche zu verwalten.'}</p>
+   <h1>${tab==='up'?'Schön, dass du da bist':'Schön, dich wiederzusehen'}</h1>
+   <p class="muted" style="margin:6px 0 18px">${tab==='up'?'Mit einem Konto bleiben deine Wünsche sicher gespeichert, und deine Freunde können sie über deinen persönlichen Link ansehen, ganz ohne sich selbst anzumelden.':'Melde dich an, dann geht es genau dort weiter, wo du aufgehört hast.'}</p>
    <div class="seg" role="tablist" style="margin-bottom:16px"><button role="tab" aria-selected="${tab==='in'}" class="${tab==='in'?'on':''}" data-act="authtab" data-v="in">Anmelden</button><button role="tab" aria-selected="${tab==='up'}" class="${tab==='up'?'on':''}" data-act="authtab" data-v="up">Registrieren</button></div>
    ${err}${msg}
    ${tab==='up'?`<form data-form="signup" class="authform">
@@ -20,10 +20,10 @@ export function Login(){
      <div class="fld"><label for="ae">E-Mail</label><input id="ae" name="email" type="email" class="inp" required autocomplete="email"></div>
      <div class="fld"><label for="ap">Passwort</label><input id="ap" name="password" type="password" class="inp" required autocomplete="current-password"></div>
      <button class="btn pri" type="submit" ${busy?'disabled':''}>Anmelden</button></form>`}
-   <details class="authalt"><summary>Ohne Passwort: Login-Link per E-Mail</summary>
+   <details class="authalt"><summary>Lieber ohne Passwort? Wir schicken dir einen Link per E-Mail</summary>
     <form data-form="magic" class="authform" style="margin-top:10px">
      <div class="fld"><label for="am">E-Mail</label><input id="am" name="email" type="email" class="inp" required autocomplete="email"></div>
      <button class="btn sec" type="submit" ${busy?'disabled':''}>Link senden</button></form></details>
-   <div class="authalt" style="border-top:1px solid var(--line);padding-top:14px;margin-top:6px"><button class="btn ghost sm" data-act="demo" style="padding-left:0">Erst mal ohne Konto ausprobieren (Demo)</button></div>
+   <div class="authalt" style="border-top:1px solid var(--line);padding-top:14px;margin-top:6px"><button class="btn ghost sm" data-act="demo" style="padding-left:0">Ich möchte mich erst einmal umsehen, ohne Konto (Demo)</button></div>
   </div></div>`;
 }

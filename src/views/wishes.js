@@ -13,9 +13,9 @@ export function Wuensche(){
   const used=[...new Set(m.wishes.map(w=>w.c))];
   const open=m.wishes.filter(w=>w.status==='offen').length;
   return `<div class="wrap">
-   <div class="pagehead"><p class="eyebrow">Meine Wünsche</p><h1>${m.managed?`${open} Wünsche von ${esc(m.name)}.`:`${open} Dinge, die mir Freude machen würden.`}</h1></div>
-   <div class="banner" style="margin-bottom:8px">${ic('lock')}<span>${m.managed?`Als Elternteil siehst du, was reserviert oder gekauft ist. ${esc(m.name)} sieht es nicht.`:'Überraschungsschutz: Du siehst nicht, ob jemand einen Wunsch reserviert oder gekauft hat.'}</span></div>
-   <p class="muted" style="font-size:14px;margin-bottom:16px">Tipp: Ein Kategorie-Wunsch wie „Hochwertige Pfanne bis 100 €“ bekommt von Wishtale einen konkreten Produktvorschlag für Schenkende. Auch ohne Link suchen wir bei jedem Wunsch ein passendes Amazon-Produkt.</p>
+   <div class="pagehead"><p class="eyebrow">Meine Wünsche</p><h1>${m.managed?`${open} Wünsche von ${esc(m.name)}.`:`${open} Dinge, über die ich mich freuen würde.`}</h1></div>
+   <div class="banner" style="margin-bottom:8px">${ic('lock')}<span>${m.managed?`Als Elternteil siehst du, was reserviert oder gekauft ist. ${esc(m.name)} sieht es nicht.`:'Die Überraschung bleibt: Du siehst nie, ob jemand einen deiner Wünsche reserviert oder gekauft hat.'}</span></div>
+   <p class="muted" style="font-size:14px;margin-bottom:16px">Du musst nicht jedes Produkt kennen. Schreib zum Beispiel „Hochwertige Pfanne bis 100 €“, dann suchen wir für deine Freunde passende Vorschläge heraus. Auch ohne Link finden wir bei Amazon etwas Passendes.</p>
    <div class="row" style="justify-content:space-between;margin-bottom:16px">
      <div class="seg" role="group" aria-label="Status">${[['offen','Offen'],['selbst','Selbst gekauft'],['alle','Alle']].map(([k,l])=>`<button class="${u.wf===k?'on':''}" data-act="wf" data-v="${k}">${l}</button>`).join('')}</div>
      <div class="seg" role="group" aria-label="Kategorie"><button class="${u.wc==='alle'?'on':''}" data-act="wc" data-v="alle">Alle</button>${used.map(c=>`<button class="${u.wc===c?'on':''}" data-act="wc" data-v="${c}">${cat(c).n}</button>`).join('')}</div>
@@ -26,7 +26,7 @@ export function Wuensche(){
       status:m.managed&&(w.res||w.bought)?{text:w.bought?'Gekauft':'Reserviert',tone:w.bought?'me':'res'}:null,
       taken:false,
       ctx:'own'
-    })).join('')||`<p class="muted">Hier ist nichts. Füge einen Wunsch hinzu.</p>`}</div>
+    })).join('')||`<p class="muted">Hier ist noch nichts. Mit „Wunsch hinzufügen“ legst du deinen ersten an.</p>`}</div>
    <div class="fab"><button class="btn amz" data-act="azopen">Bei Amazon stöbern</button><button class="btn pri" data-act="modal" data-v="wish">${ic('plus','sm')}Wunsch hinzufügen</button></div>
   </div>`;
 }

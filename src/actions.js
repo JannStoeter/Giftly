@@ -27,8 +27,8 @@ function azParse(text){
 function reserveFlow(p,w){
   if(p.remote){
     return guestRpc('reserve_wish',w.id)
-      .then(r=>{if(!r.ok){toast('Dieser Wunsch ist leider schon vergeben.');}return refreshGuest().then(()=>!!r.ok)})
-      .catch(()=>{toast('Das hat nicht geklappt. Bitte versuche es noch einmal.');return false});
+      .then(r=>{if(!r.ok){toast('Oh, da war jemand schneller: Dieser Wunsch ist schon reserviert.');}return refreshGuest().then(()=>!!r.ok)})
+      .catch(()=>{toast('Das hat leider nicht geklappt. Magst du es bitte noch einmal versuchen?');return false});
   }
   w.res='me';return Promise.resolve(true);
 }
@@ -37,12 +37,12 @@ const A={
  go(el){const v=el.dataset.v;if(v==='entdecken'){S.ui.look=null;S.ui.creator=null}if(v==='start')S.ui.step=0;location.hash='#'+v;if(location.hash==='#'+v&&S.ui.view===v)render(true)},
  pick(el){const k=el.dataset.k,v=el.dataset.v,a=S.me[k],i=a.indexOf(v);i>-1?a.splice(i,1):a.push(v);render()},
  next(){S.ui.step++;render(true)},prev(){S.ui.step--;render(true)},
- finish(){toast('Dein Wishtale ist bereit.');location.hash='#profil'},
+ finish(){toast('Geschafft! Dein Wishtale ist startklar.');location.hash='#profil'},
  edit(){S.ui.step=0;location.hash='#start'},
  preview(el){S.ui.preview=el.dataset.v==='1';render()},
  vis(el){const o=['alle','giver','privat'],k=el.dataset.k;S.me.vis[k]=o[(o.indexOf(S.me.vis[k]||'giver')+1)%3];render()},
  wf(el){S.ui.wf=el.dataset.v;render()},wc(el){S.ui.wc=el.dataset.v;render()},
- selbst(el){const w=S.me.wishes.find(x=>x.id===el.dataset.id);w.status=w.status==='selbst'?'offen':'selbst';toast(w.status==='selbst'?'Als selbst gekauft markiert. Schenkende sehen, dass du es schon hast.':'Wieder offen.');render()},
+ selbst(el){const w=S.me.wishes.find(x=>x.id===el.dataset.id);w.status=w.status==='selbst'?'offen':'selbst';toast(w.status==='selbst'?'Dann ist dieser Wunsch erledigt. Deine Freunde sehen jetzt, dass du das schon hast.':'Der Wunsch ist wieder offen.');render()},
  prio(el){const w=S.me.wishes.find(x=>x.id===el.dataset.id);w.prio=w.prio%3+1;toast('Priorität: '+PRIO[w.prio]);render()},
  delw(el){S.ui.modal=null;S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
  modal(el){S.ui.modal=el.dataset.v;render();setTimeout(()=>document.querySelector('.sheet input,.sheet select')?.focus(),30)},
@@ -54,7 +54,7 @@ const A={
  guestretry(){S.guest=null;route()},
  share(){
   const url=`${location.origin}${location.pathname}#p/${S.me.handle||S.ui.acct}`;
-  const done=()=>toast('Link kopiert. Hinweis: In dieser Demo öffnet er nur in diesem Browser das Profil.');
+  const done=()=>toast('Dein Link ist kopiert und bereit zum Verschicken. (In der Demo öffnet er dein Profil nur in diesem Browser.)');
   if(navigator.share){navigator.share({title:`${S.me.name} bei Wishtale`,url}).catch(()=>{})}
   else if(navigator.clipboard?.writeText){navigator.clipboard.writeText(url).then(done,()=>toast(url))}
   else toast(url);
@@ -62,8 +62,8 @@ const A={
  azopen(){S.ui.az={q:'',text:'',res:null,title:'',price:'',c:'wohnen',searched:false};S.ui.modal='amazon';render();setTimeout(()=>$('#azq')?.focus(),30)},
  azq(el){S.ui.az.q=el.dataset.v;render()},
  azclip(){
-  if(!navigator.clipboard?.readText){toast('Dein Browser erlaubt kein Einfügen per Knopf. Füge den Link mit Strg+V ins Feld ein.');return}
-  navigator.clipboard.readText().then(azParse).catch(()=>toast('Zwischenablage nicht lesbar. Füge den Link mit Strg+V ins Feld ein.'));
+  if(!navigator.clipboard?.readText){toast('Dein Browser lässt das Einfügen per Knopf leider nicht zu. Füge den Link bitte mit Strg+V (am Handy mit langem Tippen) in das Feld ein.');return}
+  navigator.clipboard.readText().then(azParse).catch(()=>toast('Wir kommen gerade nicht an deine Zwischenablage. Füge den Link bitte mit Strg+V in das Feld ein.'));
  },
  reset(){if(confirm('Alle Änderungen verwerfen und die Beispieldaten wiederherstellen?'))resetState()},
  closebg(el,e){if(e.target===el)A.close()},
@@ -73,7 +73,7 @@ const A={
  fb(el){
   const g=S.me.inbox.find(x=>x.id===el.dataset.id),v=el.dataset.v;
   if(v==='swap'){S.ui.swap=g.id;S.ui.swapSel=S.me.alts.slice(0,2);render();return}
-  const map={love:['ja',true,true,'Schön. Wishtale merkt sich, was dir gefällt.'],happy:['ja',true,true,'Gespeichert. Das fließt in künftige Empfehlungen ein.'],meh:['teils',true,false,'Gespeichert, nur für dich sichtbar.'],have:['teils',true,false,'Gespeichert. Ähnliches wird künftig nicht mehr vorgeschlagen.']};
+  const map={love:['ja',true,true,'Wie schön, das freut uns! Wir merken uns, was dir gefällt.'],happy:['ja',true,true,'Danke dir! Das fließt in künftige Vorschläge ein.'],meh:['teils',true,false,'Notiert. Das siehst nur du.'],have:['teils',true,false,'Verstanden. Ähnliches schlagen wir künftig nicht mehr vor.']};
   const [l,h,a,msg]=map[v];
   S.me.inbox=S.me.inbox.filter(x=>x.id!==g.id);
   S.me.history.unshift({id:g.id,what:g.what,from:g.from,when:'November 2026',liked:l,have:h,again:a,a:g.a,tone:g.tone,kw:g.kw});
@@ -85,17 +85,17 @@ const A={
   const g=S.me.inbox.find(x=>x.id===el.dataset.id);
   S.me.inbox=S.me.inbox.filter(x=>x.id!==g.id);
   S.me.history.unshift({id:g.id,what:g.what,from:g.from,when:'November 2026',liked:'teils',have:false,again:false,a:g.a,tone:g.tone,kw:g.kw});
-  S.ui.swap=null;toast(`Simuliert: ${g.from} bekommt eine freundliche Nachricht, ohne Bewertung.`);render();
+  S.ui.swap=null;toast(`Das ist eine Vorschau: ${g.from} würde jetzt eine freundliche Nachricht bekommen, ganz ohne Bewertung.`);render();
  },
  reserve(el){
   const p=guestPerson(),w=p&&p.wishes.find(x=>x.id===el.dataset.id);if(!w)return;
-  reserveFlow(p,w).then(ok=>{if(ok)toast(`Reserviert. ${p.name} sieht davon nichts, andere Schenkende sehen nur „reserviert“.`);render()});
+  reserveFlow(p,w).then(ok=>{if(ok)toast(`Erledigt, der Wunsch ist für dich reserviert. ${p.name} erfährt davon nichts, und andere Freunde sehen nur „reserviert“.`);render()});
  },
  choose(el){
   const p=guestPerson(),w=p&&p.wishes.find(x=>x.id===el.dataset.wid);if(!w)return;
   const o=offersFor(p,w),pick=[o.main,...o.alts].filter(Boolean).find(x=>String(x.id)===el.dataset.pid);
   reserveFlow(p,w).then(ok=>{
-   if(ok&&pick){S.ui.chosen[w.id]={t:pick.t,url:pick.url,price:pick.price||null};toast(`Reserviert: ${pick.t}. Du findest ihn jederzeit hier wieder.`)}
+   if(ok&&pick){S.ui.chosen[w.id]={t:pick.t,url:pick.url,price:pick.price||null};toast(`Reserviert: ${pick.t}. Du kannst ihn jederzeit hier wiederfinden.`)}
    render();
   });
  },
@@ -107,7 +107,7 @@ const A={
  },
  bought(el){
   const p=guestPerson(),w=p&&p.wishes.find(x=>x.id===el.dataset.id);if(!w)return;
-  const done=()=>{toast('Als gekauft markiert. Die Überraschung bleibt erhalten.')};
+  const done=()=>{toast('Prima, als gekauft markiert. Die Überraschung bleibt natürlich bestehen.')};
   if(p.remote){guestRpc('mark_bought',w.id).then(()=>{done();return refreshGuest()}).catch(()=>toast('Das hat nicht geklappt.'));return}
   w.bought=true;done();render();
  },
@@ -126,10 +126,10 @@ const A={
  look(el){S.ui.look=el.dataset.id;S.ui.hot=null;if(!el.dataset.keep)S.ui.creator=null;render(true)},
  lookback(){S.ui.look=null;S.ui.hot=null;render(true)},
  hot(el){S.ui.hot=S.ui.hot===el.dataset.id?null:el.dataset.id;render()},
- lookall(){const l=LOOKS.find(x=>x.id===S.ui.look),c=crea(l.cid);let n=0;l.objs.filter(o=>o.pid).forEach(o=>{const x=cprod(o.pid);if(!S.me.wishes.some(w=>w.pid===x.id)){S.me.wishes.unshift(W({t:x.t,c:x.c,prio:2,a:x.a,tone:x.tone,note:`Tipp von ${c.handle}: ${x.note}`,via:c.id,pid:x.id,kw:kwOf(x.t)}));n++}});toast(n?`${n} Teile auf deiner Wunschliste. Kauft jemand darüber, erhält ${c.handle} eine kleine Provision.`:'Alles schon auf deiner Wunschliste.');render()},
- style(el){const m=S.me;m.style=m.style||[];const id=el.dataset.id,i=m.style.findIndex(x=>x.id===id);if(i>-1){m.style.splice(i,1);toast('Stil-Vorbild entfernt.')}else{m.style.push({id});toast(`Gespeichert: In deinem Profil steht jetzt „${crea(id).scope} von ${crea(id).handle}“.`)}render()},
- cadd(el){const x=cprod(el.dataset.id),c=crea(el.dataset.cid);S.me.wishes.unshift(W({t:x.t,c:x.c,prio:2,a:x.a,tone:x.tone,note:`Tipp von ${c.handle}: ${x.note}`,via:c.id,pid:x.id,kw:kwOf(x.t)}));toast(`Auf deiner Wunschliste. Kauft jemand darüber, erhält ${c.handle} eine kleine Provision. Dir kostet das nichts.`);render()},
- cbuy(el){const c=crea(el.dataset.cid);toast(`Simuliert: Der Partnerlink öffnet sich. ${c.handle} erhält bei Kauf die Provision.`)},
+ lookall(){const l=LOOKS.find(x=>x.id===S.ui.look),c=crea(l.cid);let n=0;l.objs.filter(o=>o.pid).forEach(o=>{const x=cprod(o.pid);if(!S.me.wishes.some(w=>w.pid===x.id)){S.me.wishes.unshift(W({t:x.t,c:x.c,prio:2,a:x.a,tone:x.tone,note:`Tipp von ${c.handle}: ${x.note}`,via:c.id,pid:x.id,kw:kwOf(x.t)}));n++}});toast(n?`${n===1?'Ein Teil':n+' Teile'} aus diesem Look stehen jetzt auf deiner Wunschliste. Wenn jemand darüber einkauft, bekommt ${c.handle} eine kleine Provision, für dich ändert sich dadurch nichts.`:'Alles aus diesem Look steht schon auf deiner Wunschliste.');render()},
+ style(el){const m=S.me;m.style=m.style||[];const id=el.dataset.id,i=m.style.findIndex(x=>x.id===id);if(i>-1){m.style.splice(i,1);toast('Das Stil-Vorbild ist wieder entfernt.')}else{m.style.push({id});toast(`Das hat geklappt: In deinem Profil steht jetzt „${crea(id).scope} von ${crea(id).handle}“. So wissen deine Freunde, woran sie sich orientieren können.`)}render()},
+ cadd(el){const x=cprod(el.dataset.id),c=crea(el.dataset.cid);S.me.wishes.unshift(W({t:x.t,c:x.c,prio:2,a:x.a,tone:x.tone,note:`Tipp von ${c.handle}: ${x.note}`,via:c.id,pid:x.id,kw:kwOf(x.t)}));toast(`Schön, das steht jetzt auf deiner Wunschliste. Wenn jemand darüber einkauft, bekommt ${c.handle} eine kleine Provision, für dich ändert sich dadurch nichts.`);render()},
+ cbuy(el){const c=crea(el.dataset.cid);toast(`Das ist eine Vorschau: Hier würde sich der Partnerlink öffnen, und ${c.handle} bekäme bei einem Kauf eine kleine Provision.`)},
  occ(el){S.ui.occ=el.dataset.v;S.ui.budget=el.dataset.v==='danke'?40:100;render()},
  onlyopen(el){S.ui.onlyOpen=el.dataset.v==='1';render()},
  dens(el){S.ui.big=el.dataset.v==='1';render()},
@@ -163,8 +163,8 @@ document.addEventListener('submit',e=>{
     job.then(({data,error})=>{
       S.ui.authBusy=false;
       if(error){S.ui.authMsg={type:'error',text:friendly(error)};render();return}
-      if(kind==='signup'&&!data.session)S.ui.authMsg={type:'ok',text:'Fast geschafft: Wir haben dir eine E-Mail geschickt. Klicke auf den Link darin, dann bist du dabei.'};
-      else if(kind==='magic')S.ui.authMsg={type:'ok',text:'Wir haben dir einen Login-Link geschickt. Öffne ihn auf diesem Gerät.'};
+      if(kind==='signup'&&!data.session)S.ui.authMsg={type:'ok',text:'Fast geschafft! Wir haben dir gerade eine E-Mail geschickt. Wenn du darin auf den Link klickst, ist dein Konto startklar.'};
+      else if(kind==='magic')S.ui.authMsg={type:'ok',text:'Wir haben dir einen Link per E-Mail geschickt. Öffne ihn am besten auf diesem Gerät, dann bist du sofort angemeldet.'};
       render();
     }).catch(e=>{S.ui.authBusy=false;S.ui.authMsg={type:'error',text:friendly(e)};render()});
     return;
@@ -173,7 +173,7 @@ document.addEventListener('submit',e=>{
     const t=(fd.get('t')||'').trim();if(!t)return;
     const g=CATALOG.find(i=>overlap(kwOf(t),i.kw));const c=g?g.c:'wohnen';
     S.me.wishes.unshift(W({t,c,kind:'produkt',prio:1,status:'selbst',vis:'alle',a:cat(c).a,tone:cat(c).t,kw:kwOf(t)}));
-    toast(`„${t}“ ist eingetragen. Das schlagen wir nicht mehr vor.`);render();return;
+    toast(`„${t}“ ist eingetragen. Das schlagen wir dir und deinen Freunden nicht mehr vor.`);render();return;
   }
   if(kind==='azsearch'){
     const q=(fd.get('q')||'').trim();S.ui.az.q=q;S.ui.az.searched=true;
@@ -184,13 +184,13 @@ document.addEventListener('submit',e=>{
     const z=S.ui.az,t=(fd.get('t')||'').trim();if(!t||!z.res||z.res.error)return;
     const c=fd.get('c');
     S.me.wishes.unshift(W({t,c,kind:'produkt',prio:2,link:z.res.url,price:parsePrice(fd.get('price')),a:cat(c).a,tone:cat(c).t,kw:kwOf(t)}));
-    S.ui.modal=null;S.ui.az=null;S.ui.wf='offen';S.ui.wc='alle';toast('Auf deiner Wunschliste. Der Link zu Amazon ist gespeichert.');render();return;
+    S.ui.modal=null;S.ui.az=null;S.ui.wf='offen';S.ui.wc='alle';toast('Schön, der Wunsch steht auf deiner Liste. Den Link zu Amazon haben wir direkt dazu gespeichert.');render();return;
   }
   if(kind==='child'){
     const name=(fd.get('name')||'').trim();if(!name)return;
     const id=nid('c');
     S.accounts[id]={id,name,age:+fd.get('age')||null,tone:Object.keys(S.accounts).length%6,managed:true,invited:[],interests:[],cats:[],brands:[],tries:[],nogos:[],alts:[],vis:{interests:'giver',cats:'giver',brands:'giver',tries:'giver',nogos:'giver',alts:'giver'},wishes:[],history:[],inbox:[]};
-    switchTo(id);S.ui.step=0;toast(`Kind-Konto für ${name} angelegt. Richte jetzt das Profil ein.`);
+    switchTo(id);S.ui.step=0;toast(`Das Konto für ${name} ist angelegt. Jetzt könnt ihr das Profil gemeinsam einrichten.`);
     if(location.hash==='#start')render(true);else location.hash='#start';
     return;
   }
@@ -200,13 +200,13 @@ document.addEventListener('submit',e=>{
     const [y,mo]=(fd.get('when')||'2026-11').split('-');
     const what=fd.get('what').trim();
     S.me.history.unshift({id:nid('h'),what,from:fd.get('from').trim(),when:`${MONTHS[+mo-1]} ${y}`,liked:fd.get('liked'),have:fd.get('have')==='1',again:fd.get('again')==='1',a:'gift',tone:S.me.history.length%6,kw:kwOf(what)});
-    S.ui.modal=null;toast('Geschenk eingetragen.');render();
+    S.ui.modal=null;toast('Das Geschenk ist eingetragen.');render();
   }
   if(kind==='wish'){
     const file=fd.get('img'),done=img=>{
       const c=fd.get('c'),t=fd.get('t').trim(),k=fd.get('kind');
       S.me.wishes.unshift(W({t,c,kind:k,prio:+fd.get('prio'),link:(fd.get('link')||'').trim(),price:parsePrice(fd.get('price')),occ:fd.getAll('occ'),budget:+fd.get('budget')||null,note:(fd.get('note')||'').trim(),vis:fd.get('vis'),a:k==='erlebnis'?'ticket':cat(c).a,tone:cat(c).t,img}));
-      S.ui.modal=null;S.ui.wf='offen';S.ui.wc='alle';toast('Wunsch gespeichert.');render();
+      S.ui.modal=null;S.ui.wf='offen';S.ui.wc='alle';toast('Der Wunsch ist gespeichert.');render();
     };
     if(file&&file.size){const r=new FileReader();r.onload=()=>done(r.result);r.onerror=()=>done(null);r.readAsDataURL(file)}else done(null);
   }
