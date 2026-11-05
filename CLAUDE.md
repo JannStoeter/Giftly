@@ -2,9 +2,10 @@
 
 ## Marke
 - **Name:** Wishtale (früher Giftly, dieser Name ist vergeben)
-- **Kernsatz (Tagline):** „Wishtale. Eine kleine Geschichte über dich – für Geschenke, die wirklich passen.“
-- **Claim (bleibt als Zweitaussage):** „Jeder Wunsch hat eine Geschichte.“
-- **Früherer Arbeitstitel, noch an einigen Stellen im Code und Material:** „Die Wunschliste, die dich kennt.“ Bei neuen Texten den Kernsatz oben verwenden.
+- **Tagline (kurz, für Überschriften, Titel, Bio, Schlussfolien):** „Die Wunschliste, die dich kennt.“
+- **Erzählzeile (länger, für Unterzeilen, „Über uns“, Beschreibungen):** „Wishtale. Eine kleine Geschichte über dich – für Geschenke, die wirklich passen.“
+- **Claim (Zweitaussage):** „Jeder Wunsch hat eine Geschichte.“
+- Die kurze Tagline sagt, was Wishtale ist. Die Erzählzeile sagt, wie es sich anfühlt. Beide stehen nie direkt nebeneinander in derselben Größe.
 - **Idee:** Eine Wunschliste kennt jeder. Der Mehrwert ist der Geschmack dahinter (Interessen, Marken, Welten, was man schon hat, was man nicht möchte). Die eigenen Wünsche bleiben der Kern und werden nie vergessen.
 
 ## Ton (Tale)

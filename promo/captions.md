@@ -1,6 +1,9 @@
 # Texte für Instagram
 
-**Profiltext (Bio):** Die Wunschliste, die dich kennt. · Deine Wünsche und alles, was dich ausmacht. · Jeder Wunsch hat eine Geschichte. · Link unten
+**Profiltext (Bio):**
+Die Wunschliste, die dich kennt.
+Eine kleine Geschichte über dich, für Geschenke, die wirklich passen.
+Link unten
 
 ## Karussell „Mehr als eine Wunschliste“ (8 Folien, 4:5)
 
