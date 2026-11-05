@@ -60,6 +60,7 @@ const A={
  finish(){
   if(!S.auth.user){S.me.name=(S.me.name||'').trim();saveState();S.ui.step=0;location.hash='#registrieren';return}
   toast('Geschafft! Dein Wishtale ist startklar.');location.hash='#profil'},
+ pedit(el){S.ui.editK=S.ui.editK===el.dataset.k?null:el.dataset.k;render()},
  edit(){S.ui.step=0;location.hash='#start'},
  preview(el){S.ui.preview=el.dataset.v==='1';render()},
  vis(el){const o=['alle','giver','privat'],k=el.dataset.k;S.me.vis[k]=o[(o.indexOf(S.me.vis[k]||'giver')+1)%3];render()},

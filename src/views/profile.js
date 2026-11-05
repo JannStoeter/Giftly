@@ -14,6 +14,18 @@ export const STEPS=[
  {k:'nogos',t:'Gibt es etwas, das du lieber nicht geschenkt bekommen möchtest?',h:'Das sehen nur Menschen, die dir etwas schenken wollen. So ersparst du ihnen und dir manche Enttäuschung.',opts:()=>NOGOS},
  {k:'alts',t:'Und wenn deinen Freunden gar nichts einfällt?',h:'Dann freuen sie sich vielleicht über einen Gutschein, einen Besuch in deinem Lieblingsladen oder eine Spende. Sag uns, was dir davon gefallen würde.',opts:()=>ALTS}
 ];
+/* Auswahl zu einem Thema (Interessen, Welten, Marken …). Wird in der Einrichtung und direkt im Profil genutzt. */
+export function Picker(st){
+  let body='';
+  if(st.tiles){
+    body=`<div class="tiles">${CATS.map(c=>{const on=S.me.cats.includes(c.id);return `<button class="tile ${on?'on':''}" data-act="pick" data-k="cats" data-v="${c.id}" aria-pressed="${on}">${art(c.a,c.t)}<span>${c.n}<i class="tick">${ic('check','sm')}</i></span></button>`}).join('')}</div>`;
+  }else{
+    const list=[...new Set([...st.opts(),...S.me[st.k]])];
+    body=`<div class="opts">${list.map(o=>{const on=S.me[st.k].includes(o);return `<button class="opt ${on?'on':''}" data-act="pick" data-k="${st.k}" data-v="${esc(o)}" aria-pressed="${on}">${esc(o)}</button>`}).join('')}</div>
+    <form data-form="custom" class="addrow"><input type="hidden" name="k" value="${st.k}"><label class="sr" for="cust" style="position:absolute;left:-9999px">Eigene Angabe</label><input id="cust" name="v" class="inp" placeholder="Fehlt etwas? Schreib es einfach dazu" autocomplete="off"><button class="btn sec sm" type="submit">${ic('plus','sm')}Hinzufügen</button></form>`;
+  }
+  return body;
+}
 const NAME_STEP={k:'name',t:'Wie dürfen wir dich nennen?',h:'Dein Vorname reicht völlig. So begrüßen wir dich in deinem Wishtale, und deine Freunde sehen später, bei wem sie gerade stöbern.',name:true};
 /* Ohne Konto beginnt die Einrichtung mit dem Namen, das Konto kommt erst am Ende. */
 export const steps=()=>S.auth.user?STEPS:[NAME_STEP,...STEPS];
@@ -24,13 +36,7 @@ export function Start(){
   let body='';
   if(st.name){
     body=`<form data-form="draftname" class="addrow" style="margin-top:22px"><label class="sr" for="dn" style="position:absolute;left:-9999px">Dein Vorname</label><input id="dn" class="inp" data-prof="name" value="${esc(S.me.name)}" maxlength="60" placeholder="Zum Beispiel Lena" autocomplete="given-name"></form>`;
-  }else if(st.tiles){
-    body=`<div class="tiles">${CATS.map(c=>{const on=S.me.cats.includes(c.id);return `<button class="tile ${on?'on':''}" data-act="pick" data-k="cats" data-v="${c.id}" aria-pressed="${on}">${art(c.a,c.t)}<span>${c.n}<i class="tick">${ic('check','sm')}</i></span></button>`}).join('')}</div>`;
-  }else{
-    const list=[...new Set([...st.opts(),...S.me[st.k]])];
-    body=`<div class="opts">${list.map(o=>{const on=S.me[st.k].includes(o);return `<button class="opt ${on?'on':''}" data-act="pick" data-k="${st.k}" data-v="${esc(o)}" aria-pressed="${on}">${esc(o)}</button>`}).join('')}</div>
-    <form data-form="custom" class="addrow"><input type="hidden" name="k" value="${st.k}"><label class="sr" for="cust" style="position:absolute;left:-9999px">Eigene Angabe</label><input id="cust" name="v" class="inp" placeholder="Fehlt etwas? Schreib es einfach dazu" autocomplete="off"><button class="btn sec sm" type="submit">${ic('plus','sm')}Hinzufügen</button></form>`;
-  }
+  }else body=Picker(st);
   return `<div class="wrap"><div class="ob">
    <div class="prog" aria-label="Schritt ${i+1} von ${list0.length}">${list0.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join('')}</div>
    <p class="eyebrow">Dein Wishtale · ${i+1} von ${list0.length}</p>
@@ -53,7 +59,9 @@ export function Profil(){
   const sec=(k,title,inner)=>{
     const vk=m.vis[k]||'giver';
     if(pv&&vk==='privat')return '';
-    return `<section class="psec"><div class="hd"><h3>${title}</h3>${VisPill(vk,pv?null:k)}</div>${inner}</section>`;
+    const st=STEPS.find(x=>x.k===k),ed=!pv&&st&&S.ui.editK===k;
+    const btn=!pv&&st?`<button class="linkbtn" data-act="pedit" data-k="${k}">${ed?'Fertig':'Ändern'}</button>`:'';
+    return `<section class="psec"><div class="hd"><h3>${title}</h3><span class="row" style="gap:10px">${btn}${VisPill(vk,pv?null:k)}</span></div>${ed?Picker(st):inner}</section>`;
   };
   const chips=(a,cls='')=>a.length?`<div class="chips">${a.map(x=>`<span class="chip ${cls}">${esc(x)}</span>`).join('')}</div>`:'<p class="muted">Noch nichts hinterlegt.</p>';
   const line=`${m.name} ${m.interests.length?`liebt ${m.interests.slice(0,3).map(esc).join(', ')}`:'hat noch keine Interessen hinterlegt'}. ${m.nogos.length?`Lieber nichts mit ${m.nogos.slice(0,2).map(esc).join(' oder ')}.`:''} ${m.alts.length?`Wenn die Idee fehlt: ${esc(m.alts[0])}.`:''}`;
@@ -85,6 +93,7 @@ export function Profil(){
 
 function AboutSec(m){
   return `<section class="psec"><div class="hd"><h3>Über mich</h3>${VisPill('alle')}</div>
+   ${m.managed?'':`<div class="fld"><label for="pname">Dein Vorname</label><input id="pname" class="inp" data-prof="name" value="${esc(m.name)}" maxlength="60" autocomplete="given-name"></div>`}
    <label for="about" class="muted" style="font-size:14px">Erzähl in ein paar Sätzen etwas über dich. Deine Freunde lesen das als Erstes, wenn sie etwas für dich suchen, und bekommen so ein Gefühl dafür, was dir gefällt.</label>
    <textarea id="about" class="ta" data-prof="about" maxlength="320" placeholder="z. B. Ich koche gern für Freunde, trinke meinen Kaffee selbst gebrüht und richte meine Wohnung Stück für Stück ein.">${esc(m.about||'')}</textarea></section>`;
 }
