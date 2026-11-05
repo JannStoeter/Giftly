@@ -110,6 +110,7 @@ const w=guestPerson().wishes.find(x=>x.id===el.dataset.id);w.bought=true;toast('
  cadd(el){const x=cprod(el.dataset.id),c=crea(el.dataset.cid);S.me.wishes.unshift(W({t:x.t,c:x.c,prio:2,a:x.a,tone:x.tone,note:`Tipp von ${c.handle}: ${x.note}`,via:c.id,pid:x.id,kw:kwOf(x.t)}));toast(`Auf deiner Wunschliste. Kauft jemand darüber, erhält ${c.handle} eine kleine Provision. Dir kostet das nichts.`);render()},
  cbuy(el){const c=crea(el.dataset.cid);toast(`Simuliert: Der Partnerlink öffnet sich. ${c.handle} erhält bei Kauf die Provision.`)},
  occ(el){S.ui.occ=el.dataset.v;S.ui.budget=el.dataset.v==='danke'?40:100;render()},
+ onlyopen(el){S.ui.onlyOpen=el.dataset.v==='1';render()},
  dens(el){S.ui.big=el.dataset.v==='1';render()},
  suggest(el){S.ui.pickId=el.dataset.id;S.ui.modal='pick';render()},
  buy(el){

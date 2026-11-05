@@ -15,7 +15,7 @@ export const S={
    W({id:'m2',t:'Merino-Pullover, naturweiß',c:'mode',prio:2,a:'sweater',tone:0,note:'Größe M, gern ohne Logo.',kw:['pullover']}),
    W({id:'m3',t:'Ultraleichte Wanderstöcke',c:'outdoor',prio:2,a:'sticks',tone:1,link:'',kw:['wanderstöcke','stöcke']}),
    W({id:'m4',t:'Ein Wochenende in den Bergen',c:'erlebnisse',kind:'erlebnis',prio:3,occ:['geburtstag'],a:'mountain',tone:5,note:'Hütte, Ruhe, keine Pläne.',kw:['wochenende']}),
-   W({id:'m5',t:'Keramik-Schnupperkurs',c:'erlebnisse',kind:'erlebnis',prio:2,a:'ticket',tone:2,kw:['keramikkurs']}),
+   W({id:'m5',t:'Keramik-Schnupperkurs',c:'erlebnisse',kind:'erlebnis',prio:2,a:'vase',tone:2,kw:['keramikkurs']}),
    W({id:'m6',t:'Etwas Schönes für den Balkon',c:'wohnen',kind:'frei',prio:1,a:'plant',tone:1,note:'Überrasch mich. Pflanzen oder Licht.',kw:['balkon']}),
    W({id:'m7',t:'Leseleuchte fürs Bett',c:'wohnen',prio:1,a:'lamp',tone:4,status:'selbst',kw:['leseleuchte']})
   ],
@@ -35,7 +35,7 @@ export const S={
    tries:['Kochkurs','Keramikkurs'],style:[{id:'nora'}],nogos:['Duftkerzen','Krimskrams'],alts:['Lokaler Kaffeeröster','Wunschgutschein','IKEA-Gutschein','Spende: Tierschutz'],
    wishes:[
     W({id:'j1',t:'Hochwertige Kaffeemühle',c:'genuss',prio:3,a:'grinder',tone:2,note:'Handmühle, gern mit Keramik-Mahlwerk.',kw:['mühle'],res:'other'}),
-    W({id:'j2',t:'Wochenend-Kochkurs: frische Pasta',c:'erlebnisse',kind:'erlebnis',prio:2,occ:['geburtstag'],a:'ticket',tone:5,kw:['kochkurs']}),
+    W({id:'j2',t:'Wochenend-Kochkurs: frische Pasta',c:'erlebnisse',kind:'erlebnis',prio:2,occ:['geburtstag'],a:'cooking',tone:5,kw:['kochkurs']}),
     W({id:'j3',t:'Japanisches Messerset',c:'kochen',prio:2,occ:['weihnachten'],a:'knife',tone:4,kw:['messerset','messer']}),
     W({id:'j4',t:'Etwas Schönes für das Flurregal',c:'wohnen',kind:'frei',prio:1,a:'vase',tone:0,note:'Keine Deko-Klischees, eher Material und Form.',kw:['flurregal']}),
     W({id:'j5',t:'Siebträgermaschine',c:'genuss',a:'mug',tone:3,status:'selbst',kw:['siebträger','kaffeemaschine','espressomaschine']}),
@@ -64,7 +64,7 @@ export const S={
    interests:['Bauen & Konstruieren','Draußen spielen','Tiere'],cats:['spielen','outdoor'],brands:[],tries:['Reiten'],nogos:['Laute Spielzeuge'],alts:['Tierpark-Eintritt','Buchhandlung vor Ort'],
    wishes:[
     W({id:'n1',t:'Großes Bausteine-Set',c:'spielen',prio:3,a:'game',tone:5,occ:['weihnachten'],note:'Holz oder Bio-Kunststoff, gern viele Teile.'}),
-    W({id:'n2',t:'Ein Tag im Tierpark',c:'erlebnisse',kind:'erlebnis',prio:2,a:'ticket',tone:1,occ:['geburtstag'],kw:['tierpark']}),
+    W({id:'n2',t:'Ein Tag im Tierpark',c:'erlebnisse',kind:'erlebnis',prio:2,a:'animals',tone:1,occ:['geburtstag'],kw:['tierpark']}),
     W({id:'n3',t:'Gummistiefel',c:'outdoor',a:'sneaker',tone:2,status:'selbst',kw:['gummistiefel']})
    ],gifts:[]}
  },
@@ -79,7 +79,7 @@ S.accounts.emma={id:'emma',name:'Emma',age:6,managed:true,tone:1,invited:['Oma',
  vis:{interests:'giver',cats:'giver',brands:'giver',tries:'giver',nogos:'giver',alts:'giver'},
  wishes:[
   W({id:'e1',t:'Bausteine-Set aus Holz',c:'spielen',prio:3,a:'game',tone:5,occ:['weihnachten'],res:'other',kw:['bausteine']}),
-  W({id:'e2',t:'Einen Tag auf dem Reiterhof',c:'erlebnisse',kind:'erlebnis',prio:3,a:'ticket',tone:2,occ:['geburtstag'],res:'other',bought:true,note:'Ponys streicheln und füttern.',kw:['reiterhof']}),
+  W({id:'e2',t:'Einen Tag auf dem Reiterhof',c:'erlebnisse',kind:'erlebnis',prio:3,a:'animals',tone:2,occ:['geburtstag'],res:'other',bought:true,note:'Ponys streicheln und füttern.',kw:['reiterhof']}),
   W({id:'e3',t:'Bilderbuch mit Tieren',c:'buecher',prio:2,a:'book',tone:3,kw:['bilderbuch']}),
   W({id:'e4',t:'Rucksack für die Kita',c:'mode',a:'bag',tone:0,status:'selbst',kw:['rucksack']})
  ],
@@ -89,7 +89,7 @@ export function switchTo(id){const u=S.ui;u.acct=id;u.wf='offen';u.wc='alle';u.p
 
 /* ============ Persistenz (localStorage) ============ */
 const KEY='wishtale:v1';
-const PERSIST_UI=['acct','occ','person','big','budget','saved','cf'];
+const PERSIST_UI=['acct','occ','person','big','budget','saved','cf','onlyOpen'];
 
 export function loadState(){
   try{S.auth.demo=sessionStorage.getItem('wishtale:demo')==='1'}catch{}

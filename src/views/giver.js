@@ -1,11 +1,11 @@
 import { S, initials, guestPerson } from '../state.js';
 import { esc, ic, money, kwOf } from '../lib/util.js';
 import { art } from '../lib/art.js';
-import { CATS, OCC, ABOUT, cat, crea, cprod, occL, occTip, PRIO } from '../data/content.js';
+import { CATS, OCC, ABOUT, cat, crea, cprod, occL, occTip } from '../data/content.js';
 import { ownedOf, excluded, recommend } from '../logic.js';
-import { WishArt, densSeg, slot } from './wishes.js';
+import { densSeg } from './wishes.js';
+import { WishCard } from './card.js';
 import { AMAZON_DISCLOSURE, searchUrl } from '../lib/shops.js';
-import { EmptyBlock } from './product.js';
 
 /* Gast-Ansicht: ein Freund öffnet den Link und sieht nur dieses eine Profil. */
 export function Gast(){
@@ -62,25 +62,29 @@ export function Facts(p){
 
 /* Die Wunschliste: steht direkt unter dem Profilkopf. */
 export function WishList(p,{preview=false}={}){
-  const oc=S.ui.occ;
+  const oc=S.ui.occ,only=S.ui.onlyOpen&&!preview;
   const rel=w=>(!w.occ.length||oc==='none')?1:(w.occ.includes(oc)?2:0);
-  const open=p.wishes.filter(w=>w.status==='offen'&&w.vis!=='privat').sort((a,b)=>rel(b)-rel(a)||b.prio-a.prio);
+  const all=p.wishes.filter(w=>w.status==='offen'&&w.vis!=='privat').sort((a,b)=>rel(b)-rel(a)||b.prio-a.prio);
+  const vw=all.map(w0=>preview?{...w0,res:null,bought:false}:w0);
+  const shown=only?vw.filter(w=>w.res!=='other'):vw;
+  const cardOf=w=>{
+    const r=rel(w),isMine=w.res==='me',taken=w.res==='other';
+    let status=null,actions='';
+    if(w.bought)status={text:'Von dir gekauft',tone:'me'};
+    else if(isMine){status={text:'Von dir reserviert',tone:'me'};actions=`<button class="btn pri sm" data-act="bought" data-id="${w.id}">Gekauft</button><button class="btn ghost sm" data-act="release" data-id="${w.id}">Freigeben</button>`}
+    else if(taken){status={text:'Reserviert',tone:'res'};actions=`<button class="btn sec sm" disabled>Bereits reserviert</button>`}
+    else actions=`<button class="btn pri sm" data-act="reserve" data-id="${w.id}">Reservieren</button>`;
+    if(preview)actions='';
+    const meta=(w.via?`<span class="chip gold">Tipp von ${esc(crea(w.via).handle)}</span>`:'')+(r===2&&w.occ.length?`<span class="chip gold">Für ${occL(oc)}</span>`:'')+(r===0?`<span class="chip">Eher: ${w.occ.map(occL).join(', ')}</span>`:'')+(w.kind==='kategorie'?`<span class="chip">Kategorie${w.budget?' bis '+money(w.budget):''}</span>`:'');
+    return WishCard(w,p,{meta,status,actions,taken:taken||(w.bought&&!isMine),dim:r===0&&!taken,more:(w.kind==='kategorie'&&!taken&&!w.bought)?w.id:null});
+  };
+  const free=vw.filter(w=>w.res!=='other').length;
   const html=`<section id="wunschliste" aria-label="Wunschliste von ${esc(p.name)}">
-   <div class="row" style="justify-content:space-between;margin-bottom:8px"><div><p class="eyebrow">Wunschliste</p><h2 style="font-size:clamp(30px,4vw,44px)">${open.length} Wünsche von ${esc(p.name)}</h2></div>${densSeg()}</div>
+   <div class="row" style="justify-content:space-between;margin-bottom:8px"><div><p class="eyebrow">Wunschliste</p><h2 style="font-size:clamp(30px,4vw,44px)">${only?`${shown.length} offene`:all.length} Wünsche von ${esc(p.name)}</h2></div>
+    <div class="row" style="gap:8px">${preview?'':`<div class="seg" role="group" aria-label="Filter"><button class="${!only?'on':''}" data-act="onlyopen" data-v="0">Alle</button><button class="${only?'on':''}" data-act="onlyopen" data-v="1">Nur offene${free!==all.length?` (${free})`:''}</button></div>`}${densSeg()}</div></div>
    <p class="muted" style="font-size:14px;margin-bottom:14px">${ic('lock','sm')} ${p.managed?`${esc(p.parent||'Die Eltern')} pflegt die Wünsche und sieht Reservierungen. ${esc(p.name)} sieht nichts.`:`Reservierungen sind anonym. ${esc(p.name)} sieht nie, was reserviert oder gekauft wurde.`}${oc!=='none'?` Passende zu ${occL(oc)} stehen zuerst.`:''}</p>
-   <div class="wgrid ${S.ui.big?'big':''}">${open.map(w0=>{const w=preview?{...w0,res:null,bought:false}:w0;
-    const r=rel(w),isCat=w.kind==='kategorie';
-    let st='',btn='';
-    if(w.bought)st=`<div class="state me">${ic('check','sm')}Von dir gekauft. Bleibt eine Überraschung.</div>`;
-    else if(w.res==='me'){st=`<div class="state me">${ic('lock','sm')}Von dir reserviert</div>`;btn=`<button class="btn pri sm" data-act="bought" data-id="${w.id}">Gekauft</button><button class="btn ghost sm" data-act="release" data-id="${w.id}">Freigeben</button>`}
-    else if(w.res==='other')st=`<div class="state res">${ic('lock','sm')}Bereits reserviert</div>`;
-    else btn=isCat?`<button class="btn sec sm" data-act="suggest" data-id="${w.id}">${ic('spark','sm')}Weitere Vorschläge</button><button class="btn pri sm" data-act="reserve" data-id="${w.id}">Reservieren</button>`:`<button class="btn pri sm" data-act="reserve" data-id="${w.id}">Reservieren</button>`;
-    if(preview)btn='';
-    return `<article class="wcard ${(w.res==='other'||r===0)?'dim':''}"><div style="position:relative">${WishArt(w)}<div class="top"><span class="tag">${cat(w.c).n}</span><span class="dots" aria-label="Priorität: ${PRIO[w.prio]}">${[1,2,3].map(n=>`<i class="${n<=w.prio?'on':''}"></i>`).join('')}</span></div></div>
-     <div class="bd"><h3>${esc(w.t)}</h3><p class="note">${esc(w.note||'')}</p>
-      <div class="chips meta">${w.via?`<span class="chip gold">Tipp von ${esc(crea(w.via).handle)}</span>`:''}${r===2&&w.occ.length?`<span class="chip gold">Für ${occL(oc)}</span>`:''}${r===0?`<span class="chip">Eher: ${w.occ.map(occL).join(', ')}</span>`:''}${isCat?`<span class="chip">Kategorie${w.budget?' bis '+money(w.budget):''}</span>`:''}</div>
-      <div class="stateslot">${st}</div><div class="prodslot">${w.res==='other'||w.bought?EmptyBlock('Schon vergeben','Dieser Wunsch ist reserviert oder gekauft.'):slot(p,w)}</div><div class="acts">${btn}</div></div></article>`}).join('')}</div></section>`;
-  return {html,open:open.length};
+   <div class="wgrid ${S.ui.big?'big':''}">${shown.map(cardOf).join('')||`<p class="muted">Alle Wünsche sind schon vergeben. Schau dir unten die Ideen an.</p>`}</div></section>`;
+  return {html,open:free};
 }
 
 /* "Das würde auch gut passen": von uns kuratiert. Steht bewusst unter der Wunschliste. */

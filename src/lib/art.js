@@ -33,6 +33,8 @@ const photoTag=(url,cls='')=>url?`<img class="ph ${cls}" src="${url}" alt="" loa
 
 /* Kachel: Foto, falls im Manifest vorhanden. Die Illustration liegt darunter und
    dient als Platzhalter und Fallback, wenn ein Foto nicht lädt. */
+ART.kettle=ART.teapot; ART.cooking=ART.pan; ART.animals=ART.ticket; // Illustrationen als Fallback
+
 export function art(kind,tone=0,cls=''){
   return `<span class="art t${tone} ${cls}" aria-hidden="true"><svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice">${ART[kind]||ART.gift}</svg>${photoTag(photoUrl(kind,640))}</span>`;
 }

@@ -64,13 +64,13 @@ export const CATALOG=[
  {id:'k1',t:'Hochwertige Handkaffeemühle',p:89,c:'genuss',k:'ding',a:'grinder',tags:['kaffee'],kw:['mühle'],comp:'kaffeemaschine'},
  {id:'k2',t:'Barista-Set: Tamper und Milchkännchen',p:49,c:'genuss',k:'ding',a:'bottle',tags:['kaffee'],kw:['tamper'],comp:'siebträger'},
  {id:'k3',t:'Design-Kaffeegläser, 2er Set',p:28,c:'wohnen',k:'ding',a:'glasses',tags:['kaffee','wohnen'],kw:['kaffeegläser']},
- {id:'k4',t:'Kaffee-Tasting bei einem Röster',p:45,c:'genuss',k:'erlebnis',a:'ticket',tags:['kaffee'],kw:['tasting']},
+ {id:'k4',t:'Kaffee-Tasting bei einem Röster',p:45,c:'genuss',k:'erlebnis',a:'mug',tags:['kaffee'],kw:['tasting']},
  {id:'k5',t:'Pour-over-Karaffe von Hario',p:39,c:'genuss',k:'ding',a:'bottle',tags:['kaffee'],kw:['karaffe'],brand:'Hario'},
  {id:'k6',t:'Kochbuch: Nordisch einfach',p:32,c:'buecher',k:'ding',a:'book',tags:['kochen','lesen'],kw:['nordisch']},
  {id:'k7',t:'Präzisionswaage für die Küche',p:34,c:'kochen',k:'ding',a:'scale',tags:['kochen'],kw:['waage']},
  {id:'k8',t:'Abziehstein für Küchenmesser',p:40,c:'kochen',k:'ding',a:'knife',tags:['kochen'],kw:['abziehstein']},
  {id:'k9',t:'Kräuter-Anzuchtset für die Fensterbank',p:24,c:'kochen',k:'ding',a:'plant',tags:['kochen','garten'],kw:['kräuterset']},
- {id:'k10',t:'Keramik-Schnupperkurs',p:65,c:'erlebnisse',k:'erlebnis',a:'ticket',tags:['keramik','wohnen'],kw:['keramikkurs'],tr:'Keramik'},
+ {id:'k10',t:'Keramik-Schnupperkurs',p:65,c:'erlebnisse',k:'erlebnis',a:'vase',tags:['keramik','wohnen'],kw:['keramikkurs'],tr:'Keramik'},
  {id:'k11',t:'Leinen-Tischsets, 4er Set',p:36,c:'wohnen',k:'ding',a:'vase',tags:['wohnen','kochen'],kw:['tischset']},
  {id:'k12',t:'Handgeformte Steingut-Vase',p:42,c:'wohnen',k:'ding',a:'vase',tags:['wohnen'],kw:['vase']},
  {id:'k13',t:'Wanderkarte mit Kompass',p:24,c:'outdoor',k:'ding',a:'compass',tags:['wandern'],kw:['kompass']},
@@ -91,7 +91,7 @@ export const CATALOG=[
  {id:'c3',t:'Bilderbuch-Sammlung zum Vorlesen',p:28,c:'buecher',k:'ding',a:'book',tags:['vorlesen'],kw:['bilderbuch']},
  {id:'c4',t:'Kinder-Fernglas für kleine Entdecker',p:25,c:'outdoor',k:'ding',a:'compass',tags:['draussen','tiere'],kw:['fernglas']},
  {id:'c5',t:'Kinder-Gartenset mit Mini-Werkzeug',p:24,c:'spielen',k:'ding',a:'plant',tags:['draussen','garten'],kw:['gartenset']},
- {id:'c6',t:'Tierpark-Besuch mit Patenschaftsurkunde',p:30,c:'erlebnisse',k:'erlebnis',a:'ticket',tags:['tiere'],kw:['tierpark']}
+ {id:'c6',t:'Tierpark-Besuch mit Patenschaftsurkunde',p:30,c:'erlebnisse',k:'erlebnis',a:'animals',tags:['tiere'],kw:['tierpark']}
 ];
 
 export const OCCMAP={k1:['weihnachten','geburtstag'],k2:['weihnachten','geburtstag'],k3:['weihnachten','einzug','hochzeit'],k4:['geburtstag'],k5:['weihnachten'],k6:['weihnachten','geburtstag'],k7:['einzug'],k8:['danke'],k9:['einzug','danke'],k10:['geburtstag'],k11:['einzug','hochzeit','weihnachten'],k12:['einzug','hochzeit','danke'],k13:['geburtstag'],k14:['danke'],k15:['geburtstag'],k16:['weihnachten'],k17:['weihnachten','geburtstag'],k18:['weihnachten','geburtstag'],k19:['geburtstag'],k20:['danke','einzug'],k21:['weihnachten','hochzeit'],k22:['weihnachten','einzug'],k23:['geburtstag'],k24:['geburtstag'],k25:['weihnachten','geburtstag'],c1:['weihnachten','geburtstag'],c2:['geburtstag','weihnachten'],c3:['weihnachten','geburtstag'],c4:['geburtstag'],c5:['geburtstag','weihnachten'],c6:['geburtstag']};
@@ -107,9 +107,9 @@ export const PRODUCTS=[
  {id:'p3',cat:'pfanne',search:'Lodge Gusseisen Pfanne 26 cm vorgebrannt',asin:'B07PJTDL7N',t:'Lodge Gusseisenpfanne, 26 cm',brand:'Lodge',est:50,price:null,q:4,a:'pan',tone:0,pros:['Robust und bereits eingebrannt','Ofenfest','Günstiger Einstieg in Gusseisen']},
  {id:'p4',cat:'pfanne',search:'Staub Bratpfanne Holzgriff 28 cm',asin:'B01EZAFYC4',t:'Staub Gusseisen-Bratpfanne, 28 cm',brand:'Staub',est:135,price:135.12,q:5,a:'pot',tone:2,pros:['Emaillierter Boden, kratzfest','Sehr gleichmäßige Hitze','30 Jahre Garantie']},
  {id:'p8',cat:'pfanne',search:'Le Creuset Signature Bratpfanne Holzgriff 28 cm',asin:'B09MZFSTZ9',t:'Le Creuset Signature Gusseisen-Bratpfanne, 28 cm',brand:'Le Creuset',est:160,price:null,q:5,a:'pan',tone:2,pros:['Emailliertes Gusseisen, hält ein Leben lang','Für alle Herdarten und den Backofen','Klassiker in vielen Farben']},
- {id:'p5',cat:'wasserkocher',search:'Fellow Stagg EKG Wasserkocher',asin:'B077JBQZPX',t:'Fellow Stagg EKG Wasserkocher',brand:'Fellow',est:190,price:null,q:5,a:'teapot',tone:3,pros:['Temperatur auf das Grad genau einstellbar','Schwanenhals für kontrolliertes Gießen','Hält die Temperatur bis 60 Minuten']},
- {id:'p6',cat:'wasserkocher',search:'Bonavita Wasserkocher Schwanenhals 1 Liter',asin:'B005YR0IBU',t:'Bonavita Schwanenhals-Wasserkocher, 1 Liter',brand:'Bonavita',est:60,price:null,q:4,a:'teapot',tone:4,pros:['Schlankes Design aus Edelstahl','Präzises Gießen für Filterkaffee','Gutes Preis-Leistungs-Verhältnis']},
- {id:'p7',cat:'wasserkocher',search:'Smeg Wasserkocher KLF03',asin:'B07RN84DSH',t:'Smeg Wasserkocher KLF03, schwarz',brand:'Smeg',est:115,price:null,q:3,a:'teapot',tone:5,pros:['Auffälliges Retro-Design','Automatische Abschaltung bei 100 °C','Mehrere Farben']},
+ {id:'p5',cat:'wasserkocher',search:'Fellow Stagg EKG Wasserkocher',asin:'B077JBQZPX',t:'Fellow Stagg EKG Wasserkocher',brand:'Fellow',est:190,price:null,q:5,a:'kettle',tone:3,pros:['Temperatur auf das Grad genau einstellbar','Schwanenhals für kontrolliertes Gießen','Hält die Temperatur bis 60 Minuten']},
+ {id:'p6',cat:'wasserkocher',search:'Bonavita Wasserkocher Schwanenhals 1 Liter',asin:'B005YR0IBU',t:'Bonavita Schwanenhals-Wasserkocher, 1 Liter',brand:'Bonavita',est:60,price:null,q:4,a:'kettle',tone:4,pros:['Schlankes Design aus Edelstahl','Präzises Gießen für Filterkaffee','Gutes Preis-Leistungs-Verhältnis']},
+ {id:'p7',cat:'wasserkocher',search:'Smeg Wasserkocher KLF03',asin:'B07RN84DSH',t:'Smeg Wasserkocher KLF03, schwarz',brand:'Smeg',est:115,price:null,q:3,a:'kettle',tone:5,pros:['Auffälliges Retro-Design','Automatische Abschaltung bei 100 °C','Mehrere Farben']},
  {id:'p9',cat:'bräter',search:'Le Creuset Signature Bräter rund 24 cm ofenrot',asin:'B00VA5H8AY',t:'Le Creuset Signature Bräter, rund, 24 cm',brand:'Le Creuset',est:250,price:null,q:5,a:'pot',tone:2,pros:['Emailliertes Gusseisen, 4,2 Liter','Für alle Herdarten und Induktion','Backofenfest, hält Jahrzehnte']}
  ,{id:'p10',cat:'mühle',search:'Hario Skerton Pro Kaffeemühle Keramik',asin:'B01MXJI90S',t:'Hario Skerton Pro Handkaffeemühle mit Keramikmahlwerk',brand:'Hario',est:55,price:null,q:5,a:'grinder',tone:2,pros:['Keramik-Mahlwerk, Mahlgrad einstellbar','Fasst 100 g Bohnen','Handmühle für Filterkaffee und Espresso']},
  {id:'p11',cat:'messerset',search:'zayiko Kasshoku Damastmesser Set',asin:'B0771X3QWQ',t:'zayiko Kasshoku Damastmesser-Set, 3-teilig',brand:'zayiko',est:90,price:null,q:4,a:'knife',tone:4,pros:['Japanischer Damaststahl mit VG10-Kern','Santoku, kleines Santoku und Officemesser','Mit Geschenkbox']},

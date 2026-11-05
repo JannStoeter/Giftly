@@ -10,7 +10,7 @@ const ID = {
   grinder:    'px:9687424', // Kaffee brühen
   glasses:    '1514362545857-3bc16c4c7d1b', // Gläser
   mug:        '1514432324607-a09d9b4aefdd', // Tasse
-  pan:        '1556910103-1c02745aae4d',    // Küche
+  pan:        'px:5593702',    // Küche
   book:       '1512820790803-83ca734da794', // Bücher
   vase:       'px:7674564', // Vase
   sneaker:    '1542291026-7eec264c27ff',    // Sneaker
@@ -26,6 +26,9 @@ const ID = {
   sticks:     '1551632811-561732d1e306',    // Wandern
   compass:    '1508672019048-805c876b67e2', // Kompass / Karte
   journal:    '1531346878377-a5be20888e57', // Notizbuch
+  cooking:    '1556910103-1c02745aae4d', // Kochkurs, gemeinsam kochen
+  animals:    'px:8838137',                // Tierpark, Reiterhof
+  kettle:     'px:6660468', // Wasserkocher (Gooseneck)
   teapot:     '1544787219-7f47ccb76574',    // Tee
   game:       '1610890716171-6b1bb98ffd09', // Spiele
   bottle:     '1602143407151-7111542de6e8', // Trinkflasche

@@ -11,21 +11,21 @@ const SOURCE = {
 };
 
 export function priceLine(pr){
-  if(pr.price)return `<div class="price"><b>${money(pr.price)}</b><span>${pr.priceBy==='user'?'Preis laut Eintrag':'bei Amazon beobachtet, Stand '+PRICE_DATE}. Kann abweichen.</span></div>`;
-  if(pr.range)return `<div class="price"><b>Preis offen</b><span>Preisrahmen ca. ${money(pr.range)} (Schätzung). Aktuellen Preis bei Amazon prüfen.</span></div>`;
-  return `<div class="price"><b>Preis offen</b><span>Aktuellen Preis bei Amazon prüfen.</span></div>`;
+  if(pr.price)return `<div class="price"><b>${money(pr.price)}</b><span>${pr.priceBy==='user'?'Preis laut Eintrag':'Stand '+PRICE_DATE+', kann abweichen'}</span></div>`;
+  return `<div class="price"><b>Preis bei Amazon prüfen</b><span>${pr.range?'Preisrahmen ca. '+money(pr.range)+' (Schätzung)':'Aktueller Preis auf der Produktseite'}</span></div>`;
 }
 
-/** Produktkarte unter einem Wunsch: Titel, Richtwert-Preis und Amazon-Button. */
-export function ProductBlock(pr){
+/** Produktkarte unter einem Wunsch: Titel, Preis und Amazon-Button. opts.more: Wunsch-ID für weitere Vorschläge. */
+export function ProductBlock(pr,opts={}){
   if(!pr)return '';
   const amazon=pr.host==='amazon.de'||pr.host.endsWith('.amazon.de');
   const label=amazon?(pr.direct?'Bei Amazon ansehen':'Bei Amazon suchen'):`Zu ${esc(pr.host)}`;
   return `<div class="prod">
-   <div class="prodhd"><span class="eyebrow">${SOURCE[pr.source]}</span></div>
+   <span class="eyebrow">${SOURCE[pr.source]}</span>
    <strong class="prodt">${esc(pr.t)}</strong>
    ${priceLine(pr)}
-   <div class="row" style="gap:8px"><a class="btn amz sm" href="${pr.url}" target="_blank" rel="${REL}">${label} ${ic('arrow','sm')}</a><span class="ad">Anzeige</span></div>
+   <a class="btn amz sm" href="${pr.url}" target="_blank" rel="${REL}">${label} ${ic('arrow','sm')}</a>
+   <div class="prodft"><span class="ad">Anzeige</span>${opts.more?`<button class="linkbtn" data-act="suggest" data-id="${opts.more}">Weitere Vorschläge</button>`:''}</div>
   </div>`;
 }
 
