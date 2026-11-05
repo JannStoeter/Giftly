@@ -2,6 +2,8 @@ import { nid, kwOf } from './lib/util.js';
 
 export const W=(o)=>{const w=Object.assign({id:nid('w'),kind:'produkt',prio:2,link:'',note:'',status:'offen',vis:'alle',res:null,bought:false,tone:0,img:null,occ:[],budget:null},o,{kw:o.kw||kwOf(o.t)});if(w.kind==='kategorie'&&!w.budget){const m=/bis\s*(\d+)/i.exec(w.t);if(m)w.budget=+m[1]}return w};
 export const S={
+ auth:{user:null,demo:false,sync:'idle',syncError:'',error:''},
+ guest:null,
  me:{
   id:'me',name:'Lena',tone:2,
   interests:['Lesen','Wandern','Kochen'],cats:['buecher','outdoor','kochen','wohnen'],
@@ -90,6 +92,7 @@ const KEY='wishtale:v1';
 const PERSIST_UI=['acct','occ','person','big','budget','saved','cf'];
 
 export function loadState(){
+  try{S.auth.demo=sessionStorage.getItem('wishtale:demo')==='1'}catch{}
   try{
     const d=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem('giftly:v1')||'null'); // alter Schlüssel: Daten aus der Zeit vor der Umbenennung übernehmen
     if(!d)return;
@@ -100,6 +103,7 @@ export function loadState(){
   }catch{/* defekte oder blockierte Speicherung: mit Beispieldaten starten */}
 }
 export function saveState(){
+  if(S.auth.user)return; // angemeldet: Quelle der Wahrheit ist Supabase
   try{
     const ui=Object.fromEntries(PERSIST_UI.map(k=>[k,S.ui[k]]));
     localStorage.setItem(KEY,JSON.stringify({accounts:S.accounts,people:S.people,ui}));
@@ -111,4 +115,4 @@ export function resetState(){
 }
 
 /** Person, deren Profil gerade als Gast geöffnet ist (Beispielprofile oder ein Konto aus diesem Browser). */
-export const guestPerson=()=>S.people[S.ui.person]||S.accounts[S.ui.person]||null;
+export const guestPerson=()=>(S.guest&&S.guest.handle===S.ui.person&&S.guest.person)||S.people[S.ui.person]||null;

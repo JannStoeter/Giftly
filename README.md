@@ -22,3 +22,10 @@ npm run photos:check   # prüft alle Unsplash-Foto-IDs
 - `src/data/photos.js` Foto-Manifest (Unsplash, kostenlos nutzbar). Lädt ein Foto nicht, erscheint die Illustration.
 
 Alle Daten sind Beispieldaten und liegen nur im Browser (localStorage). Zahlungen, Shops und Konten sind simuliert.
+
+## Konten und Daten (Supabase)
+- Struktur und Zugriffsregeln: `supabase/migrations/0001_init.sql` (Profile, Wünsche, Geschenke, Reservierungen, RLS, Gast-Funktionen).
+- Der Browser nutzt nur den öffentlichen Schlüssel (`src/lib/supabase.js`, überschreibbar per `.env`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`).
+- Ohne Konto läuft ein Demo-Modus mit lokalen Beispieldaten. Mit Konto liegen alle Daten in Supabase (`src/lib/remote.js`).
+- Gäste öffnen `#p/<handle>`. Die Seite lädt über die Funktion `public_profile` und sieht nie private Bereiche oder Reservierer.
+- Im Supabase-Dashboard unter *Authentication → URL Configuration* müssen Site URL und Redirect URLs (lokal und Produktion, jeweils mit `/app/`) eingetragen sein, sonst funktionieren E-Mail-Links nicht.

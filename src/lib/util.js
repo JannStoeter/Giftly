@@ -27,7 +27,7 @@ export const ICON={
 export const ic=(n,c='')=>`<svg class="ico ${c}" viewBox="0 0 24 24" aria-hidden="true">${ICON[n]}</svg>`;
 export const money=n=>n.toLocaleString('de-DE')+' €';
 
-export const nid=p=>p+Math.random().toString(36).slice(2,9);
+export const nid=()=>crypto.randomUUID();
 
 let toastT;
 export function toast(msg){

@@ -4,7 +4,9 @@ import { LOOKS, PRODUCTS, CATALOG, PRIO, crea, cprod, cat } from './data/content
 import { check } from './logic.js';
 import { amazonUrl } from './lib/products.js';
 import { parseAmazonInput, searchUrl } from './lib/shops.js';
-import { render } from './render.js';
+import { render, route, refreshGuest } from './render.js';
+import { guestRpc } from './lib/remote.js';
+import { signIn, signUp, magicLink, signOut, friendly } from './lib/auth.js';
 
 export const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 export 
@@ -35,8 +37,13 @@ const A={
  delw(el){S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
  modal(el){S.ui.modal=el.dataset.v;render();setTimeout(()=>document.querySelector('.sheet input,.sheet select')?.focus(),30)},
  close(){S.ui.modal=null;render()},
+ authtab(el){S.ui.authTab=el.dataset.v;S.ui.authMsg=null;render()},
+ demo(){try{sessionStorage.setItem('wishtale:demo','1')}catch{}S.auth.demo=true;S.ui.authMsg=null;location.hash='#profil';route()},
+ tologin(){try{sessionStorage.removeItem('wishtale:demo')}catch{}S.auth.demo=false;S.ui.modal=null;location.hash='#login';route()},
+ logout(){signOut().finally(()=>{location.hash='';location.reload()})},
+ guestretry(){S.guest=null;route()},
  share(){
-  const url=`${location.origin}${location.pathname}#p/${S.ui.acct}`;
+  const url=`${location.origin}${location.pathname}#p/${S.me.handle||S.ui.acct}`;
   const done=()=>toast('Link kopiert. Hinweis: In dieser Demo öffnet er nur in diesem Browser das Profil.');
   if(navigator.share){navigator.share({title:`${S.me.name} bei Wishtale`,url}).catch(()=>{})}
   else if(navigator.clipboard?.writeText){navigator.clipboard.writeText(url).then(done,()=>toast(url))}
@@ -71,12 +78,22 @@ const A={
   S.ui.swap=null;toast(`Simuliert: ${g.from} bekommt eine freundliche Nachricht, ohne Bewertung.`);render();
  },
  reserve(el){
+  const gp=guestPerson();
+  if(gp?.remote){
+   guestRpc('reserve_wish',el.dataset.id).then(r=>{toast(r.ok?`Reserviert. ${gp.name} sieht davon nichts, andere Schenkende sehen nur „reserviert“.`:'Dieser Wunsch ist leider schon vergeben.');return refreshGuest()}).catch(()=>toast('Das hat nicht geklappt. Bitte versuche es noch einmal.'));
+   return;
+  }
+
   const p=guestPerson(),w=p.wishes.find(x=>x.id===el.dataset.id);w.res='me';
   toast(`Reserviert. ${p.name} sieht davon nichts, andere Schenkende sehen nur „reserviert“.`);
   if(el.dataset.stay){S.ui.ideaRes=null;S.ui.tab='wuensche'}render();
  },
- release(el){const w=guestPerson().wishes.find(x=>x.id===el.dataset.id);w.res=null;render()},
- bought(el){const w=guestPerson().wishes.find(x=>x.id===el.dataset.id);w.bought=true;toast('Als gekauft markiert. Die Überraschung bleibt erhalten.');render()},
+ release(el){
+  if(guestPerson()?.remote){guestRpc('release_wish',el.dataset.id).then(refreshGuest).catch(()=>toast('Das hat nicht geklappt.'));return}
+const w=guestPerson().wishes.find(x=>x.id===el.dataset.id);w.res=null;render()},
+ bought(el){
+  if(guestPerson()?.remote){guestRpc('mark_bought',el.dataset.id).then(()=>{toast('Als gekauft markiert. Die Überraschung bleibt erhalten.');return refreshGuest()}).catch(()=>toast('Das hat nicht geklappt.'));return}
+const w=guestPerson().wishes.find(x=>x.id===el.dataset.id);w.bought=true;toast('Als gekauft markiert. Die Überraschung bleibt erhalten.');render()},
  try(el){const p=guestPerson();S.ui.idea=el.dataset.v;S.ui.ideaRes=check(p,el.dataset.v);render()},
  save(el){const id=el.dataset.id;S.ui.saved[id]=!S.ui.saved[id];render()},
  kind(el){S.ui.kind=el.dataset.v;render()},
@@ -95,7 +112,17 @@ const A={
  occ(el){S.ui.occ=el.dataset.v;S.ui.budget=el.dataset.v==='danke'?40:100;render()},
  dens(el){S.ui.big=el.dataset.v==='1';render()},
  suggest(el){S.ui.pickId=el.dataset.id;S.ui.modal='pick';render()},
- buy(el){const p=guestPerson(),w=p.wishes.find(x=>x.id===el.dataset.wid),pr=PRODUCTS.find(x=>x.id===el.dataset.id);w.res='me';S.ui.modal=null;S.ui.ideaRes=null;window.open(amazonUrl(pr),'_blank','noopener');toast(`Reserviert. „${pr.t}“ wurde bei Amazon geöffnet.`);render()}
+ buy(el){
+  const gp=guestPerson();
+  if(gp?.remote){
+   const pr=PRODUCTS.find(x=>x.id===el.dataset.id);
+   guestRpc('reserve_wish',el.dataset.wid).then(r=>{
+    if(!r.ok){toast('Dieser Wunsch ist leider schon vergeben.');return}
+    S.ui.modal=null;window.open(amazonUrl(pr),'_blank','noopener');toast(`Reserviert. „${pr.t}“ wurde bei Amazon geöffnet.`);return refreshGuest();
+   }).catch(()=>toast('Das hat nicht geklappt.'));
+   return;
+  }
+const p=guestPerson(),w=p.wishes.find(x=>x.id===el.dataset.wid),pr=PRODUCTS.find(x=>x.id===el.dataset.id);w.res='me';S.ui.modal=null;S.ui.ideaRes=null;window.open(amazonUrl(pr),'_blank','noopener');toast(`Reserviert. „${pr.t}“ wurde bei Amazon geöffnet.`);render()}
 };
 document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;const f=A[t.dataset.act];if(f)f(t,e)});
 document.addEventListener('input',e=>{if(e.target.id==='bud'){S.ui.budget=+e.target.value;$('#budv').textContent=money(S.ui.budget)}});
@@ -117,6 +144,19 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.ui.modal)A.close(
 document.addEventListener('submit',e=>{
   const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();
   const fd=new FormData(f),kind=f.dataset.form;
+  if(kind==='signin'||kind==='signup'||kind==='magic'){
+    const email=(fd.get('email')||'').trim(),pw=fd.get('password')||'';
+    S.ui.authBusy=true;S.ui.authMsg=null;render();
+    const job=kind==='signin'?signIn(email,pw):kind==='signup'?signUp((fd.get('name')||'').trim(),email,pw):magicLink(email);
+    job.then(({data,error})=>{
+      S.ui.authBusy=false;
+      if(error){S.ui.authMsg={type:'error',text:friendly(error)};render();return}
+      if(kind==='signup'&&!data.session)S.ui.authMsg={type:'ok',text:'Fast geschafft: Wir haben dir eine E-Mail geschickt. Klicke auf den Link darin, dann bist du dabei.'};
+      else if(kind==='magic')S.ui.authMsg={type:'ok',text:'Wir haben dir einen Login-Link geschickt. Öffne ihn auf diesem Gerät.'};
+      render();
+    }).catch(e=>{S.ui.authBusy=false;S.ui.authMsg={type:'error',text:friendly(e)};render()});
+    return;
+  }
   if(kind==='azsearch'){
     const q=(fd.get('q')||'').trim();S.ui.az.q=q;S.ui.az.searched=true;
     window.open(q?searchUrl.amazon(q):'https://www.amazon.de/?tag=jannst-21','_blank','noopener');return;

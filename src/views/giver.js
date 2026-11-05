@@ -9,6 +9,8 @@ import { EmptyBlock } from './product.js';
 
 /* Gast-Ansicht: ein Freund öffnet den Link und sieht nur dieses eine Profil. */
 export function Gast(){
+  if(S.guest&&S.guest.handle===S.ui.person&&S.guest.status==='loading')return `<div class="wrap"><p class="muted" style="padding:60px 0;text-align:center" role="status">Profil wird geladen …</p></div>`;
+  if(S.guest&&S.guest.handle===S.ui.person&&S.guest.status==='error')return `<div class="wrap"><div class="panel" style="max-width:520px;margin:40px auto;display:grid;gap:12px"><h2>Das hat nicht geklappt</h2><p class="muted">Das Profil konnte nicht geladen werden. Bitte prüfe deine Verbindung und versuche es noch einmal.</p><button class="btn pri" data-act="guestretry" style="justify-self:start">Erneut versuchen</button></div></div>`;
   const p=guestPerson();
   if(!p)return `<div class="wrap"><div class="panel" style="max-width:520px;margin:40px auto;display:grid;gap:12px"><h2>Profil nicht gefunden</h2><p class="muted">Dieser Link gehört zu keinem Profil in diesem Browser. Frag die Person nach einem neuen Link.</p><a class="btn pri" href="../" style="justify-self:start">Zu Wishtale</a></div></div>`;
   return GuestPage(p,{});

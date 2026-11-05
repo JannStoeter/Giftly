@@ -8,7 +8,7 @@ import { AMAZON_DISCLOSURE, shopChips } from '../lib/shops.js';
 export function AcctModal(){
   const rows=Object.entries(S.accounts).map(([id,a])=>`<div class="altrow" style="grid-template-columns:44px 1fr auto"><span class="av t${a.tone}" style="width:44px;height:44px">${initials(a.name)}</span><div><strong>${esc(a.name)}${a.age?`, ${a.age}`:''}</strong><br><span class="muted" style="font-size:13.5px">${a.managed?`Kind-Konto, verwaltet von ${esc(S.accounts.me.name)}`:'Hauptkonto'}</span></div>${S.ui.acct===id?'<span class="chip ok">Aktiv</span>':`<button class="btn sec sm" data-act="acct" data-id="${id}">Wechseln</button>`}</div>`).join('');
   return `<div class="scrim" data-act="closebg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mt">
-   <h2 id="mt">Konten</h2>${rows}
+   <h2 id="mt">Konten</h2>${S.auth.user?`<p class="muted" style="font-size:14px;margin-bottom:10px">Angemeldet als <b>${esc(S.auth.user.email||'')}</b></p>`:`<div class="banner" style="margin-bottom:12px"><span>Demo-Modus: Daten bleiben nur in diesem Browser. <button class="chip" data-act="tologin">Konto anlegen oder anmelden</button></span></div>`}${rows}
    <h3 style="font-size:24px;margin:20px 0 6px">Kind-Konto anlegen</h3>
    <p class="muted" style="font-size:14.5px;margin-bottom:12px">Für Kinder pflegst du Profil und Wünsche. Du siehst, was reserviert ist. Das Kind sieht es nicht.</p>
    <form data-form="child">
@@ -17,7 +17,7 @@ export function AcctModal(){
     <p class="disc" style="margin:0 0 12px">Du legst das Konto als sorgeberechtigte Person an. Gespeichert werden nur Vorname und Alter.</p>
     <div class="row" style="justify-content:flex-end"><button type="button" class="btn ghost" data-act="close">Schließen</button><button class="btn pri" type="submit">Anlegen und einrichten</button></div>
    </form>
-   <p class="disc" style="margin-top:18px">Alle Daten liegen nur in deinem Browser. <button class="chip" data-act="reset">Demodaten zurücksetzen</button></p></div></div>`;
+   ${S.auth.user?`<div class="row" style="justify-content:space-between;margin-top:18px"><span class="disc" style="margin:0">Deine Daten liegen in deinem Wishtale-Konto.</span><button class="btn sec sm" data-act="logout">Abmelden</button></div>`:`<p class="disc" style="margin-top:18px">Alle Daten liegen nur in deinem Browser. <button class="chip" data-act="reset">Demodaten zurücksetzen</button></p>`}</div></div>`;
 }
 export function PickModal(){
   const p=guestPerson(),w=p.wishes.find(x=>x.id===S.ui.pickId);if(!w)return '';

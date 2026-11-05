@@ -7,7 +7,7 @@ export function Header(v){
   return `<header class="hdr"><div class="wrap">
    <a class="mark" href="../" aria-label="Zur Startseite">wishtale<i></i></a>
    <nav class="nav" aria-label="Hauptnavigation">${items.map(([k,l])=>`<button class="${v===k?'on':''}" data-act="go" data-v="${k}">${l}</button>`).join('')}</nav>
-   <div class="right"><button class="acctbtn" data-act="modal" data-v="accounts" aria-label="Konto wechseln"><span class="av t${S.me.tone}">${initials(S.me.name)}</span><span class="hide-s">${esc(S.me.name)}${S.me.managed?' (Kind)':''}</span></button></div>
+   <div class="right">${S.auth.user?`<span id="syncst" class="syncst" data-state="${S.auth.sync}">${{saving:'Speichert …',saved:'Gespeichert',error:'Nicht gespeichert'}[S.auth.sync]||''}</span>`:'<span class="syncst" data-state="demo">Demo</span>'}<button class="acctbtn" data-act="modal" data-v="accounts" aria-label="Konto und Einstellungen"><span class="av t${S.me.tone}">${initials(S.me.name)}</span><span class="hide-s">${esc(S.me.name)}${S.me.managed?' (Kind)':''}</span></button></div>
   </div></header>`;
 }
 export function BottomNav(v){
@@ -22,6 +22,10 @@ export const VisPill=(k,btn)=>{const x=V[k];return btn?`<button class="pill" dat
 export function GuestHeader(){
   return `<header class="hdr"><div class="wrap">
    <a class="mark" href="../" aria-label="Zur Startseite">wishtale<i></i></a>
-   <div class="right"><a class="btn pri sm" href="#start" data-act="go" data-v="start">Eigenes Wishtale erstellen</a></div>
+   <div class="right"><a class="btn pri sm" href="${S.auth.user?'#profil':'#start'}">${S.auth.user?'Zu meinem Wishtale':'Eigenes Wishtale erstellen'}</a></div>
   </div></header>`;
+}
+
+export function LoginHeader(){
+  return `<header class="hdr"><div class="wrap"><a class="mark" href="../" aria-label="Zur Startseite">wishtale<i></i></a></div></header>`;
 }
