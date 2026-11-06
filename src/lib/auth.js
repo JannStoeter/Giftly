@@ -2,7 +2,8 @@ import { sb } from './supabase.js';
 import { S, draftHasData, ensureDraft, clearDraft } from '../state.js';
 import { loadMine } from './remote.js';
 
-export const redirectUrl = () => location.origin + location.pathname;
+/** Ziel nach dem Klick auf den Link in der Mail: immer die App der Seite, auf der man sich angemeldet hat. */
+export const redirectUrl = () => location.origin + '/app/';
 
 export function friendly(err) {
   const m = (err && (err.message || String(err))) || '';
@@ -18,8 +19,17 @@ export function friendly(err) {
 }
 
 export const signIn = (email, password) => sb.auth.signInWithPassword({ email, password });
+/** Der Entwurf aus der Einrichtung reist im Konto mit. So geht nichts verloren, auch wenn der Bestätigungslink auf einem anderen Gerät oder in einem anderen Browser geöffnet wird. */
+const draftPayload = () => {
+  const d = S.accounts.draft;
+  if (!draftHasData() || !d) return undefined;
+  const cut = a => (a || []).slice(0, 30).map(x => String(x).slice(0, 60));
+  return { interests: cut(d.interests), cats: cut(d.cats), brands: cut(d.brands), tries: cut(d.tries), nogos: cut(d.nogos), alts: cut(d.alts) };
+};
 export const signUp = (name, email, password) =>
-  sb.auth.signUp({ email, password, options: { data: { full_name: name }, emailRedirectTo: redirectUrl() } });
+  sb.auth.signUp({ email, password, options: { data: { full_name: name, draft: draftPayload() }, emailRedirectTo: redirectUrl() } });
+export const resendSignup = email =>
+  sb.auth.resend({ type: 'signup', email, options: { emailRedirectTo: redirectUrl() } });
 export const magicLink = email =>
   sb.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectUrl(), shouldCreateUser: true } });
 export const signOut = () => sb.auth.signOut();
@@ -27,6 +37,7 @@ export const signOut = () => sb.auth.signOut();
 /** Nach dem Login: eigene Daten laden. */
 export async function enter(user) {
   S.auth.user = user;
+  S.ui.authSent = null; S.ui.authResent = null;
   S.auth.error = '';
   try { await loadMine(user); }
   catch (e) { S.auth.error = friendly(e); console.error(e); }
@@ -38,8 +49,16 @@ export async function enter(user) {
  */
 export function adoptDraft() {
   ensureDraft();
-  if (!draftHasData()) { clearDraft(); return false; }
-  const d = S.accounts.draft, a = S.accounts.me;
+  let d = draftHasData() ? S.accounts.draft : null;
+  const meta = S.auth.user && S.auth.user.user_metadata && S.auth.user.user_metadata.draft;
+  if (!d && meta && typeof meta === 'object') {
+    // Kein Entwurf in diesem Browser (zum Beispiel Link am Handy geöffnet): aus dem Konto nehmen
+    const list = v => (Array.isArray(v) ? v.filter(x => typeof x === 'string').slice(0, 30).map(x => x.slice(0, 60)) : []);
+    d = { name: S.auth.user.user_metadata.full_name || '', interests: list(meta.interests), cats: list(meta.cats), brands: list(meta.brands), tries: list(meta.tries), nogos: list(meta.nogos), alts: list(meta.alts) };
+  }
+  if (meta) sb.auth.updateUser({ data: { draft: null } }).catch(() => {}); // einmal übernommen, dann weg
+  const a = S.accounts.me;
+  if (!d) { clearDraft(); return false; }
   const empty = a && !a.interests.length && !a.cats.length && !a.brands.length && !a.wishes.length;
   let took = false;
   if (empty) {

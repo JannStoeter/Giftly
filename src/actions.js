@@ -10,7 +10,7 @@ import { sb } from './lib/supabase.js';
 import { hidePromo } from './views/inspiration.js';
 import { render, route, refreshGuest } from './render.js';
 import { guestRpc } from './lib/remote.js';
-import { signIn, signUp, magicLink, signOut, friendly } from './lib/auth.js';
+import { signIn, signUp, magicLink, signOut, friendly, resendSignup } from './lib/auth.js';
 
 export const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 export 
@@ -72,7 +72,12 @@ const A={
  delw(el){S.ui.modal=null;S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
  modal(el){S.ui.modal=el.dataset.v;render();setTimeout(()=>document.querySelector('.sheet input,.sheet select')?.focus({preventScroll:true}),30)},
  close(){S.ui.modal=null;render()},
- authtab(el){S.ui.authMsg=null;location.hash=el.dataset.v==='up'?'#registrieren':'#anmelden'},
+ resend(){
+  const em=S.ui.authSent?.email;if(!em)return;S.ui.authBusy=true;render();
+  resendSignup(em).then(({error})=>{S.ui.authBusy=false;S.ui.authResent=error?friendly(error):'Die Mail ist unterwegs. Das kann einen Moment dauern.';render()}).catch(()=>{S.ui.authBusy=false;S.ui.authResent='Das hat nicht geklappt. Bitte versuche es gleich noch einmal.';render()});
+ },
+ authback(){S.ui.authSent=null;S.ui.authResent=null;S.ui.authMsg=null;render()},
+ authtab(el){S.ui.authSent=null;S.ui.authMsg=null;location.hash=el.dataset.v==='up'?'#registrieren':'#anmelden'},
  demo(){S.ui.authMsg=null;location.hash='#demo'},
  tologin(){S.ui.modal=null;S.ui.authMsg=null;location.hash='#start'},
  exitdemo(){S.ui.modal=null;S.ui.authMsg=null;location.hash='#start'},
@@ -200,13 +205,15 @@ document.addEventListener('submit',e=>{
   const fd=new FormData(f),kind=f.dataset.form;
   if(kind==='signin'||kind==='signup'||kind==='magic'){
     const email=(fd.get('email')||'').trim(),pw=fd.get('password')||'';
-    S.ui.authBusy=true;S.ui.authMsg=null;render();
+    S.ui.authBusy=true;S.ui.authMsg=null;S.ui.authEmail=email;render();
     const job=kind==='signin'?signIn(email,pw):kind==='signup'?signUp((fd.get('name')||'').trim(),email,pw):magicLink(email);
     job.then(({data,error})=>{
       S.ui.authBusy=false;
       if(error){S.ui.authMsg={type:'error',text:friendly(error)};render();return}
-      if(kind==='signup'&&!data.session)S.ui.authMsg={type:'ok',text:'Fast geschafft! Wir haben dir gerade eine E-Mail geschickt. Wenn du darin auf den Link klickst, ist dein Konto startklar.'};
-      else if(kind==='magic')S.ui.authMsg={type:'ok',text:'Wir haben dir einen Link per E-Mail geschickt. Öffne ihn am besten auf diesem Gerät, dann bist du sofort angemeldet.'};
+      // Schon registrierte Adresse: Supabase meldet keinen Fehler, schickt aber auch keine Mail
+      if(kind==='signup'&&data&&data.user&&data.user.identities&&data.user.identities.length===0){S.ui.authMsg={type:'error',text:friendly({message:'already registered'})};render();return}
+      if(kind==='signup'&&!data.session)S.ui.authSent={kind:'signup',email};
+      else if(kind==='magic')S.ui.authSent={kind:'magic',email};
       render();
     }).catch(e=>{S.ui.authBusy=false;S.ui.authMsg={type:'error',text:friendly(e)};render()});
     return;
