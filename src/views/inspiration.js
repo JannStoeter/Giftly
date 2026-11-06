@@ -1,7 +1,7 @@
 import { S } from '../state.js';
 import { esc, ic } from '../lib/util.js';
 import { art, artIllu } from '../lib/art.js';
-import { worldOffers, popularOffers } from '../lib/products.js';
+import { worldOffers, popularOffers, promoOffers } from '../lib/products.js';
 import { CATS, cat } from '../data/content.js';
 import { priceLine } from './product.js';
 import { safeUrl } from '../lib/promo.js';
@@ -9,7 +9,7 @@ import { money } from '../lib/util.js';
 
 const REL='noopener noreferrer sponsored nofollow';
 
-function Card(o,cid,have){
+export function Card(o,cid,have){
   const amazon=o.host==='amazon.de';
   const label=o.cta||(amazon?(o.direct?'Bei Amazon ansehen':'Bei Amazon suchen'):`Zu ${esc(o.host)}`);
   return `<article class="offer">
@@ -27,24 +27,42 @@ function Card(o,cid,have){
   </article>`;
 }
 
-function CmsProduct(x){
+export function CmsProduct(x){
   return `<article class="offer">
    <span class="otn">${artIllu('gift',0)}</span>
    <div class="obody"><strong class="ot">${esc(x.title)}</strong>${x.price?`<div class="price"><b>${money(x.price)}</b><span>Preis kann abweichen</span></div>`:''}${x.note?`<span class="why">${esc(x.note)}</span>`:''}<span class="ad">Anzeige</span></div>
    <div class="oa"><a class="btn amz sm" href="${esc(safeUrl(x.url))}" target="_blank" rel="${REL}">Ansehen ${ic('arrow','sm')}</a></div></article>`;
 }
+const HIDE='wishtale:promo-hidden';
+const hiddenIds=()=>{try{return JSON.parse(localStorage.getItem(HIDE)||'[]')}catch{return[]}};
+export const hidePromo=id=>{try{localStorage.setItem(HIDE,JSON.stringify([...hiddenIds(),id].slice(-20)))}catch{/* nur für diese Sitzung */}};
+const ACT={share:['share',''],wishes:['go','wuensche'],inspiration:['go','entdecken']};
+
+/** Aktion aus dem CMS, für Menschen mit eigenem Wishtale: kurze Botschaft, ein Knopf und ein paar passende Ideen. */
+export function AppPromo(){
+  const P=S.promo;if(!P)return '';
+  const gone=hiddenIds();
+  const c=P.campaigns.find(x=>(x.placement||[]).includes('app')&&!gone.includes(x.id));
+  if(!c)return '';
+  const head=c.app_headline||c.headline||c.title,body=c.app_headline?c.app_body:c.body;
+  const act=ACT[c.app_cta_action];
+  const byId=new Map(P.products.map(p=>[p.id,p]));
+  const own=(c.product_ids||[]).map(i=>byId.get(i)).filter(Boolean).slice(0,2);
+  const auto=own.length?[]:promoOffers(S.me,2);
+  const mine=new Set(S.me.wishes.map(w=>w.t.toLowerCase()));
+  return `<section class="promocard" aria-label="Aktion"><div class="pc-top"><p class="eyebrow">Aktion</p><button class="linkbtn" data-act="promohide" data-id="${esc(c.id)}" aria-label="Aktion ausblenden">Ausblenden</button></div>
+   <h2 class="pc-h">${esc(head)}</h2>${body?`<p class="muted pc-b">${esc(body)}</p>`:''}
+   ${act&&c.app_cta_label?`<p><button class="btn pri" data-act="${act[0]}" ${act[1]?`data-v="${act[1]}"`:''}>${esc(c.app_cta_label)}</button></p>`:''}
+   ${own.length||auto.length?`<p class="eyebrow" style="margin-top:14px">Das könnte dir gefallen</p><div class="offers">${own.map(CmsProduct).join('')}${auto.map(o=>Card(o,o._cid,mine.has(o.t.toLowerCase()))).join('')}</div><p class="disc" style="margin-top:6px"><b>Anzeige:</b> Links zu Amazon sind Partnerlinks. Preise sind Richtwerte und können abweichen.</p>`:''}
+  </section>`;
+}
 function Promo(){
   const P=S.promo;if(!P)return '';
   const now=P.campaigns.filter(c=>(c.placement||[]).includes('app'));
-  const byId=new Map(P.products.map(p=>[p.id,p]));
-  const camp=now.map(c=>{const prods=(c.product_ids||[]).map(i=>byId.get(i)).filter(Boolean);
-   return `<section class="psec promo" style="margin-bottom:18px"><p class="eyebrow">Aktion</p><h3 aria-level="2">${esc(c.headline||c.title)}</h3>${c.body?`<p class="muted">${esc(c.body)}</p>`:''}
-    ${prods.length?`<div class="offers" style="margin-top:10px">${prods.map(CmsProduct).join('')}</div>`:''}
-    ${c.cta_label&&c.cta_url?`<p style="margin-top:12px"><a class="btn pri sm" href="${esc(safeUrl(c.cta_url))}">${esc(c.cta_label)}</a></p>`:''}</section>`;}).join('');
   const inCamp=new Set(now.flatMap(c=>c.product_ids||[]));
   const feat=P.products.filter(p=>p.featured&&!inCamp.has(p.id));
   const fs=feat.length?`<section class="psec" style="margin-bottom:18px"><p class="eyebrow">Empfehlung von Wishtale</p><h3 aria-level="2">Ausgesucht für dich</h3><div class="offers" style="margin-top:10px">${feat.map(CmsProduct).join('')}</div></section>`:'';
-  return camp+fs;
+  return AppPromo()+fs;
 }
 
 export function Entdecken(){

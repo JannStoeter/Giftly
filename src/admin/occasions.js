@@ -6,6 +6,17 @@ const d = (y, m, day, h = 8) => new Date(y, m - 1, day, h, 0, 0);
 const nthWeekday = (y, m, wd, n) => { const first = d(y, m, 1).getDay(); return 1 + ((wd - first + 7) % 7) + (n - 1) * 7; };
 const iso = x => x.toISOString();
 
+/** Texte für Menschen, die schon ein Wishtale haben (in der App). Es geht um passende Geschenke für sie selbst. */
+const APP = {
+  bf: { app_headline: 'Black Friday steht vor der Tür', app_body: 'Der beste Zeitpunkt, damit deine Freunde passende Geschenke für dich finden. Teile deinen Wunschzettel, dann wissen sie, worüber du dich freuen würdest.', app_cta_label: 'Wunschzettel teilen', app_cta_action: 'share' },
+  xmas: { app_headline: 'Weihnachten steht vor der Tür', app_body: 'Deine Liebsten suchen schon nach Ideen. Mit deinem Link sehen sie auf einen Blick, was zu dir passt.', app_cta_label: 'Wunschzettel teilen', app_cta_action: 'share' },
+  nikolaus: { app_headline: 'Was steckt in deinem Stiefel?', app_body: 'Ein kleiner Wunsch reicht oft schon. Trag ihn ein, und teile danach deinen Link.', app_cta_label: 'Wunsch eintragen', app_cta_action: 'wishes' },
+  last: { app_headline: 'Noch ein Link, und alle wissen Bescheid', app_body: 'Bis Heiligabend ist noch Zeit. Teile deinen Wunschzettel, damit deine Freunde das Passende für dich finden.', app_cta_label: 'Wunschzettel teilen', app_cta_action: 'share' },
+  newyear: { app_headline: 'Was wünschst du dir fürs neue Jahr?', app_body: 'Zwischen den Jahren ist Zeit zum Träumen. Halte fest, worauf du dich freust.', app_cta_label: 'Wünsche ansehen', app_cta_action: 'wishes' },
+  valentin: { app_headline: 'Verrate, worüber du dich freuen würdest', app_body: 'Wer weiß, was dir gefällt, trifft viel leichter, was dir wirklich Freude macht.', app_cta_label: 'Wunschzettel teilen', app_cta_action: 'share' },
+  muttertag: { app_headline: 'Zeig deiner Familie, was dir gefällt', app_body: 'Mit einem Wunschzettel müssen deine Liebsten nicht raten.', app_cta_label: 'Wunschzettel teilen', app_cta_action: 'share' },
+};
+
 /** Liefert Vorschläge, deren Ende noch nicht vorbei ist, sortiert nach Beginn. */
 export function suggest(now = new Date()) {
   const out = [];
@@ -44,7 +55,7 @@ export function suggest(now = new Date()) {
     );
   });
   return out.filter(o => o.end > now).sort((a, b) => a.start - b.start).slice(0, 6).map(o => ({
-    ...o, start: iso(o.start < now ? new Date(now.getTime() + 36e5) : o.start), end: iso(o.end), running: o.start <= now,
+    ...APP[o.id.split('-')[0]], ...o, start: iso(o.start < now ? new Date(now.getTime() + 36e5) : o.start), end: iso(o.end), running: o.start <= now,
     placement: ['landing', 'app'], cta_url: '/app/#start',
   }));
 }

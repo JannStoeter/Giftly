@@ -5,6 +5,7 @@ import { ACT, CATS, BRANDS, TRIES, NOGOS, ALTS, cat, crea } from '../data/conten
 import { VisPill, Legend } from './shared.js';
 import { GuestPage } from './giver.js';
 import { completeness } from '../lib/tale.js';
+import { AppPromo } from './inspiration.js';
 
 export const STEPS=[
  {k:'interests',t:'Was machst du in deiner freien Zeit am liebsten?',h:'Such dir aus, was zu deinem Alltag passt. Daran erkennen wir später, über welche Geschenke du dich wirklich freuen würdest.',opts:()=>ACT.map(a=>a.l)},
@@ -66,6 +67,7 @@ export function Profil(){
   const chips=(a,cls='')=>a.length?`<div class="chips">${a.map(x=>`<span class="chip ${cls}">${esc(x)}</span>`).join('')}</div>`:'<p class="muted">Noch nichts hinterlegt.</p>';
   const line=`${m.name} ${m.interests.length?`liebt ${m.interests.slice(0,3).map(esc).join(', ')}`:'hat noch keine Interessen hinterlegt'}. ${m.nogos.length?`Lieber nichts mit ${m.nogos.slice(0,2).map(esc).join(' oder ')}.`:''} ${m.alts.length?`Wenn die Idee fehlt: ${esc(m.alts[0])}.`:''}`;
   return `<div class="wrap">
+   ${pv?'':AppPromo()}
    ${pv?'':`   <div class="pcard"><span class="av t${m.tone}">${initials(m.name)}</span>
     <div><p class="eyebrow" style="color:#B8C4A8">Wishtale</p><h1>${esc(m.name)}</h1><p style="margin-top:8px">${line}</p></div>
     <div class="row" style="gap:8px"><button class="btn gold sm" data-act="share">Link teilen</button>${m.handle?`<a class="btn sec sm" style="border-color:var(--accent-ink);color:var(--accent-ink)" href="#p/${m.handle}" target="_blank" rel="noopener">Als Gast ansehen</a>`:''}<button class="btn sec sm" style="border-color:var(--accent-ink);color:var(--accent-ink)" data-act="edit">Bearbeiten</button></div></div>`}

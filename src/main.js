@@ -7,7 +7,7 @@ import { S } from './state.js';
 import { sb } from './lib/supabase.js';
 import { enter, adoptDraft } from './lib/auth.js';
 import { toast } from './lib/util.js';
-import { route } from './render.js';
+import { route, render } from './render.js';
 import './actions.js';
 import { loadPromo } from './lib/promo.js';
 
@@ -32,7 +32,7 @@ async function boot(){
   }
   window.addEventListener('hashchange',route);
   route();
-  loadPromo().then(p=>{S.promo=p;if(['entdecken','gast'].includes(S.ui.view)&&!S.ui.modal)route()});
+  loadPromo().then(p=>{S.promo=p;if(['entdecken','gast','profil','wuensche'].includes(S.ui.view)&&!S.ui.modal&&!document.activeElement?.matches?.('input,textarea,select'))render()});
 
   sb.auth.onAuthStateChange((event,sess)=>{
     // nicht direkt in der Callback-Funktion auf Supabase warten (Deadlock-Gefahr), daher setTimeout

@@ -7,6 +7,7 @@ import { guessCategory } from './lib/category.js';
 import { parseAmazonInput, searchUrl } from './lib/shops.js';
 import { parsePinterest, parseInstagram, givePinConsent, revokePinConsent } from './lib/social.js';
 import { sb } from './lib/supabase.js';
+import { hidePromo } from './views/inspiration.js';
 import { render, route, refreshGuest } from './render.js';
 import { guestRpc } from './lib/remote.js';
 import { signIn, signUp, magicLink, signOut, friendly } from './lib/auth.js';
@@ -140,6 +141,7 @@ const A={
  ownedel(el){S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
  pins(el){S.ui.pinsCtx=el.dataset.ctx||'guest';S.ui.modal='pins';render()},
  pinconsent(){givePinConsent();render()},
+ promohide(el){hidePromo(el.dataset.id);render()},
  pinrevoke(){revokePinConsent();location.reload()},
  delacct(){
   if(!confirm('Möchtest du dein Konto mit allen Wünschen und Einträgen wirklich löschen? Das lässt sich nicht rückgängig machen.'))return;

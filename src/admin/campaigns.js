@@ -3,8 +3,9 @@ import { esc, toast, toLocal, fromLocal, fmtDate } from './util.js';
 import { suggest } from './occasions.js';
 import { buildCampaignPost } from './ideas.js';
 
-const PLACES = { landing: 'Banner auf der Landingpage', app: 'Inspiration in der App' };
-const empty = () => { const s = new Date(), e = new Date(Date.now() + 7 * 864e5); return { title: '', headline: '', body: '', cta_label: '', cta_url: '', placement: ['app'], product_ids: [], starts_at: s.toISOString(), ends_at: e.toISOString(), active: true }; };
+const PLACES = { landing: 'Banner auf der Landingpage (für neue Besucher)', app: 'In der App (Profil, Wünsche und Inspiration, für Menschen mit Wishtale)' };
+const ACTIONS = { '': 'Kein Knopf', share: 'Wunschzettel teilen', wishes: 'Zu den Wünschen', inspiration: 'Zu den Ideen' };
+const empty = () => { const s = new Date(), e = new Date(Date.now() + 7 * 864e5); return { title: '', headline: '', body: '', cta_label: '', cta_url: '', placement: ['app'], app_headline: '', app_body: '', app_cta_label: '', app_cta_action: 'share', product_ids: [], starts_at: s.toISOString(), ends_at: e.toISOString(), active: true }; };
 const state = c => { const n = Date.now(); if (!c.active) return ['Aus', '']; if (new Date(c.starts_at) > n) return ['Geplant', 'gold']; if (new Date(c.ends_at) < n) return ['Beendet', '']; return ['Läuft', 'ok']; };
 
 export async function mount(el) {
@@ -17,6 +18,11 @@ export async function mount(el) {
     <div class="fld wide"><label for="c-body">Text (optional, bis 400 Zeichen)</label><textarea id="c-body" name="body" class="ta" maxlength="400">${esc(edit.body)}</textarea></div>
     <div class="fld"><label for="c-cta">Knopf-Text (optional)</label><input id="c-cta" name="cta_label" class="inp" maxlength="40" value="${esc(edit.cta_label)}"></div>
     <div class="fld"><label for="c-url">Knopf-Link (https:// oder /app/…)</label><input id="c-url" name="cta_url" class="inp" value="${esc(edit.cta_url)}"></div>
+    <div class="wide card sub"><h3>Texte in der App (für Menschen, die schon ein Wishtale haben)</h3><p class="hint">Hier geht es um passende Geschenke für sie selbst, nicht ums Anlegen. Bleibt das leer, nutzt die App die Texte oben.</p><div class="grid2">
+     <div class="fld wide"><label for="c-ah">Überschrift in der App</label><input id="c-ah" name="app_headline" class="inp" maxlength="120" value="${esc(edit.app_headline)}"></div>
+     <div class="fld wide"><label for="c-ab">Text in der App</label><textarea id="c-ab" name="app_body" class="ta" maxlength="400">${esc(edit.app_body)}</textarea></div>
+     <div class="fld"><label for="c-al">Knopf-Text in der App</label><input id="c-al" name="app_cta_label" class="inp" maxlength="40" value="${esc(edit.app_cta_label)}"></div>
+     <div class="fld"><label for="c-aa">Was der Knopf macht</label><select id="c-aa" name="app_cta_action" class="sel">${Object.entries(ACTIONS).map(([k, v]) => `<option value="${k}" ${edit.app_cta_action === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div></div></div>
     <div class="fld"><label for="c-s">Start</label><input id="c-s" name="starts_at" type="datetime-local" class="inp" required value="${toLocal(edit.starts_at)}"></div>
     <div class="fld"><label for="c-e">Ende</label><input id="c-e" name="ends_at" type="datetime-local" class="inp" required value="${toLocal(edit.ends_at)}"></div>
    </div>
@@ -39,7 +45,7 @@ export async function mount(el) {
   el.onclick = async e => {
     const b = e.target.closest('[data-a]'); if (!b) return; const a = b.dataset.a, r = rows.find(x => x.id === b.dataset.id);
     try {
-      if (a === 'drive') { const x = suggest().find(v => v.id === b.dataset.id); edit = { title: x.title, headline: x.headline, body: x.body, cta_label: x.cta_label, cta_url: x.cta_url, placement: x.placement, product_ids: [], starts_at: x.start, ends_at: x.end, active: true }; draw(); window.scrollTo(0, 0); el.querySelector('#c-title')?.focus(); }
+      if (a === 'drive') { const x = suggest().find(v => v.id === b.dataset.id); edit = { title: x.title, headline: x.headline, body: x.body, cta_label: x.cta_label, cta_url: x.cta_url, app_headline: x.app_headline || '', app_body: x.app_body || '', app_cta_label: x.app_cta_label || '', app_cta_action: x.app_cta_action || '', placement: x.placement, product_ids: [], starts_at: x.start, ends_at: x.end, active: true }; draw(); window.scrollTo(0, 0); el.querySelector('#c-title')?.focus(); }
       else if (a === 'new') { edit = empty(); draw(); el.querySelector('#c-title')?.focus(); }
       else if (a === 'edit') { edit = { ...r }; draw(); window.scrollTo(0, 0); el.querySelector('#c-title')?.focus(); }
       else if (a === 'dup') { const rest = { ...r }; delete rest.id; delete rest.created_at; delete rest.updated_at; edit = { ...rest, title: r.title + ' (Kopie)', active: false }; draw(); window.scrollTo(0, 0); }
@@ -52,7 +58,7 @@ export async function mount(el) {
     const s = fromLocal(f('starts_at')), en = fromLocal(f('ends_at'));
     if (!(new Date(en) > new Date(s))) return toast('Das Ende muss nach dem Start liegen.', true);
     const url = f('cta_url'); if (url && !/^(https:\/\/|\/)/.test(url)) return toast('Der Knopf-Link muss mit https:// oder / beginnen.', true);
-    const row = { ...(edit.id ? { id: edit.id } : {}), title: f('title'), headline: f('headline'), body: f('body'), cta_label: f('cta_label'), cta_url: url, starts_at: s, ends_at: en,
+    const row = { ...(edit.id ? { id: edit.id } : {}), title: f('title'), headline: f('headline'), body: f('body'), cta_label: f('cta_label'), cta_url: url, app_headline: f('app_headline'), app_body: f('app_body'), app_cta_label: f('app_cta_label'), app_cta_action: f('app_cta_action'), starts_at: s, ends_at: en,
       placement: fd.getAll('pl'), product_ids: fd.getAll('pr'), active: fd.get('active') === 'on' };
     try {
       const saved = await save('campaigns', row); toast('Gespeichert.');

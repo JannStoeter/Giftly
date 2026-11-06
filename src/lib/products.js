@@ -78,6 +78,19 @@ export function popularOffers(n = 4) {
     .map(({ x }) => ({ ...fromProduct(x, 'katalog'), id: x.id, why: [] }));
 }
 
+/** Ein paar Produkte für die Aktion in der App: reihum je ein Treffer aus den Welten der Person, sonst beliebte Wunschideen. */
+export function promoOffers(person, n = 3) {
+  const out = [], seen = new Set();
+  for (let i = 0; i < 3 && out.length < n; i++) {
+    for (const cid of person.cats) {
+      const o = worldOffers(person, cid, i + 1)[i];
+      if (o && !seen.has(o.id)) { seen.add(o.id); out.push({ ...o, _cid: cid }); if (out.length >= n) break; }
+    }
+  }
+  for (const o of popularOffers(n + 3)) if (out.length < n && !seen.has(o.id)) { seen.add(o.id); out.push({ ...o, _cid: 'wohnen' }); }
+  return out;
+}
+
 /* ---------- Welten ---------- */
 export const WORLD_OF_CAT = { pfanne: 'kochen', bräter: 'kochen', messerset: 'kochen', wasserkocher: 'genuss', mühle: 'genuss', wanderstöcke: 'outdoor' };
 const strip = t => String(t).replace(/<[^>]+>/g, '');
