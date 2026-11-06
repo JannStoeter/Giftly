@@ -106,7 +106,7 @@ export async function mount(el) {
     const stamp = Date.now(), urls = [];
     for (let i = 0; i < cur.slides.length; i++) {
       const path = `${cur.id}/${stamp}-${pad(i)}.jpg`, b = await render(i, 'image/jpeg', 0.92);
-      const { error } = await sb.storage.from('social-posts').upload(path, b, { contentType: 'image/jpeg', upsert: true }); if (error) throw error;
+      const { error } = await sb.storage.from('social-posts').upload(path, b, { contentType: 'image/jpeg', upsert: false }); if (error) throw error;
       urls.push(sb.storage.from('social-posts').getPublicUrl(path).data.publicUrl);
     }
     cur.image_urls = urls;
