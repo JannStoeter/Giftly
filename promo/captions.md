@@ -39,6 +39,21 @@ Lena sucht ein Geschenk für Jonas. Wishtale zeigt ihr, was sich Jonas wünscht,
 
 **Musik:** ruhig, warm, ohne Gesang, zum Beispiel Piano oder Akustikgitarre. Nutze nur lizenzfreie Musik oder die Audiothek für Unternehmen von Instagram.
 
+## Instagram-Profil
+
+**Name (Suchfeld, max. 64 Zeichen):** Wishtale | Die Wunschliste, die dich kennt
+
+**Bio (max. 150 Zeichen):**
+```
+Die Wunschliste, die dich kennt 🎁
+Erzähl, was dir gefällt, und deine Freunde finden Geschenke, die wirklich passen.
+Dein Wishtale kostenlos anlegen 👇
+```
+
+**Link:** https://wishtale.de (sobald die Domain bei Vercel verbunden ist)
+
+**Kategorie:** App oder Produkt/Dienstleistung, **Kontoart:** Business oder Creator
+
 ## Hinweise
 - Diese Beiträge enthalten keine Affiliate-Links und keine Amazon-Preise oder -Bilder. Eine Kennzeichnung als Werbung ist deshalb nicht nötig. Sobald ein Beitrag auf Amazon verlinkt, kennzeichne ihn als „Werbung“.
 - Die Domain und der Instagram-Name stehen in `promo/content.mjs`. Ändere sie dort und führe `npm run promo` aus.
