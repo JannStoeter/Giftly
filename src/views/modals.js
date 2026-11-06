@@ -53,22 +53,24 @@ export function Modal(){
   if(m==='world')return WorldModal();
   if(m==='pins')return PinsModal();
   if(m==='accounts')return AcctModal();
+  if(m==='wish'){}
+  const d=(m==='wish'&&S.ui.editWish&&S.me.wishes.find(w=>w.id===S.ui.editWish))||{};
   if(m==='wish')return `<div class="scrim" data-act="closebg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mt">
-   <h2 id="mt">Neuer Wunsch</h2>
+   <h2 id="mt">${S.ui.editWish?'Wunsch bearbeiten':'Neuer Wunsch'}</h2>
    <form data-form="wish">
-    <div class="fld"><label for="wt">Was wünschst du dir?</label><input id="wt" name="t" class="inp" required placeholder="Produkt, Erlebnis oder eine Idee" autocomplete="off"></div>
-    <div class="fld"><span class="lb">Art</span><div class="radios">${[['produkt','Produkt'],['kategorie','Nur Kategorie'],['erlebnis','Erlebnis'],['frei','Freier Wunsch']].map(([v,l],i)=>`<label><input type="radio" name="kind" value="${v}" ${i?'':'checked'}><span>${l}</span></label>`).join('')}</div></div>
-    <div class="fld"><label for="wb">Budget bis in Euro (optional, für Kategorie-Wünsche)</label><input id="wb" name="budget" type="number" min="1" inputmode="numeric" class="inp" placeholder="z. B. 100"></div>
-    <div class="fld"><span class="lb">Besonders passend zu (optional)</span><div class="radios">${OCC.map(o=>`<label><input type="checkbox" name="occ" value="${o.id}"><span>${o.l}</span></label>`).join('')}</div></div>
-    <div class="fld"><label for="wp">Preis in Euro (optional)</label><input id="wp" name="price" class="inp" inputmode="decimal" placeholder="z. B. 69,90"></div>
-    <div class="fld"><span class="lb">Produkt bei Amazon suchen?</span><div><button type="button" class="btn amz sm" data-act="azopen">Bei Amazon stöbern ${ic('arrow','sm')}</button></div></div>
-    <div class="fld"><label for="wl">Link (optional)</label><input id="wl" name="link" class="inp" placeholder="z. B. shop.de/produkt" autocomplete="off"></div>
-    <div class="fld"><label for="wn">Notiz</label><textarea id="wn" name="note" class="ta" placeholder="Farbe, Größe, Stimmung"></textarea></div>
-    <div class="fld"><label for="wc2">Kategorie</label><select id="wc2" name="c" class="sel">${CATS.map(c=>`<option value="${c.id}">${c.n}</option>`).join('')}</select></div>
-    <div class="fld"><span class="lb">Wie wichtig ist es dir?</span><div class="radios">${[1,2,3].map(n=>`<label><input type="radio" name="prio" value="${n}" ${n===2?'checked':''}><span>${PRIO[n]}</span></label>`).join('')}</div></div>
-    <div class="fld"><label for="wi">Bild (optional)</label><input id="wi" name="img" type="file" accept="image/*" class="inp"></div>
-    <div class="fld"><label for="wv">Wer sieht das?</label><select id="wv" name="vis" class="sel"><option value="alle">Alle mit Profilzugriff</option><option value="giver">Nur Schenkende</option><option value="privat">Privat, nur ich</option></select></div>
-    <div class="row" style="justify-content:flex-end"><button type="button" class="btn ghost" data-act="close">Abbrechen</button><button class="btn pri" type="submit">Wunsch speichern</button></div>
+    <div class="fld"><label for="wt">Was wünschst du dir?</label><input id="wt" name="t" class="inp" required placeholder="Produkt, Erlebnis oder eine Idee" autocomplete="off" value="${esc(d.t||'')}"></div>
+    <div class="fld"><span class="lb">Art</span><div class="radios">${[['produkt','Produkt'],['kategorie','Nur Kategorie'],['erlebnis','Erlebnis'],['frei','Freier Wunsch']].map(([v,l],i)=>`<label><input type="radio" name="kind" value="${v}" ${(d.kind||'produkt')===v?'checked':''}><span>${l}</span></label>`).join('')}</div></div>
+    <div class="fld"><label for="wb">Budget bis in Euro (optional, für Kategorie-Wünsche)</label><input id="wb" name="budget" type="number" min="1" inputmode="numeric" class="inp" placeholder="z. B. 100" value="${d.budget||''}"></div>
+    <div class="fld"><span class="lb">Besonders passend zu (optional)</span><div class="radios">${OCC.map(o=>`<label><input type="checkbox" name="occ" value="${o.id}" ${(d.occ||[]).includes(o.id)?'checked':''}><span>${o.l}</span></label>`).join('')}</div></div>
+    <div class="fld"><label for="wp">Preis in Euro (optional)</label><input id="wp" name="price" class="inp" inputmode="decimal" placeholder="z. B. 69,90" value="${d.price?String(d.price).replace('.',','):''}"></div>
+    ${S.ui.editWish?'':`<div class="fld"><span class="lb">Produkt bei Amazon suchen?</span><div><button type="button" class="btn amz sm" data-act="azopen">Bei Amazon stöbern ${ic('arrow','sm')}</button></div></div>`}
+    <div class="fld"><label for="wl">Link (optional)</label><input id="wl" name="link" class="inp" placeholder="z. B. shop.de/produkt" autocomplete="off" value="${esc(d.link||'')}"></div>
+    <div class="fld"><label for="wn">Notiz</label><textarea id="wn" name="note" class="ta" placeholder="Farbe, Größe, Stimmung">${esc(d.note||'')}</textarea></div>
+    <div class="fld"><label for="wc2">Kategorie</label><select id="wc2" name="c" class="sel">${CATS.map(c=>`<option value="${c.id}" ${(d.c||'wohnen')===c.id?'selected':''}>${c.n}</option>`).join('')}</select></div>
+    <div class="fld"><span class="lb">Wie wichtig ist es dir?</span><div class="radios">${[1,2,3].map(n=>`<label><input type="radio" name="prio" value="${n}" ${n===(d.prio||2)?'checked':''}><span>${PRIO[n]}</span></label>`).join('')}</div></div>
+    <div class="fld"><label for="wi">Bild (optional${S.ui.editWish&&d.img?', ein neues ersetzt das alte':''})</label><input id="wi" name="img" type="file" accept="image/*" class="inp"></div>
+    <div class="fld"><label for="wv">Wer sieht das?</label><select id="wv" name="vis" class="sel">${[['alle','Alle mit Profilzugriff'],['giver','Nur Schenkende'],['privat','Privat, nur ich']].map(([v,l])=>`<option value="${v}" ${(d.vis||'alle')===v?'selected':''}>${l}</option>`).join('')}</select></div>
+    <div class="row" style="justify-content:flex-end"><button type="button" class="btn ghost" data-act="close">Abbrechen</button><button class="btn pri" type="submit">${S.ui.editWish?'Änderungen speichern':'Wunsch speichern'}</button></div>
    </form></div></div>`;
   return `<div class="scrim" data-act="closebg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mt">
    <h2 id="mt">Geschenk eintragen</h2>

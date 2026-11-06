@@ -9,7 +9,7 @@ import { priceLine } from './product.js';
 
 const REL = 'noopener noreferrer sponsored nofollow';
 
-function Row(o) {
+function Row(o, ctx) {
   const amazon = o.host === 'amazon.de';
   const label = o.cta || (amazon ? (o.direct ? 'Bei Amazon ansehen' : 'Bei Amazon suchen') : `Zu ${esc(o.host)}`);
   const saved = S.ui.saved[o.id];
@@ -24,6 +24,7 @@ function Row(o) {
    <div class="oa">
     <a class="btn amz sm" href="${o.url}" target="_blank" rel="${REL}">${label} ${ic('arrow', 'sm')}</a>
     <button class="btn sec sm" data-act="save" data-id="${esc(o.id)}" aria-pressed="${!!saved}">${saved ? 'Gemerkt' : 'Merken'}</button>
+    ${ctx === 'own' && !o.exp ? `<button class="btn ghost sm" data-act="ihave" data-id="${esc(o.id)}">Habe ich schon</button>` : ''}
    </div>
   </div>`;
 }
@@ -41,7 +42,7 @@ export function WorldModal() {
     <div><p class="eyebrow">Welt · ${esc(p.name)}</p><h2 id="mt">${esc(c.n)}</h2></div>
    </div>
    <div class="tale">${tale.paragraphs.map(t => `<p>${esc(t)}</p>`).join('')}<p class="ask">${esc(tale.ask)}</p></div>
-   ${offers.length ? offers.map(Row).join('') : `<p class="muted" style="margin:14px 0">Dazu haben wir noch keine Idee, die nicht schon vorhanden oder gewünscht ist. Schau gern in die Wunschliste.</p>`}
+   ${offers.length ? offers.map(o => Row(o, ctx)).join('') : `<p class="muted" style="margin:14px 0">Dazu haben wir noch keine Idee, die nicht schon vorhanden oder gewünscht ist. Schau gern in die Wunschliste.</p>`}
    <p class="disc"><b>Hinweis:</b> Wir haben diese Auswahl aus den Wünschen, Lieblingsmarken und Vorlieben von ${esc(p.name)} zusammengestellt. Es kann trotzdem sein, dass ${esc(p.name)} das eine oder andere schon besitzt. Die Links zu Amazon sind Partnerlinks (Anzeige), Preise können abweichen.</p>
    <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn ghost" data-act="close">Schließen</button></div>
   </div></div>`;

@@ -2,7 +2,7 @@ import { S, W, switchTo, resetState, guestPerson, saveState } from './state.js';
 import { $, toast, kwOf, nid, money, overlap } from './lib/util.js';
 import { CATALOG, PRIO, cat } from './data/content.js';
 import { check } from './logic.js';
-import { offersFor, worldOffers, popularOffers } from './lib/products.js';
+import { offersFor, worldOffers, popularOffers, ownedTypeFor } from './lib/products.js';
 import { guessCategory } from './lib/category.js';
 import { parseAmazonInput, searchUrl } from './lib/shops.js';
 import { parsePinterest, parseInstagram, givePinConsent, revokePinConsent } from './lib/social.js';
@@ -70,8 +70,9 @@ const A={
  selbst(el){const w=S.me.wishes.find(x=>x.id===el.dataset.id);w.status=w.status==='selbst'?'offen':'selbst';toast(w.status==='selbst'?'Dann ist dieser Wunsch erledigt. Deine Freunde sehen jetzt, dass du das schon hast.':'Der Wunsch ist wieder offen.');render()},
  prio(el){const w=S.me.wishes.find(x=>x.id===el.dataset.id);w.prio=w.prio%3+1;toast('Priorität: '+PRIO[w.prio]);render()},
  delw(el){S.ui.modal=null;S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
- modal(el){S.ui.modal=el.dataset.v;render();setTimeout(()=>document.querySelector('.sheet input,.sheet select')?.focus({preventScroll:true}),30)},
- close(){S.ui.modal=null;render()},
+ modal(el){if(el.dataset.v==='wish')S.ui.editWish=null;S.ui.modal=el.dataset.v;render();setTimeout(()=>document.querySelector('.sheet input,.sheet select')?.focus({preventScroll:true}),30)},
+ close(){S.ui.modal=null;S.ui.editWish=null;render()},
+ wedit(el){S.ui.editWish=el.dataset.id;S.ui.modal='wish';render();setTimeout(()=>document.getElementById('wt')?.focus({preventScroll:true}),30)},
  resend(){
   const em=S.ui.authSent?.email;if(!em)return;S.ui.authBusy=true;render();
   resendSignup(em).then(({error})=>{S.ui.authBusy=false;S.ui.authResent=error?friendly(error):'Die Mail ist unterwegs. Das kann einen Moment dauern.';render()}).catch(()=>{S.ui.authBusy=false;S.ui.authResent='Das hat nicht geklappt. Bitte versuche es gleich noch einmal.';render()});
@@ -148,6 +149,11 @@ const A={
  ownedel(el){S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
  pins(el){S.ui.pinsCtx=el.dataset.ctx||'guest';S.ui.modal='pins';render()},
  pinconsent(){givePinConsent();render()},
+ ihave(el){
+  const t=ownedTypeFor(el.dataset.id);if(!t)return;
+  if(!S.me.wishes.some(w=>w.status==='selbst'&&w.t.toLowerCase()===t.label.toLowerCase()))S.me.wishes.unshift(W({t:t.label,c:t.c,kind:'produkt',prio:1,status:'selbst',vis:'alle',a:t.a,tone:t.tone,kw:t.kw}));
+  toast(`Notiert: ${t.label} hast du schon. Solche Vorschläge blenden wir aus. Unter „Das habe ich schon“ im Profil kannst du es wieder entfernen.`);render();
+ },
  promohide(el){hidePromo(el.dataset.id);render()},
  pinrevoke(){revokePinConsent();location.reload()},
  delacct(){
@@ -277,6 +283,11 @@ document.addEventListener('submit',e=>{
   if(kind==='wish'){
     const file=fd.get('img'),done=img=>{
       const c=fd.get('c'),t=fd.get('t').trim(),k=fd.get('kind');
+      if(S.ui.editWish){
+        const w=S.me.wishes.find(x=>x.id===S.ui.editWish);
+        if(w){const keep=w.c===c&&w.kind===k;Object.assign(w,{t,c,kind:k,prio:+fd.get('prio'),link:(fd.get('link')||'').trim(),price:parsePrice(fd.get('price')),occ:fd.getAll('occ'),budget:+fd.get('budget')||null,note:(fd.get('note')||'').trim(),vis:fd.get('vis'),kw:kwOf(t),img:img||w.img||null,...(keep?{}:{a:k==='erlebnis'?'ticket':cat(c).a,tone:cat(c).t})})}
+        S.ui.editWish=null;S.ui.modal=null;toast('Gespeichert.');render();return;
+      }
       S.me.wishes.unshift(W({t,c,kind:k,prio:+fd.get('prio'),link:(fd.get('link')||'').trim(),price:parsePrice(fd.get('price')),occ:fd.getAll('occ'),budget:+fd.get('budget')||null,note:(fd.get('note')||'').trim(),vis:fd.get('vis'),a:k==='erlebnis'?'ticket':cat(c).a,tone:cat(c).t,img}));
       S.ui.modal=null;S.ui.wf='offen';S.ui.wc='alle';toast('Der Wunsch ist gespeichert.');render();
     };

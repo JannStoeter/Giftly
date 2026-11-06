@@ -63,7 +63,6 @@ export function Facts(p,{preview=false}={}){
   const soc=p.social||{};
   const inspo=(soc.pinterest||soc.instagram)?`<p class="muted" style="font-size:13.5px;margin-bottom:10px">Hier sammelt ${esc(p.name)} Ideen und Fundstücke. Ein Blick darauf verrät oft mehr als jede Wunschliste.</p><div class="social">${soc.pinterest?`<button class="btn sec sm" data-act="pins" data-ctx="${ctx}">Pins hier ansehen</button><a class="chip" href="${esc(soc.pinterest)}" target="_blank" rel="noopener noreferrer">Auf Pinterest öffnen ↗</a>`:''}${soc.instagram?`<a class="chip" href="${esc(instagramUrl(soc.instagram))}" target="_blank" rel="noopener noreferrer">Instagram: @${esc(soc.instagram)} ↗</a>`:''}</div>`:'';
   return block('Hat '+esc(p.name)+' schon',chips(owned.map(w=>w.t),'ok'))
-   +block('Schon verschenkt',chips((p.gifts||p.history||[]).map(g=>`${g.what} · ${g.from}`)))
    +block('Das inspiriert '+esc(p.name),inspo)
    +block('Möchte ausprobieren',chips(p.tries,'gold'))
    +block('Welten',worlds)
@@ -110,7 +109,7 @@ export function Ideen(p){
     const cards=r.res.map(x=>{
       if(x.type==='wish')return `<div class="res-card bad"><strong>Steht schon auf der Liste</strong><p>${esc(x.w.t)}${x.w.res==='other'?' ist bereits von jemandem reserviert.':' ist noch frei.'}</p>${x.w.res?'':`<div class="row">${x.w.kind==='kategorie'?`<button class="btn gold sm" data-act="suggest" data-id="${x.w.id}">Produkt vorschlagen</button>`:''}<button class="btn pri sm" data-act="reserve" data-id="${x.w.id}" data-stay="1">Jetzt reservieren</button></div>`}</div>`;
       if(x.type==='have')return `<div class="res-card bad"><strong>Das hat ${esc(p.name)} schon</strong><p>${esc(p.name)} hat sich bereits selbst gekauft: ${esc(x.w.t)}.</p></div>`;
-      if(x.type==='given')return `<div class="res-card bad"><strong>Wurde schon geschenkt</strong><p>${esc(x.g.what)} von ${esc(x.g.from)} (${esc(x.g.when)}).${x.g.liked==='nein'?' Es kam nicht gut an.':''}</p></div>`;
+      if(x.type==='given')return `<div class="res-card bad"><strong>Das gibt es schon</strong><p>${esc(p.name)} hat so etwas schon bekommen.</p></div>`;
       return `<div class="res-card bad"><strong>Lieber nicht</strong><p>${esc(p.name)} möchte keine ${esc(x.n)} geschenkt bekommen.</p></div>`;
     }).join('');
     let verdict='';

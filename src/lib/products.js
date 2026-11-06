@@ -10,6 +10,7 @@ import { PRODUCTS, CATALOG } from '../data/content.js';
 import { AMAZON_TAG, normUrl, searchUrl } from './shops.js';
 import { picks, excluded, recommend } from '../logic.js';
 import { weightOf } from './weights.js';
+import { fits, wanted } from './fit.js';
 
 export const amazonUrl = p => p.asin ? `https://www.amazon.de/dp/${p.asin}?tag=${AMAZON_TAG}` : searchUrl.amazon(p.search || p.t);
 
@@ -21,10 +22,12 @@ export function productFor(person, w) {
   }
   const own = deepLink(w.link);
   if (own) return { t: w.t, url: own, host: new URL(own).hostname.replace(/^www\./, ''), price: w.price || null, priceBy: 'user', source: 'link', direct: true };
-  const brandHit = PRODUCTS.find(x => w.kw.some(k => same(k, x.cat)) && norm(w.t).includes(norm(x.brand)));
-  const catHit = brandHit || PRODUCTS.find(x => w.kw.some(k => same(k, x.cat)));
+  // Nur Produkte, die zu den genannten Eigenschaften passen (z. B. „beschichtet“)
+  const match = PRODUCTS.filter(x => w.kw.some(k => same(k, x.cat)) && fits(w, x));
+  const brandHit = match.find(x => norm(w.t).includes(norm(x.brand)));
+  const catHit = brandHit || [...match].sort((a, b) => b.q - a.q)[0];
   if (catHit && w.kind !== 'frei') return fromProduct(catHit, 'katalog');
-  const cat = CATALOG.find(i => i.k === 'ding' && overlap(w.kw, i.kw));
+  const cat = !wanted(w).length && CATALOG.find(i => i.k === 'ding' && overlap(w.kw, i.kw));
   if (cat && w.kind !== 'frei') return { t: cat.t, url: searchUrl.amazon(cat.t), host: 'amazon.de', range: cat.p, a: cat.a, source: 'katalog', direct: false };
   if (w.kind === 'erlebnis' || w.kind === 'frei') return null; // dafür gibt es Ideen (ideasFor)
   return { t: w.t, url: searchUrl.amazon(w.t), host: 'amazon.de', source: 'erzeugt', direct: false };
@@ -58,7 +61,7 @@ export function offersFor(person, w) {
     const offers = list.map(e => ({ ...fromProduct(e.x, 'vorschlag'), id: e.x.id, why: e.why }));
     return { main: offers[0] || (main && { ...main, id: 'main' }) || null, alts: offers.slice(1, 4), over };
   }
-  const pool = PRODUCTS.filter(x => w.kw.some(k => same(k, x.cat)));
+  const pool = PRODUCTS.filter(x => w.kw.some(k => same(k, x.cat)) && fits(w, x));
   if (main && pool.length && w.kind !== 'frei') {
     const mp = pool.find(x => x.t === main.t);
     const alts = pool.filter(x => x !== mp).sort((a, b) => b.q - a.q).slice(0, 3).map(x => ({ ...fromProduct(x, 'katalog'), id: x.id }));
@@ -76,6 +79,26 @@ export function popularOffers(n = 4) {
     .map(x => ({ x, sc: x.q * weightOf(WORLD_OF_CAT[x.cat] || 'wohnen') }))
     .filter(e => e.sc > 0).sort((a, b) => b.sc - a.sc).slice(0, n)
     .map(({ x }) => ({ ...fromProduct(x, 'katalog'), id: x.id, why: [] }));
+}
+
+/**
+ * „So etwas habe ich schon“: Zu einem Vorschlag die Art des Produkts (nicht das genaue Produkt), z. B. „Kopfhörer“ oder „Bratpfanne“.
+ * Wird als „schon vorhanden“ gespeichert, dann tauchen Vorschläge dieser Art nicht mehr auf.
+ */
+const TYPE_LABEL = { pfanne: 'Bratpfanne', bräter: 'Bräter', messerset: 'Messerset', wasserkocher: 'Wasserkocher', mühle: 'Kaffeemühle', wanderstöcke: 'Wanderstöcke' };
+const cap = s => String(s).charAt(0).toUpperCase() + String(s).slice(1);
+export function ownedTypeFor(id) {
+  const x = PRODUCTS.find(p => p.id === id);
+  if (x) return { label: TYPE_LABEL[x.cat] || cap(x.cat), kw: [x.cat], a: x.a, tone: x.tone, c: WORLD_OF_CAT[x.cat] || 'wohnen' };
+  const it = CATALOG.find(i => String(i.id) === String(id));
+  if (it) {
+    // Art des Produkts: Wort vor dem Doppelpunkt („Kochbuch: …“), sonst das Stichwort, wenn es im Titel steht, sonst der erste Teil des Titels
+    const head = it.t.split(/:| für | mit /)[0].trim();
+    const key = (it.kw || [])[0];
+    const label = it.t.includes(':') ? head : (key && norm(it.t).includes(norm(key)) ? cap(key) : head);
+    return { label: cap(label), kw: [...new Set([...(it.kw || []), ...kwOf(label)])], a: it.a, tone: 0, c: it.c };
+  }
+  return null;
 }
 
 /** Ein paar Produkte für die Aktion in der App: reihum je ein Treffer aus den Welten der Person, sonst beliebte Wunschideen. */

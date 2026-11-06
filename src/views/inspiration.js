@@ -23,6 +23,7 @@ export function Card(o,cid,have){
    <div class="oa">
     <a class="btn amz sm" href="${o.url}" target="_blank" rel="${REL}">${label} ${ic('arrow','sm')}</a>
     ${have?`<span class="chip ok">${ic('check','sm')}Auf deiner Liste</span>`:`<button class="btn sec sm" data-act="oadd" data-cid="${cid}" data-id="${esc(o.id)}">${ic('plus','sm')}Als Wunsch</button>`}
+    ${o.exp?'':`<button class="btn ghost sm" data-act="ihave" data-id="${esc(o.id)}">Habe ich schon</button>`}
    </div>
   </article>`;
 }
