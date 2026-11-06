@@ -52,8 +52,45 @@ export async function publish({ imageUrls, caption }, fetchImpl = fetch, opts = 
     container = (await call(`${c.userId}/media`, { method: 'POST', params: { media_type: 'CAROUSEL', children: kids.join(','), caption } }, fetchImpl)).id;
   }
   await wait(container, fetchImpl);
+  return finish(container, fetchImpl);
+}
+
+/** Veröffentlicht einen fertig verarbeiteten Container und holt die Adresse des Beitrags. */
+export async function finish(container, fetchImpl = fetch) {
+  const c = igConfig();
   const pub = await call(`${c.userId}/media_publish`, { method: 'POST', params: { creation_id: container } }, fetchImpl);
   let permalink = '';
   try { permalink = (await call(pub.id, { params: { fields: 'permalink' } }, fetchImpl)).permalink || ''; } catch { /* nicht kritisch */ }
   return { mediaId: pub.id, permalink };
+}
+
+/** Stories: jedes Bild wird eine eigene Story (ohne Bildunterschrift). Gibt die Medien-ID der letzten zurück. */
+export async function publishStories({ imageUrls }, fetchImpl = fetch, opts = {}) {
+  if (!igConfigured()) throw new HttpError(400, 'Instagram ist noch nicht verbunden.');
+  if (!imageUrls?.length) throw new HttpError(400, 'Die Story hat noch keine Bilder.');
+  if (imageUrls.length > 10) throw new HttpError(400, 'Bitte höchstens 10 Stories auf einmal.');
+  const c = igConfig(), wait = opts.wait || waitReady;
+  let last = { mediaId: '', permalink: '' };
+  for (const url of imageUrls) {
+    const id = (await call(`${c.userId}/media`, { method: 'POST', params: { media_type: 'STORIES', image_url: url } }, fetchImpl)).id;
+    await wait(id, fetchImpl);
+    last = await finish(id, fetchImpl);
+  }
+  return last;
+}
+
+/** Reel: legt den Container an. Instagram verarbeitet das Video einige Sekunden bis Minuten, danach folgt finish(). */
+export async function startReel({ videoUrl, caption }, fetchImpl = fetch) {
+  if (!igConfigured()) throw new HttpError(400, 'Instagram ist noch nicht verbunden.');
+  if (!/^https:\/\//.test(videoUrl || '')) throw new HttpError(400, 'Das Reel hat noch kein Video.');
+  const c = igConfig();
+  const r = await call(`${c.userId}/media`, { method: 'POST', params: { media_type: 'REELS', video_url: videoUrl, caption: caption || '', share_to_feed: 'true' } }, fetchImpl);
+  return r.id;
+}
+
+/** Fragt ab, ob ein Container fertig ist: 'FINISHED', 'IN_PROGRESS' oder wirft bei Fehlern. */
+export async function containerStatus(id, fetchImpl = fetch) {
+  const s = await call(id, { params: { fields: 'status_code,status' } }, fetchImpl);
+  if (s.status_code === 'ERROR' || s.status_code === 'EXPIRED') throw new HttpError(502, `Instagram konnte das Video nicht verarbeiten${s.status ? ': ' + s.status : '.'}`);
+  return s.status_code || 'IN_PROGRESS';
 }

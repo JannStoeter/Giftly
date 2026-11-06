@@ -98,6 +98,17 @@ export const IDEAS = [
         cta('Weihnachten kann kommen', 'Dein Wishtale ist in wenigen Minuten angelegt.'),
       ],
     }) },
+  { id: 'wunsch', format: 'story', title: 'Wunsch des Tages (Story)', desc: 'Kurze Story-Folgen: eine Frage ans Publikum, dein Wunsch und der Weg zum eigenen Wunschzettel.',
+    fields: [['frage', 'Frage', 'Was wünschst du dir gerade?'], ['wunsch', 'Dein Wunsch des Tages', 'Ein ruhiger Sonntag und ein frisch gebrühter Kaffee']],
+    build: v => ({
+      title: 'Story: Wunsch des Tages', caption: '',
+      slides: [S({ eyebrow: 'Wünsch dir was', title: v.frage, sub: 'Antworte uns gern in der Story.' }), S({ eyebrow: 'Unser Wunsch des Tages', title: v.wunsch, theme: 'gruen' }), cta('Was steht auf deinem Wunschzettel?', 'Lege dein Wishtale an, den Link findest du in unserer Bio.')],
+    }) },
+  { id: 'countdown', format: 'story', title: 'Countdown bis Heiligabend (Story)', desc: 'Eine Story mit den Tagen bis Heiligabend und dem Hinweis auf den Wunschzettel. Die Tage werden beim Erstellen berechnet.', fields: [],
+    build: () => ({
+      title: 'Story: Countdown', caption: '',
+      slides: [S({ eyebrow: 'Weihnachten', title: `Noch ${daysToXmas()} Tage bis Heiligabend`, sub: 'Weißt du schon, was du dir wünschst?' }), cta('Schreib es auf, solange noch Zeit ist', 'Dein Wishtale ist in wenigen Minuten angelegt.')],
+    }) },
   { id: 'produkt', title: 'Wunsch-Idee der Woche', desc: 'Eine Anregung zum Wünschen, mit einem Produkt als Beispiel. Das Produkt wählt Wishtale automatisch, passend zu deiner Gewichtung. Bitte nur gelegentlich einsetzen, damit es nicht nach Werbung aussieht.',
     fields: [['intro', 'Einstiegssatz', 'Weihnachten steht vor der Tür, aber du weißt nicht, was du dir wünschen sollst? Schau dir das hier an'], ['product', 'Produkt', '', productOptions], ['anzeige', 'Mit „Anzeige“ kennzeichnen (ja oder nein)', 'ja']],
     build: v => {

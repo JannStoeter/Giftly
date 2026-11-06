@@ -46,5 +46,16 @@
       "path": "/api/cron-publish",
       "schedule": "0 7 * * *"
     }
-  ]
+  ],
+  "functions": {
+    "api/instagram.js": {
+      "maxDuration": 60
+    },
+    "api/cron-publish.js": {
+      "maxDuration": 60
+    },
+    "api/ads.js": {
+      "maxDuration": 30
+    }
+  }
 }

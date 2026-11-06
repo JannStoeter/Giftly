@@ -39,17 +39,21 @@ function fitTitle(ctx, text, maxW, maxLines, from, to) {
   return { size: to, lines: wrap(ctx, text, maxW).slice(0, maxLines) };
 }
 
+export const FORMATS = { post: { label: 'Beitrag (Karussell)', w: 1080, h: 1350 }, story: { label: 'Story', w: 1080, h: 1920 }, reel: { label: 'Reel (Video)', w: 1080, h: 1920 } };
+
+/** opts.format: 'post' (4:5), 'story' oder 'reel' (9:16, mit Rand für die Instagram-Bedienelemente oben und unten). */
 export function drawSlide(canvas, s, index, total, opts = {}) {
+  const fmt = opts.format || 'post', tall = fmt !== 'post', H = tall ? 1920 : 1350, TOP = tall ? 170 : 0, BOT = tall ? 250 : 0;
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d'), th = THEMES[s.theme] || THEMES.creme, cw = W - PAD * 2;
   ctx.fillStyle = th.bg; ctx.fillRect(0, 0, W, H);
 
   // Kopf: Logo und Seitenzahl
   ctx.textBaseline = 'alphabetic'; ctx.fillStyle = th.ink; ctx.font = `400 58px ${DISP}`;
-  ctx.fillText('wishtale', PAD, 140);
+  ctx.fillText('wishtale', PAD, 140 + TOP);
   const lw = ctx.measureText('wishtale').width;
-  ctx.fillStyle = th.gold; ctx.beginPath(); ctx.arc(PAD + lw + 14, 134, 7, 0, Math.PI * 2); ctx.fill();
-  if (total > 1 && s.type !== 'cta') { ctx.fillStyle = th.muted; ctx.font = `500 30px ${BODY}`; ctx.textAlign = 'right'; ctx.fillText(`${index + 1} / ${total}`, W - PAD, 136); ctx.textAlign = 'left'; }
+  ctx.fillStyle = th.gold; ctx.beginPath(); ctx.arc(PAD + lw + 14, 134 + TOP, 7, 0, Math.PI * 2); ctx.fill();
+  if (!tall && total > 1 && s.type !== 'cta') { ctx.fillStyle = th.muted; ctx.font = `500 30px ${BODY}`; ctx.textAlign = 'right'; ctx.fillText(`${index + 1} / ${total}`, W - PAD, 136); ctx.textAlign = 'left'; }
 
   // Inhalt vorbereiten, damit er senkrecht mittig steht
   const blocks = [];
@@ -63,7 +67,7 @@ export function drawSlide(canvas, s, index, total, opts = {}) {
   if (s.type === 'photo') {
     ctx.font = `400 40px ${BODY}`;
     const subH = s.sub ? wrap(ctx, s.sub, cw).length * 56 + 34 : 0;
-    const ph = Math.max(220, Math.min(470, (H - 210 - 190) - (eyebrow ? 60 : 0) - t.lines.length * tl - 30 - 34 - subH));
+    const ph = Math.max(220, Math.min(tall ? 820 : 470, (H - 210 - 190 - TOP - BOT) - (eyebrow ? 60 : 0) - t.lines.length * tl - 30 - 34 - subH));
     blocks.push({ h: ph, gap: 34, draw: y => {
       ctx.save(); rr(ctx, PAD, y, cw, ph, 36); ctx.clip();
       if (opts.image) { const r = Math.max(cw / opts.image.width, ph / opts.image.height), iw = opts.image.width * r, ih = opts.image.height * r; ctx.drawImage(opts.image, PAD + (cw - iw) / 2, y + (ph - ih) / 2, iw, ih); }
@@ -98,13 +102,13 @@ export function drawSlide(canvas, s, index, total, opts = {}) {
     blocks.push({ h: 50, gap: 44, draw: y => { ctx.fillStyle = th.ink; ctx.font = `600 44px ${BODY}`; const a = s.handle || ''; ctx.fillText(a, PAD, y + 42); const aw = ctx.measureText(a).width; ctx.font = `400 44px ${BODY}`; ctx.fillText((a && s.domain ? '  ·  ' : '') + (s.domain || ''), PAD + aw, y + 42); } });
   }
   const total_h = blocks.reduce((a, b, i) => a + b.h + (i ? blocks[i - 1].gap || 24 : 0), 0);
-  let y = Math.max(210, 210 + (H - 210 - 190 - total_h) / 2);
+  let y = Math.max(210 + TOP, 210 + TOP + (H - 210 - 190 - TOP - BOT - total_h) / 2);
   blocks.forEach((b, i) => { b.draw(y); y += b.h + (b.gap || 24); });
 
   // Fuß
   ctx.fillStyle = th.muted; ctx.font = `400 32px ${BODY}`;
-  ctx.fillText(s.footer ?? 'Jeder Wunsch hat eine Geschichte.', PAD, H - 96);
-  if (index < total - 1) { ctx.strokeStyle = th.ink; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(W - PAD - 44, H - 106); ctx.lineTo(W - PAD, H - 106); ctx.moveTo(W - PAD - 16, H - 122); ctx.lineTo(W - PAD, H - 106); ctx.lineTo(W - PAD - 16, H - 90); ctx.stroke(); }
+  ctx.fillText(s.footer ?? 'Jeder Wunsch hat eine Geschichte.', PAD, H - 96 - BOT);
+  if (!tall && index < total - 1) { ctx.strokeStyle = th.ink; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(W - PAD - 44, H - 106); ctx.lineTo(W - PAD, H - 106); ctx.moveTo(W - PAD - 16, H - 122); ctx.lineTo(W - PAD, H - 106); ctx.lineTo(W - PAD - 16, H - 90); ctx.stroke(); }
 }
 
 export const blank = type => ({
