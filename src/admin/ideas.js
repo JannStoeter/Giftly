@@ -91,32 +91,43 @@ export const IDEAS = [
         cta('Weihnachten kann kommen', 'Dein Wishtale ist in wenigen Minuten angelegt.'),
       ],
     }) },
-  { id: 'produkt', title: 'Geschenkidee der Woche', desc: 'Wishtale wählt ein Produkt automatisch aus, passend zu deiner Kategorie-Gewichtung. Mit Foto, Gründen und Anzeigen-Kennzeichnung.',
-    fields: [['offset', 'Anderes Produkt wählen (0, 1, 2 …)', '0']],
+  { id: 'produkt', title: 'Wunsch-Idee der Woche', desc: 'Eine Anregung zum Wünschen, mit einem Produkt als Beispiel. Das Produkt wählt Wishtale automatisch, passend zu deiner Gewichtung. Bitte nur gelegentlich einsetzen, damit es nicht nach Werbung aussieht.',
+    fields: [['intro', 'Einstiegssatz', 'Weihnachten steht vor der Tür, aber du weißt nicht, was du dir wünschen sollst? Schau dir das hier an'], ['offset', 'Anderes Produkt wählen (0, 1, 2 …)', '0'], ['anzeige', 'Mit „Anzeige“ kennzeichnen (ja oder nein)', 'ja']],
     build: v => {
-      const x = pickProduct(+v.offset || 0); if (!x) return { title: 'Geschenkidee der Woche', caption: '', slides: [S({ title: 'Es gibt gerade kein passendes Produkt' })] };
-      const world = cat(WORLD_OF_CAT[x.cat] || 'wohnen').n;
+      const x = pickProduct(+v.offset || 0);
+      if (!x) return { title: 'Wunsch-Idee der Woche', caption: '', slides: [S({ title: 'Gerade ist kein Produkt ausgewählt', sub: 'Unter Produkte steht jede Kategorie auf null. Stelle dort mindestens eine wieder auf 100 %.' })] };
+      const world = cat(WORLD_OF_CAT[x.cat] || 'wohnen').n, ad = !/^n/i.test(String(v.anzeige || 'ja'));
       return {
-        title: `Geschenkidee: ${x.t}`, product: x.id,
-        caption: `Anzeige | Geschenkidee der Woche: ${x.t}.\n\n${(x.pros || []).slice(0, 2).join(' ')}\n\nMehr Ideen, die zu deinem Geschmack passen, findest du in deinem Wishtale. Den Link findest du in der Bio.\n\nAls Amazon-Partner verdiene ich an qualifizierten Verkäufen.\n\n${TAGS} #werbung`,
+        title: `Wunsch-Idee: ${x.t}`, product: x.id,
+        caption: `${ad ? 'Anzeige | ' : ''}${v.intro}:\n\n${x.t}${x.brand ? ` von ${x.brand}` : ''}. ${(x.pros || []).slice(0, 2).join(' ')}\n\nVielleicht ist das ein Wunsch für deinen Wunschzettel? In deinem Wishtale sammelst du alles, worüber du dich freuen würdest, und deine Freunde finden es ohne Nachfragen. Den Link findest du in der Bio.${ad ? '\n\nAls Amazon-Partner verdiene ich an qualifizierten Verkäufen.' : ''}\n\n${TAGS} #wunschzettel${ad ? ' #werbung' : ''}`,
         slides: [
-          S({ eyebrow: 'Geschenkidee der Woche', title: x.t, sub: `Aus der Welt ${world}.` }),
+          S({ eyebrow: 'Wünsch dir was', title: v.intro, sub: 'Eine Idee für deinen Wunschzettel.' }),
           S({ type: 'photo', photoKey: x.a, eyebrow: x.brand || world, title: x.t, sub: x.price ? `Bei Amazon zuletzt ca. ${x.price.toFixed(2).replace('.', ',')} € gesehen (Stand ${PRICE_DATE}), der Preis kann abweichen.` : 'Den aktuellen Preis siehst du bei Amazon.' }),
-          S({ type: 'chips', eyebrow: 'Darum passt es', title: 'Das spricht für dieses Geschenk', chips: (x.pros || []).slice(0, 4).map((c, i) => (i ? '' : '*') + c) }),
-          cta('Mehr Ideen aus deinen Welten', 'In deinem Wishtale findest du Vorschläge, die zu deinem Geschmack passen.'),
+          S({ type: 'chips', eyebrow: 'Darum könnte es dir gefallen', title: 'Das spricht dafür', chips: (x.pros || []).slice(0, 4).map((c, i) => (i ? '' : '*') + c) }),
+          S({ eyebrow: 'Dein Wunschzettel', title: 'Setz es auf deine Wunschliste, wenn es dir gefällt', sub: 'In deinem Wishtale steht neben den Wünschen auch, was du schon hast und was dich ausmacht.' }),
+          cta('Sammle deine Wünsche an einem Ort', 'Lege dein Wishtale an und teile den Link mit deinen Freunden.'),
         ],
         link: amazonUrl(x),
       };
     } },
-  { id: 'aktion', title: 'Aktion aus dem CMS', desc: 'Baut aus einer deiner Aktionen (zum Beispiel Black Friday) ein Karussell mit den Aktionsprodukten.', fields: [['campaign', 'Aktion', '']], ctx: true,
-    build: (v, ctx) => {
-      const c = (ctx.campaigns || []).find(x => x.id === v.campaign) || (ctx.campaigns || [])[0];
-      if (!c) return { title: 'Aktion', caption: '', slides: [S({ title: 'Lege zuerst unter Aktionen eine Aktion an' }), cta()] };
-      const prods = (c.product_ids || []).map(id => (ctx.products || []).find(p => p.id === id)).filter(Boolean);
-      return {
-        title: `Aktion: ${c.title}`,
-        caption: `${c.headline || c.title}\n\n${c.body || ''}\n\nMehr dazu findest du in deinem Wishtale. Den Link findest du in der Bio.\n\n${TAGS} #werbung`.replace(/\n\n\n/g, '\n\n'),
-        slides: [S({ eyebrow: 'Aktion', title: c.headline || c.title, sub: c.body }), ...(prods.length ? [S({ type: 'chips', eyebrow: 'Das ist dabei', title: 'Ausgesucht für dich', chips: prods.map((p, i) => (i ? '' : '*') + p.title) })] : []), cta(c.cta_label || 'Jetzt in deinem Wishtale stöbern', 'Dein Wishtale ist in wenigen Minuten angelegt.')],
-      };
-    } },
+  { id: 'aktion', title: 'Aktion aus dem CMS', desc: 'Baut aus einer deiner Aktionen (zum Beispiel Black Week oder Weihnachten) ein Karussell, das ums Wünschen geht.', fields: [['campaign', 'Aktion', '']], ctx: true,
+    build: (v, ctx) => buildCampaignPost((ctx.campaigns || []).find(x => x.id === v.campaign) || (ctx.campaigns || [])[0], ctx) },
 ];
+
+/** Karussell zu einer Aktion: Es geht immer ums Wünschen, nicht ums Kaufen. */
+export function buildCampaignPost(c, ctx = {}) {
+  if (!c) return { title: 'Aktion', caption: '', slides: [S({ title: 'Lege zuerst unter Aktionen eine Aktion an' }), cta()] };
+  const prods = (c.product_ids || []).map(id => (ctx.products || []).find(p => p.id === id)).filter(Boolean);
+  const head = c.headline || c.title;
+  return {
+    title: `Aktion: ${c.title}`, campaignId: c.id,
+    caption: `${head}\n\n${c.body || ''}\n\nLege dein Wishtale an und teile den Link mit deinen Liebsten. Den Link findest du in der Bio.\n\n${TAGS} #wunschzettel${prods.length ? ' #werbung' : ''}`.replace(/\n\n\n/g, '\n\n'),
+    slides: [
+      S({ eyebrow: 'Wünsch dir was', title: head, sub: '' }),
+      ...(c.body ? [S({ eyebrow: 'Dein Wunschzettel', title: 'So geht das mit deinem Wishtale', sub: c.body })] : []),
+      S({ type: 'chips', eyebrow: 'Das gehört dazu', title: 'Alles, was dich ausmacht, auf einer Seite', chips: ['*Deine Wünsche', 'Interessen', 'Lieblingsmarken', 'Schon vorhanden', 'Bitte nicht'] }),
+      ...(prods.length ? [S({ type: 'chips', eyebrow: 'Ein paar Ideen', title: 'Vielleicht ist ja etwas für deinen Wunschzettel dabei', chips: prods.map((p, i) => (i ? '' : '*') + p.title) })] : []),
+      cta(c.cta_label || 'Meinen Wunschzettel anlegen', 'Dein Wishtale ist in wenigen Minuten angelegt.'),
+    ],
+  };
+}

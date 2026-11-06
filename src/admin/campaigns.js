@@ -1,5 +1,7 @@
 import { list, save, remove } from './api.js';
 import { esc, toast, toLocal, fromLocal, fmtDate } from './util.js';
+import { suggest } from './occasions.js';
+import { buildCampaignPost } from './ideas.js';
 
 const PLACES = { landing: 'Banner auf der Landingpage', app: 'Inspiration in der App' };
 const empty = () => { const s = new Date(), e = new Date(Date.now() + 7 * 864e5); return { title: '', headline: '', body: '', cta_label: '', cta_url: '', placement: ['app'], product_ids: [], starts_at: s.toISOString(), ends_at: e.toISOString(), active: true }; };
@@ -19,11 +21,17 @@ export async function mount(el) {
     <div class="fld"><label for="c-e">Ende</label><input id="c-e" name="ends_at" type="datetime-local" class="inp" required value="${toLocal(edit.ends_at)}"></div>
    </div>
    <fieldset class="fld"><legend>Wo soll die Aktion erscheinen?</legend>${Object.entries(PLACES).map(([k, v]) => `<label class="chk"><input type="checkbox" name="pl" value="${k}" ${edit.placement.includes(k) ? 'checked' : ''}> ${v}</label>`).join('')}</fieldset>
-   <fieldset class="fld"><legend>Produkte in dieser Aktion (erscheinen in der App unter der Aktion)</legend>${prods.map(p => `<label class="chk"><input type="checkbox" name="pr" value="${p.id}" ${edit.product_ids.includes(p.id) ? 'checked' : ''}> ${esc(p.title)}${p.active ? '' : ' (aus)'}</label>`).join('') || '<p class="muted">Lege zuerst Produkte an.</p>'}</fieldset>
-   <div class="row"><label class="chk"><input type="checkbox" name="active" ${edit.active ? 'checked' : ''}> Eingeschaltet (läuft nur im Zeitraum)</label></div>
+   <fieldset class="fld"><legend>Produkte als Beispiele (optional, erscheinen in der App unter der Aktion)</legend>${prods.map(p => `<label class="chk"><input type="checkbox" name="pr" value="${p.id}" ${edit.product_ids.includes(p.id) ? 'checked' : ''}> ${esc(p.title)}${p.active ? '' : ' (aus)'}</label>`).join('') || '<p class="muted">Keine eigenen Produkte angelegt. Das ist in Ordnung, die Aktion läuft auch ohne.</p>'}</fieldset>
+   <div class="row"><label class="chk"><input type="checkbox" name="active" ${edit.active ? 'checked' : ''}> Eingeschaltet (läuft nur im Zeitraum)</label>${edit.id ? '' : `<label class="chk"><input type="checkbox" name="ig" checked> Passenden Instagram-Beitrag dazu erstellen</label>`}</div>
    <div class="row"><button class="btn pri" type="submit">Speichern</button><button class="btn ghost" type="button" data-a="cancel">Abbrechen</button>${edit.id ? '<button class="btn ghost danger" type="button" data-a="del">Löschen</button>' : ''}</div></form>`;
+  const suggestions = () => {
+    const have = new Set(rows.map(r => r.title)), list = suggest().filter(x => !have.has(x.title));
+    if (!list.length) return '';
+    return `<section class="card"><h2>Vorschläge für die nächsten Wochen</h2><p class="muted">Fertig ausgefüllt, mit Zeitraum und Texten, die ums Wünschen gehen und nicht ums Kaufen. Du entscheidest nur, ob du die Aktion fährst. Danach kannst du alles noch ändern.</p>
+      <div class="ideas">${list.map(x => `<div class="card idea"><b>${esc(x.title)}</b><span class="muted">${esc(x.when)} · ${fmtDate(x.start)} bis ${fmtDate(x.end)}${x.running ? ' · <span class="pill ok">jetzt aktuell</span>' : ''}</span><span>${esc(x.headline)}</span><button class="btn pri sm" data-a="drive" data-id="${esc(x.id)}">Aktion fahren</button></div>`).join('')}</div></section>`;
+  };
   const draw = () => {
-    el.innerHTML = `<div class="head"><div><h1>Aktionen</h1><p class="muted">Sonderaktionen mit Zeitraum, zum Beispiel zum Black Friday oder zu Weihnachten. Eine Aktion erscheint automatisch von Start bis Ende und verschwindet danach von selbst.</p></div><button class="btn pri" data-a="new">Aktion hinzufügen</button></div>
+    el.innerHTML = `${edit ? '' : suggestions()}<div class="head"><div><h1>Aktionen</h1><p class="muted">Sonderaktionen mit Zeitraum, zum Beispiel zum Black Friday oder zu Weihnachten. Eine Aktion erscheint automatisch von Start bis Ende und verschwindet danach von selbst.</p></div><button class="btn pri" data-a="new">Aktion hinzufügen</button></div>
     ${edit ? form() : ''}<div class="tablewrap"><table><thead><tr><th>Aktion</th><th>Zeitraum</th><th>Ort</th><th>Status</th><th></th></tr></thead><tbody>
     ${rows.map(c => { const [t, k] = state(c); return `<tr><td><b>${esc(c.title)}</b><br><span class="muted">${esc(c.headline)}</span></td><td>${fmtDate(c.starts_at)}<br>bis ${fmtDate(c.ends_at)}</td><td>${c.placement.map(p => esc(PLACES[p] || p)).join('<br>')}</td><td><span class="pill ${k}">${t}</span></td><td class="actions"><button class="btn sec sm" data-a="edit" data-id="${c.id}">Bearbeiten</button> <button class="btn ghost sm" data-a="dup" data-id="${c.id}">Kopieren</button></td></tr>`; }).join('') || '<tr><td colspan="5" class="muted">Noch keine Aktionen.</td></tr>'}
     </tbody></table></div>`;
@@ -31,7 +39,8 @@ export async function mount(el) {
   el.onclick = async e => {
     const b = e.target.closest('[data-a]'); if (!b) return; const a = b.dataset.a, r = rows.find(x => x.id === b.dataset.id);
     try {
-      if (a === 'new') { edit = empty(); draw(); el.querySelector('#c-title')?.focus(); }
+      if (a === 'drive') { const x = suggest().find(v => v.id === b.dataset.id); edit = { title: x.title, headline: x.headline, body: x.body, cta_label: x.cta_label, cta_url: x.cta_url, placement: x.placement, product_ids: [], starts_at: x.start, ends_at: x.end, active: true }; draw(); window.scrollTo(0, 0); el.querySelector('#c-title')?.focus(); }
+      else if (a === 'new') { edit = empty(); draw(); el.querySelector('#c-title')?.focus(); }
       else if (a === 'edit') { edit = { ...r }; draw(); window.scrollTo(0, 0); el.querySelector('#c-title')?.focus(); }
       else if (a === 'dup') { const rest = { ...r }; delete rest.id; delete rest.created_at; delete rest.updated_at; edit = { ...rest, title: r.title + ' (Kopie)', active: false }; draw(); window.scrollTo(0, 0); }
       else if (a === 'cancel') { edit = null; draw(); }
@@ -45,7 +54,16 @@ export async function mount(el) {
     const url = f('cta_url'); if (url && !/^(https:\/\/|\/)/.test(url)) return toast('Der Knopf-Link muss mit https:// oder / beginnen.', true);
     const row = { ...(edit.id ? { id: edit.id } : {}), title: f('title'), headline: f('headline'), body: f('body'), cta_label: f('cta_label'), cta_url: url, starts_at: s, ends_at: en,
       placement: fd.getAll('pl'), product_ids: fd.getAll('pr'), active: fd.get('active') === 'on' };
-    try { await save('campaigns', row); toast('Gespeichert.'); edit = null; await load(); } catch (err) { toast('Das hat nicht geklappt: ' + (err.message || err), true); }
+    try {
+      const saved = await save('campaigns', row); toast('Gespeichert.');
+      if (fd.get('ig') === 'on' && !edit.id) {
+        const out = buildCampaignPost(saved, { products: prods });
+        const post = await save('social_posts', { title: out.title, status: 'draft', caption: out.caption, slides: out.slides, scheduled_for: new Date(saved.starts_at) > new Date() ? saved.starts_at : null });
+        try { sessionStorage.setItem('cms:open-post', post.id); } catch { /* ohne Speicher */ }
+        toast('Die Aktion ist angelegt, und der Instagram-Beitrag wartet auf dich.'); location.hash = '#instagram'; return;
+      }
+      edit = null; await load();
+    } catch (err) { toast('Das hat nicht geklappt: ' + (err.message || err), true); }
   };
   await load();
 }

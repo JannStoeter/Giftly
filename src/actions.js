@@ -2,7 +2,7 @@ import { S, W, switchTo, resetState, guestPerson, saveState } from './state.js';
 import { $, toast, kwOf, nid, money, overlap } from './lib/util.js';
 import { CATALOG, PRIO, cat } from './data/content.js';
 import { check } from './logic.js';
-import { offersFor, worldOffers } from './lib/products.js';
+import { offersFor, worldOffers, popularOffers } from './lib/products.js';
 import { guessCategory } from './lib/category.js';
 import { parseAmazonInput, searchUrl } from './lib/shops.js';
 import { parsePinterest, parseInstagram, givePinConsent, revokePinConsent } from './lib/social.js';
@@ -153,7 +153,7 @@ const A={
  wopen(el){S.ui.pickId=el.dataset.id;S.ui.wishCtx=el.dataset.ctx||'guest';S.ui.modal='wishdetail';render();setTimeout(()=>document.querySelector('.sheet [data-act=close]')?.focus({preventScroll:true}),30)},
  try(el){const p=guestPerson();S.ui.idea=el.dataset.v;S.ui.ideaRes=check(p,el.dataset.v);render()},
  oadd(el){
-  const o=worldOffers(S.me,el.dataset.cid,12).find(x=>String(x.id)===el.dataset.id);if(!o)return;
+  const o=[...worldOffers(S.me,el.dataset.cid,12),...popularOffers(12)].find(x=>String(x.id)===el.dataset.id);if(!o)return;
   S.me.wishes.unshift(W({t:o.t,c:el.dataset.cid,kind:o.exp?'erlebnis':'produkt',prio:2,link:o.exp?'':o.url,price:o.price||null,a:o.a||cat(el.dataset.cid).a,tone:o.tone||0,kw:kwOf(o.t)}));
   toast('Schön, das steht jetzt auf deiner Wunschliste.');render();
  },

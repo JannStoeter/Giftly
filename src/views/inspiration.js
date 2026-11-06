@@ -1,7 +1,7 @@
 import { S } from '../state.js';
 import { esc, ic } from '../lib/util.js';
 import { art, artIllu } from '../lib/art.js';
-import { worldOffers } from '../lib/products.js';
+import { worldOffers, popularOffers } from '../lib/products.js';
 import { CATS, cat } from '../data/content.js';
 import { priceLine } from './product.js';
 import { safeUrl } from '../lib/promo.js';
@@ -63,7 +63,7 @@ export function Entdecken(){
    <div class="pagehead"><p class="eyebrow">Inspiration</p><h1>Ideen aus deinen Welten</h1>
     <p class="muted" style="max-width:620px">${m.cats.length?'Wir haben für jede deiner Welten ein paar Dinge herausgesucht, die zu deinen Interessen und Marken passen. Was dir gefällt, setzt du mit einem Tipp auf deine Wunschliste.':'Sobald du in deinem Profil ein paar Welten auswählst, schlagen wir dir hier passende Dinge vor. Bis dahin findest du ein paar Anregungen aus beliebten Bereichen.'}</p></div>
    ${Promo()}
-   ${secs.length?secs.join(''):'<p class="muted">Für deine Welten haben wir gerade noch keine Vorschläge. Das kommt bald.</p>'}
+   ${secs.length?secs.join(''):`<section class="psec" style="margin-bottom:18px"><p class="eyebrow">Zum Anfangen</p><h3 aria-level="2">Beliebte Wunschideen</h3><p class="muted">Sobald du in deinem Profil Interessen und Marken angibst, wird es persönlicher. Bis dahin ein paar Anregungen.</p><div class="offers" style="margin-top:10px">${popularOffers(4).map(o=>Card(o,'wohnen',mine.has(o.t.toLowerCase()))).join('')}</div></section>`}
    <p class="disc" style="margin-top:18px"><b>Anzeige:</b> Links zu Amazon sind Partnerlinks. ${'Als Amazon-Partner verdiene ich an qualifizierten Verkäufen.'} Preise sind Richtwerte und können abweichen.</p>
   </div>`;
 }

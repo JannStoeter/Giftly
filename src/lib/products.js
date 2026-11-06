@@ -70,6 +70,14 @@ export function offersFor(person, w) {
   return { main: main ? { ...main, id: 'main' } : null, alts, over: 0 };
 }
 
+/** Beliebte Wunschideen für Profile, die noch kaum etwas angegeben haben. Gewichtung aus dem CMS gilt auch hier. */
+export function popularOffers(n = 4) {
+  return PRODUCTS
+    .map(x => ({ x, sc: x.q * weightOf(WORLD_OF_CAT[x.cat] || 'wohnen') }))
+    .filter(e => e.sc > 0).sort((a, b) => b.sc - a.sc).slice(0, n)
+    .map(({ x }) => ({ ...fromProduct(x, 'katalog'), id: x.id, why: [] }));
+}
+
 /* ---------- Welten ---------- */
 export const WORLD_OF_CAT = { pfanne: 'kochen', bräter: 'kochen', messerset: 'kochen', wasserkocher: 'genuss', mühle: 'genuss', wanderstöcke: 'outdoor' };
 const strip = t => String(t).replace(/<[^>]+>/g, '');

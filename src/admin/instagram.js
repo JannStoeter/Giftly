@@ -16,6 +16,9 @@ export async function mount(el) {
     posts = await list('social_posts', 'updated_at', false);
     const [c, p] = await Promise.all([sb.from('campaigns').select('*').order('starts_at', { ascending: false }), sb.from('products').select('*')]);
     ctx = { campaigns: c.data || [], products: p.data || [] };
+    let want = null; try { want = sessionStorage.getItem('cms:open-post'); sessionStorage.removeItem('cms:open-post'); } catch { /* ohne Speicher */ }
+    const hit = want && posts.find(x => x.id === want);
+    if (hit) { cur = { ...hit, slides: JSON.parse(JSON.stringify(hit.slides)) }; sel = 0; status(); }
     draw();
   };
   const status = async () => {
@@ -52,7 +55,8 @@ export async function mount(el) {
   };
   const publishBox = () => {
     const ok = conn && conn.instagram && conn.instagram.configured;
-    return `<div class="card"><h2>Veröffentlichen</h2>
+    const hint = cur.title.startsWith('Aktion:') ? '<p class="banner"><b>Dieser Beitrag gehört zu einer Aktion.</b> Lies Texte und Bildunterschrift kurz durch, prüfe die geplante Zeit und wähle dann „Einplanen“ oder „Jetzt auf Instagram posten“.</p>' : cur.title.startsWith('Wunsch-Idee:') ? '<p class="banner"><b>Das ist ein Beitrag mit einem Produkt als Beispiel.</b> Setze solche Beiträge nur gelegentlich ein, höchstens jeden vierten, damit der Fokus auf dem Wünschen bleibt.</p>' : '';
+    return `<div class="card"><h2>Veröffentlichen</h2>${hint}
      ${cur.status === 'posted' ? `<p><span class="pill ok">Gepostet</span> ${cur.posted_at ? fmtDate(cur.posted_at) : ''} ${cur.ig_permalink ? `<a href="${esc(cur.ig_permalink)}" target="_blank" rel="noopener">Auf Instagram ansehen</a>` : ''}</p>` : ''}
      ${cur.publish_error ? `<p class="banner warn2" role="alert"><b>Letzter Versuch fehlgeschlagen:</b> ${esc(cur.publish_error)}</p>` : ''}
      ${ok ? '' : `<p class="banner">Instagram ist noch nicht verbunden. Unter <a href="#verbindungen">Verbindungen</a> steht, wie du es einrichtest. Bis dahin lädst du die Bilder herunter und postest in der Instagram-App.</p>`}
@@ -80,6 +84,7 @@ export async function mount(el) {
        <p class="hint">Du kannst alles danach in Ruhe bearbeiten: Texte, Reihenfolge, Farben, Fotos und die Bildunterschrift.</p></form>`;
     }
     return `<div class="head"><div><h1>Welche Idee möchtest du posten?</h1><p class="muted">Wähle eine Idee. Wishtale erstellt daraus die Folien und die Bildunterschrift, und du bearbeitest sie danach.</p></div><button class="btn ghost" data-a="list">Zurück zur Liste</button></div>
+     ${posts.slice(0, 4).some(p => p.title.startsWith('Wunsch-Idee:')) ? '<div class="banner"><b>Zur Erinnerung:</b> Unter den letzten Beiträgen war schon einer mit einem Produkt. Wir empfehlen höchstens jeden vierten, damit der Feed nach Wunschzettel aussieht und nicht nach Werbung.</div>' : ''}
      <div class="ideas">${IDEAS.map(i => `<button class="card idea" data-a="idea" data-id="${i.id}"><b>${esc(i.title)}</b><span class="muted">${esc(i.desc)}</span></button>`).join('')}<button class="card idea" data-a="blankpost"><b>Leerer Beitrag</b><span class="muted">Von Grund auf selbst bauen.</span></button></div>`;
   };
   const draw = () => {
