@@ -13,14 +13,16 @@ export async function mount(el) {
   ${err ? `<div class="banner warn2" role="alert"><b>Der Status konnte nicht geladen werden.</b> ${esc(err)} Auf einer Vorschau ohne Server-Funktionen (npm run dev) geht das nicht, auf der echten Seite schon.</div>` : ''}
   <div class="card"><h2>Instagram ${st ? pill(st.instagram.configured, st.instagram.username ? 'Verbunden mit @' + esc(st.instagram.username) : 'Verbunden') : ''}</h2>
    ${st?.instagram.error ? `<p class="banner warn2" role="alert">${esc(st.instagram.error)}</p>` : ''}
-   <p class="muted">Damit postest du Beiträge direkt aus dem Studio. Du brauchst ein Instagram-Geschäftskonto oder Creator-Konto, das mit einer Facebook-Seite verbunden ist.</p>
+   <p class="muted">Damit postest du Beiträge direkt aus dem Studio. Der einfachste Weg ist der „Instagram-Login“: Du brauchst nur dein berufliches Instagram-Konto und ein Meta-Entwicklerkonto, aber <b>keine Facebook-Seite</b>.</p>
    <ol class="steps">
-    ${step('1. Konto vorbereiten', 'Stelle @wishtale.de in der Instagram-App auf „Berufliches Konto“ und verbinde es unter Einstellungen mit einer Facebook-Seite für Wishtale.')}
-    ${step('2. Meta-App anlegen', 'Auf developers.facebook.com eine App vom Typ „Business“ anlegen und das Produkt „Instagram“ hinzufügen. Berechtigungen: <code>instagram_basic</code>, <code>instagram_content_publish</code>, <code>pages_show_list</code>, <code>pages_read_engagement</code>.')}
-    ${step('3. Token erzeugen', 'Im Graph API Explorer ein Nutzer-Token mit diesen Berechtigungen erzeugen und in ein langlebiges Token (60 Tage) umtauschen. Dein Konto als Tester oder Entwickler der App eintragen, dann ist keine Meta-Prüfung nötig, solange du nur dein eigenes Konto bedienst.')}
-    ${step('4. Instagram-ID finden', 'Abfrage <code>/me/accounts</code> liefert deine Facebook-Seite, danach <code>/{seiten-id}?fields=instagram_business_account</code> liefert die Instagram-ID.')}
-    ${step('5. In Vercel eintragen', `Projekt <b>wishtale</b> › Settings › Environment Variables: <code>META_ACCESS_TOKEN</code> und <code>META_IG_USER_ID</code>. Danach neu deployen.`)}
+    ${step('1. Entwicklerkonto', 'Gehe auf <b>developers.facebook.com</b>, melde dich mit deinem Facebook- oder Meta-Konto an und wähle „Erste Schritte“. Bestätige deine Handynummer und die Angaben.')}
+    ${step('2. App erstellen', 'Oben rechts „Meine Apps“ › „App erstellen“. Als Name zum Beispiel „Wishtale CMS“. Wenn Meta nach dem Anwendungsfall fragt, wähle „Andere“ oder „Inhalte auf Instagram verwalten“, als App-Typ „Business“. Dann „App erstellen“.')}
+    ${step('3. Instagram hinzufügen', 'In der App links auf „Produkte“ oder „Anwendungsfälle“, dann „Instagram“ hinzufügen und die Einrichtung <b>„API-Einrichtung mit Instagram-Login“</b> öffnen.')}
+    ${step('4. Konto verbinden', 'Dort unter „Instagram-Konto hinzufügen“ meldest du dich mit @wishtale.de an und erlaubst den Zugriff. Falls Instagram eine Einladung als Tester schickt, nimm sie in der Instagram-App unter Einstellungen › Apps und Websites an.')}
+    ${step('5. Token erzeugen', 'Neben dem Konto steht „Token generieren“. Bestätige die Berechtigung „Inhalte veröffentlichen“ und kopiere das Token. Daneben steht die lange <b>Instagram-Konto-ID</b>, ebenfalls kopieren.')}
+    ${step('6. In Vercel eintragen', 'Projekt <b>wishtale</b> › Settings › Environment Variables. Lege drei Einträge an: <code>META_ACCESS_TOKEN</code> (das Token), <code>META_IG_USER_ID</code> (die Konto-ID) und <code>META_API_HOST</code> mit dem Wert <code>https://graph.instagram.com</code>. Danach unter Deployments „Redeploy“ klicken.')}
    </ol>
+   <p class="hint">Solange die Meta-App im Entwicklungsmodus bleibt, darfst du damit dein eigenes Konto bedienen, ohne dass Meta die App prüfen muss. Die Menünamen bei Meta ändern sich öfter, die Reihenfolge bleibt aber gleich.</p>
    <p class="hint">Hinweis: Das langlebige Token läuft nach etwa 60 Tagen ab, dann musst du ein neues eintragen. Der Status oben zeigt dir, wenn es nicht mehr funktioniert.</p></div>
   <div class="card"><h2>Geplante Beiträge ${st ? pill(st.cron.secret && st.cron.serviceKey && st.instagram.configured, 'Bereit', 'Nicht bereit') : ''}</h2>
    <p class="muted">Damit Beiträge zur geplanten Zeit automatisch erscheinen, ruft Vercel täglich um 7 Uhr (UTC) eine Funktion auf. Dafür brauchst du in Vercel zusätzlich:</p>
