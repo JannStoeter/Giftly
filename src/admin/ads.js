@@ -1,5 +1,6 @@
 import { list, save, remove } from './api.js';
 import { esc, toast, lines } from './util.js';
+import { sb } from '../lib/supabase.js';
 
 const HL = 30, DL = 90;
 const empty = () => ({ name: '', status: 'draft', budget_daily: '', final_url: 'https://wishtale.de', keywords: [], headlines: [], descriptions: [], utm_campaign: '', notes: '' });
@@ -28,7 +29,15 @@ export const problems = p => {
 };
 
 export async function mount(el) {
-  let rows = [], edit = null;
+  let rows = [], edit = null, connected = false, live = null, busy = false;
+  const post = async body => {
+    const { data: { session } } = await sb.auth.getSession();
+    const r = await fetch('/api/ads', { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + session.access_token }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || 'Fehler ' + r.status); return j;
+  };
+  const probe = async () => { try { const { data: { session } } = await sb.auth.getSession(); const r = await fetch('/api/integrations', { headers: { authorization: 'Bearer ' + session.access_token } }); connected = r.ok && (await r.json()).googleAds.configured; } catch { connected = false; } draw(); };
+  const liveBox = () => !connected ? '' : `<div class="card"><div class="row"><h2 style="margin:0">Kampagnen in Google Ads (letzte 30 Tage)</h2><button class="btn sec sm" data-a="refresh">${busy ? 'Lädt …' : 'Aktualisieren'}</button></div>
+    ${live ? `<div class="tablewrap"><table><thead><tr><th>Kampagne</th><th>Status</th><th>Tagesbudget</th><th>Klicks</th><th>Kosten</th><th></th></tr></thead><tbody>${live.map(c => `<tr><td><b>${esc(c.name)}</b></td><td><span class="pill ${c.status === 'ENABLED' ? 'ok' : ''}">${c.status === 'ENABLED' ? 'Läuft' : c.status === 'PAUSED' ? 'Pausiert' : esc(c.status)}</span></td><td>${c.dailyBudget.toFixed(2).replace('.', ',')} €</td><td>${c.clicks}</td><td>${c.cost.toFixed(2).replace('.', ',')} €</td><td class="actions"><button class="btn sec sm" data-a="gstatus" data-id="${c.id}" data-to="${c.status === 'ENABLED' ? 'PAUSED' : 'ENABLED'}">${c.status === 'ENABLED' ? 'Pausieren' : 'Starten'}</button> <button class="btn ghost sm" data-a="gbudget" data-bid="${c.budgetId}" data-v="${c.dailyBudget}">Budget ändern</button></td></tr>`).join('') || '<tr><td colspan="6" class="muted">Noch keine Kampagnen.</td></tr>'}</tbody></table></div>` : '<p class="muted">Tippe auf „Aktualisieren“, um die Kampagnen zu laden.</p>'}</div>`;
   const load = async () => { rows = await list('ad_plans', 'updated_at', false); draw(); };
   const cur = () => ({ ...edit, headlines: lines(edit._h ?? edit.headlines.join('\n')), descriptions: lines(edit._d ?? edit.descriptions.join('\n')), keywords: lines(edit._k ?? edit.keywords.join('\n')) });
   const preview = () => { const p = cur(), h = p.headlines.slice(0, 3); return `<div class="adprev"><span class="adtag">Anzeige</span> <span class="muted">${esc(p.final_url.replace(/^https:\/\//, ''))}</span><div class="adh">${esc(h.join(' | ') || 'Deine Überschriften erscheinen hier')}</div><div>${esc(p.descriptions[0] || 'Deine Beschreibung erscheint hier.')}</div></div>`; };
@@ -45,10 +54,11 @@ export async function mount(el) {
    <div class="fld"><label for="a-s">Status</label><select id="a-s" name="status" class="sel">${[['draft', 'Entwurf'], ['live', 'Läuft in Google Ads'], ['paused', 'Pausiert']].map(([k, v]) => `<option value="${k}" ${edit.status === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div></div>
    <div id="adprev">${preview()}</div><div id="adchk">${check()}</div>
    <p class="hint">Tracking-Link: <code>${esc(utmUrl(cur()))}</code></p>
-   <div class="row"><button class="btn pri" type="submit">Speichern</button><button class="btn sec" type="button" data-a="csv">CSV für Google Ads Editor</button><button class="btn ghost" type="button" data-a="cancel">Abbrechen</button>${edit.id ? '<button class="btn ghost danger" type="button" data-a="del">Löschen</button>' : ''}</div></form>`;
+   <div class="row"><button class="btn pri" type="submit">Speichern</button><button class="btn sec" type="button" data-a="csv">CSV für Google Ads Editor</button>${connected && edit.id ? '<button class="btn sec" type="button" data-a="gcreate">In Google Ads anlegen (pausiert)</button>' : ''}<button class="btn ghost" type="button" data-a="cancel">Abbrechen</button>${edit.id ? '<button class="btn ghost danger" type="button" data-a="del">Löschen</button>' : ''}</div></form>`;
   const draw = () => {
     el.innerHTML = `<div class="head"><div><h1>Google Ads</h1><p class="muted">Hier planst du Suchanzeigen, prüfst die Längen und exportierst alles für den Google Ads Editor.</p></div><button class="btn pri" data-a="new">Plan hinzufügen</button></div>
-    <div class="banner"><b>Noch nicht mit Google Ads verbunden.</b> Anzeigen werden hier geplant und als Datei in den Google Ads Editor geladen. Eine direkte Steuerung (Budget, Pausieren, Auswertung) braucht einen Zugang zur Google-Ads-Schnittstelle mit Entwickler-Token. Das richten wir ein, sobald du ein Google-Ads-Konto hast.</div>
+    ${connected ? '<div class="banner"><b>Mit Google Ads verbunden.</b> Neue Kampagnen aus einem Plan werden immer pausiert angelegt. Du startest sie erst, wenn du sie geprüft hast.</div>' : '<div class="banner"><b>Noch nicht mit Google Ads verbunden.</b> Du kannst Pläne schon jetzt anlegen und als Datei in den Google Ads Editor laden. Wie du Google Ads anschließt, steht unter <a href="#verbindungen">Verbindungen</a>.</div>'}
+    ${liveBox()}
     <div class="banner warn2"><b>Datenschutz:</b> Für Conversion-Messung oder Remarketing von Google braucht die Seite ein Einwilligungsbanner, und die Datenschutzerklärung muss angepasst werden. Das ist bisher nicht eingebaut, die Seite setzt keine Google-Skripte ein.</div>
     ${edit ? form() : ''}<div class="tablewrap"><table><thead><tr><th>Plan</th><th>Budget</th><th>Status</th><th></th></tr></thead><tbody>
     ${rows.map(r => `<tr><td><b>${esc(r.name)}</b><br><span class="muted">${r.headlines.length} Überschriften, ${r.keywords.length} Suchbegriffe</span></td><td>${r.budget_daily ? esc(r.budget_daily) + ' € pro Tag' : ''}</td><td><span class="pill ${r.status === 'live' ? 'ok' : r.status === 'paused' ? 'gold' : ''}">${{ draft: 'Entwurf', live: 'Läuft', paused: 'Pausiert' }[r.status]}</span></td><td class="actions"><button class="btn sec sm" data-a="edit" data-id="${r.id}">Bearbeiten</button></td></tr>`).join('') || '<tr><td colspan="4" class="muted">Noch keine Pläne.</td></tr>'}</tbody></table></div>`;
@@ -64,17 +74,22 @@ export async function mount(el) {
   el.onclick = async e => {
     const b = e.target.closest('[data-a]'); if (!b) return; const a = b.dataset.a, r = rows.find(x => x.id === b.dataset.id);
     try {
-      if (a === 'new') { edit = empty(); draw(); }
+      if (a === 'refresh') { busy = true; draw(); try { live = (await post({ action: 'campaigns' })).campaigns; } finally { busy = false; draw(); } }
+      else if (a === 'gstatus') { await post({ action: 'status', campaignId: b.dataset.id, status: b.dataset.to }); toast(b.dataset.to === 'PAUSED' ? 'Die Kampagne ist pausiert.' : 'Die Kampagne läuft.'); live = (await post({ action: 'campaigns' })).campaigns; draw(); }
+      else if (a === 'gbudget') { const v = prompt('Neues Tagesbudget in Euro:', b.dataset.v); if (v == null) return; const n = parseFloat(String(v).replace(',', '.')); if (!(n > 0)) return toast('Bitte eine Zahl größer als 0 eingeben.', true); await post({ action: 'budget', budgetId: b.dataset.bid, euro: n }); toast('Das Budget ist geändert.'); live = (await post({ action: 'campaigns' })).campaigns; draw(); }
+      else if (a === 'gcreate') { const pr = problems(cur()); if (pr.length) return toast('Bitte zuerst die Hinweise beheben.', true); if (!confirm('Aus diesem Plan eine pausierte Kampagne in Google Ads anlegen?')) return; await save('ad_plans', { id: edit.id, ...planRow() }); const r = await post({ action: 'create', planId: edit.id }); toast(`Angelegt (pausiert): ${r.name}`); live = (await post({ action: 'campaigns' })).campaigns; edit = null; await load(); }
+      else if (a === 'new') { edit = empty(); draw(); }
       else if (a === 'edit') { edit = { ...r }; draw(); window.scrollTo(0, 0); }
       else if (a === 'cancel') { edit = null; draw(); }
       else if (a === 'csv') { const p = cur(), pr = problems(p); if (pr.length && !confirm('Es gibt noch Hinweise:\n\n' + pr.join('\n') + '\n\nTrotzdem exportieren?')) return; const url = URL.createObjectURL(new Blob(['﻿' + toCsv(p)], { type: 'text/csv;charset=utf-8' })); const l = document.createElement('a'); l.href = url; l.download = 'google-ads-' + (p.utm_campaign || 'plan') + '.csv'; l.click(); URL.revokeObjectURL(url); }
       else if (a === 'del') { if (confirm('Diesen Plan wirklich löschen?')) { await remove('ad_plans', edit.id); edit = null; await load(); } }
     } catch (err) { toast('Das hat nicht geklappt: ' + (err.message || err), true); }
   };
+  const planRow = () => { const p = cur(), b = parseFloat(String(edit.budget_daily).replace(',', '.')); return { name: p.name.trim(), status: p.status, budget_daily: Number.isFinite(b) && b > 0 ? b : null, final_url: p.final_url.trim(), keywords: p.keywords, headlines: p.headlines, descriptions: p.descriptions, utm_campaign: (p.utm_campaign || '').trim(), notes: p.notes || '' }; };
   el.onsubmit = async e => {
-    e.preventDefault(); const p = cur(), b = parseFloat(String(edit.budget_daily).replace(',', '.'));
-    const row = { ...(edit.id ? { id: edit.id } : {}), name: p.name.trim(), status: p.status, budget_daily: Number.isFinite(b) && b > 0 ? b : null, final_url: p.final_url.trim(), keywords: p.keywords, headlines: p.headlines, descriptions: p.descriptions, utm_campaign: (p.utm_campaign || '').trim(), notes: p.notes || '' };
+    e.preventDefault();
+    const row = { ...(edit.id ? { id: edit.id } : {}), ...planRow() };
     try { await save('ad_plans', row); toast('Gespeichert.'); edit = null; await load(); } catch (err) { toast('Das hat nicht geklappt: ' + (err.message || err), true); }
   };
-  await load();
+  await load(); probe();
 }

@@ -1,3 +1,4 @@
+import { weightOf } from './lib/weights.js';
 import { esc, norm, kwOf, same, overlap, money, gen } from './lib/util.js';
 import { S } from './state.js';
 import { ACT, CATALOG, PRODUCTS, cat, occL } from './data/content.js';
@@ -28,7 +29,8 @@ export function recommend(p){
     if(p.cats.includes(it.c)){sc+=1;if(!why.length)why.push(`Passt zu ${gen(p.name)} Welt <b>${esc(cat(it.c).n)}</b>.`)}
     const oc=S.ui.occ;
     if(oc!=='none'&&sc>0){if(it.occ.includes(oc)){sc+=2;why.push(`Passt zu <b>${occL(oc)}</b>.`)}else sc-=1}
-    if(sc>0) good.push({it,sc,why});
+    const wt=weightOf(it.c);
+    if(sc>0&&wt>0) good.push({it,sc:sc*wt,why});
   });
   good.sort((a,b)=>b.sc-a.sc);
   return {good,skip};

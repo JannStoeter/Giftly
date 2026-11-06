@@ -9,6 +9,7 @@ import { same, overlap, norm, kwOf } from './util.js';
 import { PRODUCTS, CATALOG } from '../data/content.js';
 import { AMAZON_TAG, normUrl, searchUrl } from './shops.js';
 import { picks, excluded, recommend } from '../logic.js';
+import { weightOf } from './weights.js';
 
 export const amazonUrl = p => p.asin ? `https://www.amazon.de/dp/${p.asin}?tag=${AMAZON_TAG}` : searchUrl.amazon(p.search || p.t);
 
@@ -70,7 +71,7 @@ export function offersFor(person, w) {
 }
 
 /* ---------- Welten ---------- */
-const WORLD_OF_CAT = { pfanne: 'kochen', bräter: 'kochen', messerset: 'kochen', wasserkocher: 'genuss', mühle: 'genuss', wanderstöcke: 'outdoor' };
+export const WORLD_OF_CAT = { pfanne: 'kochen', bräter: 'kochen', messerset: 'kochen', wasserkocher: 'genuss', mühle: 'genuss', wanderstöcke: 'outdoor' };
 const strip = t => String(t).replace(/<[^>]+>/g, '');
 const nearby = t => `https://www.google.de/search?q=${encodeURIComponent(t + ' in der Nähe')}`;
 
@@ -81,8 +82,10 @@ const nearby = t => `https://www.google.de/search?q=${encodeURIComponent(t + ' i
 export function worldOffers(person, cid, n = 6) {
   const out = [];
   PRODUCTS.filter(x => WORLD_OF_CAT[x.cat] === cid && !excluded(person, { kw: [...kwOf(x.t), x.cat] })).forEach(x => {
+    const wt = weightOf(cid);
+    if (wt === 0) return;
     const why = [];
-    let sc = x.q;
+    let sc = x.q * wt;
     if (person.brands.includes(x.brand)) { sc += 4; why.push(`${x.brand} gehört zu den Lieblingsmarken.`); }
     if (person.wishes.some(w => w.status === 'offen' && w.kw.some(k => same(k, x.cat)))) { sc += 3; why.push('Passt zu einem Wunsch auf der Liste.'); }
     out.push({ sc, offer: { ...fromProduct(x, 'katalog'), id: x.id, why } });

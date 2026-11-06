@@ -1,4 +1,5 @@
 import { list, save, remove } from './api.js';
+import { sb } from '../lib/supabase.js';
 import { esc, money, toast } from './util.js';
 import { CATS } from '../data/content.js';
 import { withAmazonTag } from '../lib/shops.js';
@@ -8,11 +9,20 @@ export const PARTNERS = { amazon: 'Amazon', mydays: 'mydays', 'jochen-schweizer'
 const empty = () => ({ title: '', brand: '', category: 'wohnen', partner: 'amazon', url: '', price: '', image_url: '', note: '', active: true, featured: false, sort: 0 });
 
 export async function mount(el) {
-  let rows = [], edit = null, q = '';
-  const load = async () => { rows = await list('products', 'sort', true); draw(); };
+  let rows = [], edit = null, q = '', weights = {};
+  const load = async () => {
+    rows = await list('products', 'sort', true);
+    const { data } = await sb.from('settings').select('value').eq('key', 'category_weights').maybeSingle();
+    weights = (data && data.value) || {}; draw();
+  };
+  const wlabel = v => (v === 0 ? 'Nicht zeigen' : v < 100 ? 'Weniger' : v > 100 ? 'Mehr' : 'Normal');
+  const steering = () => `<section class="card"><h2>Automatische Auswahl steuern</h2>
+    <p class="muted">Wishtale wählt die Produkte selbst aus, passend zu Interessen, Marken und Wünschen. Hier legst du nur fest, welche Kategorien dabei stärker oder schwächer nach vorn rücken. 100 % ist normal, 0 % blendet eine Kategorie ganz aus.</p>
+    <div class="weights">${CATS.map(c => { const v = weights[c.id] ?? 100; return `<div class="wrow"><label for="w-${c.id}">${c.n}</label><input id="w-${c.id}" type="range" min="0" max="200" step="10" value="${v}" data-w="${c.id}"><output for="w-${c.id}">${v} % · ${wlabel(v)}</output></div>`; }).join('')}</div>
+    <div class="row"><button class="btn pri sm" data-a="saveweights">Gewichtung speichern</button><button class="btn ghost sm" data-a="resetweights">Alles auf normal</button></div></section>`;
   const draw = () => {
     const shown = rows.filter(r => !q || (r.title + r.brand + r.note).toLowerCase().includes(q));
-    el.innerHTML = `<div class="head"><div><h1>Produkte</h1><p class="muted">Hier steuerst du, welche Produkte die App empfiehlt. Ein Produkt mit Haken bei „Hervorgehoben“ erscheint unter Inspiration als Empfehlung von Wishtale (mit „Anzeige“).</p></div><button class="btn pri" data-a="new">Produkt hinzufügen</button></div>
+    el.innerHTML = `<div class="head"><div><h1>Produkte</h1><p class="muted">Die Empfehlungen in der App entstehen automatisch. Du steuerst sie über die Gewichtung der Kategorien und kannst eigene Produkte ergänzen. Ein Produkt mit Haken bei „Hervorgehoben“ erscheint zusätzlich unter Inspiration als Empfehlung von Wishtale (mit „Anzeige“).</p></div></div>${steering()}<div class="head"><div><h2>Eigene Produkte (optional)</h2></div><button class="btn pri" data-a="new">Produkt hinzufügen</button></div>
      <div class="row"><label class="sr" for="pq">Suchen</label><input id="pq" class="inp" placeholder="Produkte suchen" value="${esc(q)}" style="max-width:320px"></div>
      ${edit ? form() : ''}
      <div class="tablewrap"><table><thead><tr><th>Produkt</th><th>Partner</th><th>Preis</th><th>Status</th><th></th></tr></thead><tbody>
@@ -42,12 +52,14 @@ export async function mount(el) {
       if (a === 'new') { edit = empty(); draw(); el.querySelector('#f-title')?.focus(); }
       else if (a === 'edit') { edit = { ...r }; draw(); el.querySelector('#f-title')?.focus(); window.scrollTo(0, 0); }
       else if (a === 'cancel') { edit = null; draw(); }
+      else if (a === 'saveweights') { const { error } = await sb.from('settings').upsert({ key: 'category_weights', value: weights }); if (error) throw error; toast('Die Gewichtung ist gespeichert und wirkt sofort in der App.'); }
+      else if (a === 'resetweights') { weights = {}; draw(); toast('Zurückgesetzt. Zum Übernehmen bitte speichern.'); }
       else if (a === 'toggle') { await save('products', { id: r.id, active: !r.active }); toast(r.active ? 'Das Produkt ist ausgeschaltet.' : 'Das Produkt ist wieder aktiv.'); await load(); }
       else if (a === 'del') { if (confirm('Dieses Produkt wirklich löschen?')) { await remove('products', edit.id); edit = null; toast('Gelöscht.'); await load(); } }
     } catch (err) { toast('Das hat nicht geklappt: ' + (err.message || err), true); }
   };
   el.onchange = e => { if (e.target.id === 'f-cat') e.target.dataset.touched = '1'; if (e.target.id === 'f-title') { const c = el.querySelector('#f-cat'); if (c && !c.dataset.touched && !edit.id) c.value = guessCategory(e.target.value, c.value); } };
-  el.oninput = e => { if (e.target.id === 'pq') { q = e.target.value.toLowerCase(); const pos = e.target.selectionStart; draw(); const i = el.querySelector('#pq'); i.focus(); i.setSelectionRange(pos, pos); } };
+  el.oninput = e => { if (e.target.dataset.w) { weights[e.target.dataset.w] = +e.target.value; e.target.nextElementSibling.textContent = `${e.target.value} % · ${wlabel(+e.target.value)}`; return; } if (e.target.id === 'pq') { q = e.target.value.toLowerCase(); const pos = e.target.selectionStart; draw(); const i = el.querySelector('#pq'); i.focus(); i.setSelectionRange(pos, pos); } };
   el.onsubmit = async e => {
     e.preventDefault(); const fd = new FormData(e.target);
     let url = (fd.get('url') || '').trim();

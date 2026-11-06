@@ -61,7 +61,9 @@ export function drawSlide(canvas, s, index, total, opts = {}) {
   blocks.push({ h: t.lines.length * tl, gap: 30, draw: y => { ctx.fillStyle = th.ink; ctx.font = `400 ${t.size}px ${DISP}`; t.lines.forEach((l, i) => ctx.fillText(l, PAD, y + t.size * 0.82 + i * tl)); } });
 
   if (s.type === 'photo') {
-    const ph = 470;
+    ctx.font = `400 40px ${BODY}`;
+    const subH = s.sub ? wrap(ctx, s.sub, cw).length * 56 + 34 : 0;
+    const ph = Math.max(220, Math.min(470, (H - 210 - 190) - (eyebrow ? 60 : 0) - t.lines.length * tl - 30 - 34 - subH));
     blocks.push({ h: ph, gap: 34, draw: y => {
       ctx.save(); rr(ctx, PAD, y, cw, ph, 36); ctx.clip();
       if (opts.image) { const r = Math.max(cw / opts.image.width, ph / opts.image.height), iw = opts.image.width * r, ih = opts.image.height * r; ctx.drawImage(opts.image, PAD + (cw - iw) / 2, y + (ph - ih) / 2, iw, ih); }
@@ -110,4 +112,4 @@ export const blank = type => ({
   sub: '', quote: '', chips: [], handle: type === 'cta' ? '@wishtale.de' : '', domain: type === 'cta' ? 'wishtale.de' : '',
 });
 
-export const blob = canvas => new Promise(res => canvas.toBlob(res, 'image/png'));
+export const blob = (canvas, type = 'image/png', q) => new Promise(res => canvas.toBlob(res, type, q));

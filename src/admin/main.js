@@ -5,8 +5,8 @@ import './admin.css';
 import { adminState, signIn, signOut, count } from './api.js';
 import { $, esc, toast } from './util.js';
 
-const TABS = [['start', 'Übersicht'], ['produkte', 'Produkte'], ['aktionen', 'Aktionen'], ['instagram', 'Instagram'], ['ads', 'Google Ads'], ['texte', 'Seitentexte']];
-const MODS = { produkte: () => import('./products.js'), aktionen: () => import('./campaigns.js'), instagram: () => import('./instagram.js'), ads: () => import('./ads.js'), texte: () => import('./texts.js') };
+const TABS = [['start', 'Übersicht'], ['produkte', 'Produkte'], ['aktionen', 'Aktionen'], ['instagram', 'Instagram'], ['ads', 'Google Ads'], ['texte', 'Seitentexte'], ['verbindungen', 'Verbindungen']];
+const MODS = { produkte: () => import('./products.js'), aktionen: () => import('./campaigns.js'), instagram: () => import('./instagram.js'), ads: () => import('./ads.js'), texte: () => import('./texts.js'), verbindungen: () => import('./connections.js') };
 const root = $('#root');
 
 function loginView(msg) {
@@ -22,8 +22,14 @@ async function dashboard(el) {
   el.innerHTML = `<div class="head"><div><h1>Übersicht</h1><p class="muted">Von hier steuerst du Produkte, Aktionen, Instagram-Beiträge und Anzeigenpläne.</p></div></div>
   ${ready ? '' : '<div class="banner warn2"><b>Die Datenbank ist noch nicht vorbereitet.</b> Die Änderung <code>0005_cms.sql</code> wurde noch nicht angewendet. Führe sie im Supabase-SQL-Editor aus oder gib sie frei, dann funktioniert alles.</div>'}
   <div class="stats">${[['Produkte', p, '#produkte'], ['Aktionen', c, '#aktionen'], ['Instagram-Beiträge', s, '#instagram'], ['Anzeigenpläne', a, '#ads']].map(([t, n, h]) => `<a class="stat" href="${h}"><b>${n ?? '–'}</b><span>${t}</span></a>`).join('')}</div>
-  <div class="card"><h2>Verbindungen</h2><ul class="conn"><li><span class="pill ok">Aktiv</span> Datenbank und Anmeldung (Supabase)</li><li><span class="pill">Nicht verbunden</span> Instagram (direktes Veröffentlichen)</li><li><span class="pill">Nicht verbunden</span> Google Ads (direkte Steuerung)</li></ul>
-  <p class="muted">Instagram-Bilder erstellst und lädst du schon jetzt hier herunter. Google-Ads-Pläne exportierst du für den Google Ads Editor.</p></div>`;
+  <div class="card"><h2>Verbindungen</h2><ul class="conn"><li><span class="pill ok">Aktiv</span> Datenbank und Anmeldung (Supabase)</li><li id="ci"></li><li id="cg"></li></ul><p class="muted">Wie du Instagram und Google Ads verbindest, steht unter <a href="#verbindungen">Verbindungen</a>.</p></div>`;
+  statusPills(el);
+}
+
+async function statusPills(el) {
+  const set = (id, ok, text) => { const n = el.querySelector('#' + id); if (n) n.innerHTML = `<span class="pill ${ok ? 'ok' : ''}">${ok ? 'Verbunden' : 'Nicht verbunden'}</span> ${text}`; };
+  set('ci', false, 'Instagram (direktes Veröffentlichen)'); set('cg', false, 'Google Ads (direkte Steuerung)');
+  try { const { sb } = await import('../lib/supabase.js'); const { data: { session } } = await sb.auth.getSession(); const r = await fetch('/api/integrations', { headers: { authorization: 'Bearer ' + session.access_token } }); if (!r.ok) return; const j = await r.json(); set('ci', j.instagram.configured, 'Instagram (direktes Veröffentlichen)'); set('cg', j.googleAds.configured, 'Google Ads (direkte Steuerung)'); } catch { /* ohne Server-Funktionen */ }
 }
 
 async function show() {

@@ -32,7 +32,7 @@ async function boot(){
   }
   window.addEventListener('hashchange',route);
   route();
-  loadPromo().then(p=>{S.promo=p;if(S.ui.view==='entdecken')route()});
+  loadPromo().then(p=>{S.promo=p;if(['entdecken','gast'].includes(S.ui.view)&&!S.ui.modal)route()});
 
   sb.auth.onAuthStateChange((event,sess)=>{
     // nicht direkt in der Callback-Funktion auf Supabase warten (Deadlock-Gefahr), daher setTimeout
