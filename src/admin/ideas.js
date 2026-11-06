@@ -26,6 +26,13 @@ export function pickProduct(offset = 0) {
   return top[(week() + offset) % top.length].x;
 }
 
+/** Auswahlliste für die Produkt-Idee: Standard ist die automatische Wahl, daneben alle Produkte mit Marke, Welt und Hinweis auf die Gewichtung. */
+function productOptions() {
+  const auto = pickProduct(0);
+  return [['', `Automatisch wählen${auto ? ` (diese Woche: ${auto.t})` : ''}`],
+    ...PRODUCTS.map(x => [x.id, `${x.t}${x.brand ? ' · ' + x.brand : ''} · ${cat(WORLD_OF_CAT[x.cat] || 'wohnen').n}${weightOf(WORLD_OF_CAT[x.cat] || 'wohnen') === 0 ? ' (Kategorie ausgeblendet)' : ''}`])];
+}
+
 export const IDEAS = [
   { id: 'tale', title: 'So lebt dein Tale', desc: 'Die Geschichte von einer Person, ihrem Wishtale und einem Geschenk, das passt. Der Klassiker für den Einstieg.',
     fields: [['name', 'Name der Person', 'Jonas'], ['helper', 'Name der schenkenden Person', 'Lena'], ['interests', 'Interessen (mit Komma)', 'Kaffee brühen, Kochen, Einrichten'], ['brands', 'Marken (mit Komma)', 'Hario, Fellow'], ['wishes', 'Wünsche (mit Komma)', 'Handkaffeemühle, Wasserkocher, Kochkurs'], ['owned', 'Schon vorhanden (mit Komma)', 'Siebträgermaschine, Gusseisenpfanne'], ['pick', 'Das schenkt die Person', 'die Waage und den Kurs'], ['tale', 'Kleine Geschichte (Zitat)', 'liebt guten Kaffee. Für den perfekten Espresso nimmt sich die Person am Sonntag gern etwas mehr Zeit.']],
@@ -92,9 +99,9 @@ export const IDEAS = [
       ],
     }) },
   { id: 'produkt', title: 'Wunsch-Idee der Woche', desc: 'Eine Anregung zum Wünschen, mit einem Produkt als Beispiel. Das Produkt wählt Wishtale automatisch, passend zu deiner Gewichtung. Bitte nur gelegentlich einsetzen, damit es nicht nach Werbung aussieht.',
-    fields: [['intro', 'Einstiegssatz', 'Weihnachten steht vor der Tür, aber du weißt nicht, was du dir wünschen sollst? Schau dir das hier an'], ['offset', 'Anderes Produkt wählen (0, 1, 2 …)', '0'], ['anzeige', 'Mit „Anzeige“ kennzeichnen (ja oder nein)', 'ja']],
+    fields: [['intro', 'Einstiegssatz', 'Weihnachten steht vor der Tür, aber du weißt nicht, was du dir wünschen sollst? Schau dir das hier an'], ['product', 'Produkt', '', productOptions], ['anzeige', 'Mit „Anzeige“ kennzeichnen (ja oder nein)', 'ja']],
     build: v => {
-      const x = pickProduct(+v.offset || 0);
+      const x = (v.product && PRODUCTS.find(p => p.id === v.product)) || pickProduct(0);
       if (!x) return { title: 'Wunsch-Idee der Woche', caption: '', slides: [S({ title: 'Gerade ist kein Produkt ausgewählt', sub: 'Unter Produkte steht jede Kategorie auf null. Stelle dort mindestens eine wieder auf 100 %.' })] };
       const world = cat(WORLD_OF_CAT[x.cat] || 'wohnen').n, ad = !/^n/i.test(String(v.anzeige || 'ja'));
       return {
