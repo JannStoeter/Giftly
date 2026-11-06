@@ -3,7 +3,7 @@
  * Ton: fließende, warme Sätze. Keine Kurzsätze aus ein, zwei Wörtern mit Punkt.
  */
 export const BRAND = {
-  name: 'wishtale', handle: '@wishtale', domain: 'wishtale.de',
+  name: 'wishtale', handle: '@wishtale.de', domain: 'wishtale.de',
   claim: 'Jeder Wunsch hat eine Geschichte.', tagline: 'Die Wunschliste, die dich kennt.',
 };
 
