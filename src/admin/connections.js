@@ -11,6 +11,13 @@ export async function mount(el) {
   const pill = (ok, yes = 'Verbunden', no = 'Nicht verbunden') => `<span class="pill ${ok ? 'ok' : ''}">${ok ? yes : no}</span>`;
   el.innerHTML = `<div class="head"><div><h1>Verbindungen</h1><p class="muted">Hier siehst du, was schon verbunden ist, und wie du Instagram und Google Ads anschließt. Alle Schlüssel trägst du in Vercel ein, nie in dieses CMS und nie in eine Chat-Nachricht.</p></div></div>
   ${err ? `<div class="banner warn2" role="alert"><b>Der Status konnte nicht geladen werden.</b> ${esc(err)} Auf einer Vorschau ohne Server-Funktionen (npm run dev) geht das nicht, auf der echten Seite schon.</div>` : ''}
+  <div class="card"><h2>Schreibassistent ${st ? pill(st.ai && st.ai.configured) : ''}</h2>
+   <p class="muted">Der Assistent schreibt aus einer Idee die Folien und die Bildunterschrift im Wishtale-Ton und überarbeitet sie auf Zuruf (kürzer, wärmer, ohne Produkt). Er nutzt die Claude-API von Anthropic. Jede Anfrage kostet wenige Cent.</p>
+   <ol class="steps">
+    ${step('1. Konto und Schlüssel', 'Auf <b>console.anthropic.com</b> ein Konto anlegen, unter „Billing“ ein kleines Guthaben aufladen und unter „API Keys“ einen Schlüssel erzeugen. Setze dort auch ein <b>monatliches Limit</b> (zum Beispiel 10 Euro).')}
+    ${step('2. In Vercel eintragen', 'Projekt <b>wishtale</b> › Settings › Environment Variables: <code>ANTHROPIC_API_KEY</code> mit dem Schlüssel. Danach „Redeploy“.')}
+   </ol>
+   <p class="hint">Optional: <code>ANTHROPIC_MODEL</code> legt das Modell fest. Ohne Eintrag nutzt das CMS <code>claude-sonnet-5-5</code>. Die Texte, die du eingibst, gehen an Anthropic. Gib dort keine personenbezogenen Daten Dritter ein.</p></div>
   <div class="card"><h2>Instagram ${st ? pill(st.instagram.configured, st.instagram.username ? 'Verbunden mit @' + esc(st.instagram.username) : 'Verbunden') : ''}</h2>
    ${st?.instagram.error ? `<p class="banner warn2" role="alert">${esc(st.instagram.error)}</p>` : ''}
    <p class="muted">Damit postest du Beiträge direkt aus dem Studio. Der einfachste Weg ist der „Instagram-Login“: Du brauchst nur dein berufliches Instagram-Konto und ein Meta-Entwicklerkonto, aber <b>keine Facebook-Seite</b>.</p>
