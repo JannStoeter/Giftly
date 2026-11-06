@@ -584,3 +584,6 @@ mark.todo{background:#F5D98B;color:#3A2A00;padding:0 4px;border-radius:4px}
 .dark .card .eyebrow,.dark .card .muted{color:var(--muted)}
 .duo-tag.gold{color:#8A5F10}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.promobar{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;background:var(--accent);color:var(--accent-ink);padding:9px 16px;font-size:14.5px;text-align:center}
+.promobar a{color:var(--accent-ink);font-weight:600;text-underline-offset:3px}

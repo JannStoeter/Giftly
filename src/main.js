@@ -9,6 +9,7 @@ import { enter, adoptDraft } from './lib/auth.js';
 import { toast } from './lib/util.js';
 import { route } from './render.js';
 import './actions.js';
+import { loadPromo } from './lib/promo.js';
 
 async function boot(){
   loadState(); // Demo-Daten (nur ohne Konto relevant)
@@ -31,6 +32,7 @@ async function boot(){
   }
   window.addEventListener('hashchange',route);
   route();
+  loadPromo().then(p=>{S.promo=p;if(S.ui.view==='entdecken')route()});
 
   sb.auth.onAuthStateChange((event,sess)=>{
     // nicht direkt in der Callback-Funktion auf Supabase warten (Deadlock-Gefahr), daher setTimeout

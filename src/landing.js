@@ -32,3 +32,14 @@ initContent();
 const openCms=async e=>{e?.preventDefault();const m=await import('./cms/editor.js');m.openEditor()};
 document.getElementById('cms-open')?.addEventListener('click',openCms);
 if(location.search.includes('bearbeiten'))openCms();
+
+/* Aktion aus dem CMS als schmaler Hinweis oben auf der Seite (nur wenn eine läuft). */
+import('./lib/promo.js').then(async({loadPromo,safeUrl})=>{
+  const {campaigns}=await loadPromo();
+  const c=campaigns.find(x=>(x.placement||[]).includes('landing'));
+  if(!c||!(c.headline||c.title))return;
+  const bar=document.createElement('div');bar.className='promobar';bar.setAttribute('role','region');bar.setAttribute('aria-label','Aktion');
+  const t=document.createElement('span');t.textContent=c.headline||c.title;bar.appendChild(t);
+  if(c.cta_label&&c.cta_url){const a=document.createElement('a');a.href=safeUrl(c.cta_url);a.textContent=c.cta_label;bar.appendChild(a)}
+  document.body.insertBefore(bar,document.querySelector('.skip')?.nextSibling||document.body.firstChild);
+}).catch(()=>{});

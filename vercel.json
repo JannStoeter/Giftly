@@ -10,6 +10,10 @@
       ]
     },
     {
+      "source": "/cms(.*)",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }, { "key": "Cache-Control", "value": "no-store" }]
+    },
+    {
       "source": "/photos/(.*)",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     }

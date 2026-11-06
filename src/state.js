@@ -4,6 +4,7 @@ export const W=(o)=>{const w=Object.assign({id:nid('w'),kind:'produkt',prio:2,li
 export const S={
  auth:{user:null,demo:false,sync:'idle',syncError:'',error:''},
  guest:null,
+ promo:null,
  me:{
   id:'me',name:'Lena',tone:2,
   interests:['Lesen','Wandern','Kochen'],cats:['buecher','outdoor','kochen','wohnen'],
