@@ -10,7 +10,7 @@ import { sb } from './lib/supabase.js';
 import { hidePromo } from './views/inspiration.js';
 import { render, route, refreshGuest } from './render.js';
 import { guestRpc } from './lib/remote.js';
-import { signIn, signUp, magicLink, signOut, friendly, resendSignup } from './lib/auth.js';
+import { signIn, signUp, magicLink, signOut, friendly, resendSignup, resetPassword, setPassword } from './lib/auth.js';
 
 export const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 export 
@@ -76,6 +76,8 @@ const A={
   const em=S.ui.authSent?.email;if(!em)return;S.ui.authBusy=true;render();
   resendSignup(em).then(({error})=>{S.ui.authBusy=false;S.ui.authResent=error?friendly(error):'Die Mail ist unterwegs. Das kann einen Moment dauern.';render()}).catch(()=>{S.ui.authBusy=false;S.ui.authResent='Das hat nicht geklappt. Bitte versuche es gleich noch einmal.';render()});
  },
+ forgot(){S.ui.authMsg=null;S.ui.authSent=null;location.hash='#passwort-vergessen'},
+ newpw(){S.ui.modal=null;location.hash='#neues-passwort'},
  authback(){S.ui.authSent=null;S.ui.authResent=null;S.ui.authMsg=null;render()},
  authtab(el){S.ui.authSent=null;S.ui.authMsg=null;location.hash=el.dataset.v==='up'?'#registrieren':'#anmelden'},
  demo(){S.ui.authMsg=null;location.hash='#demo'},
@@ -203,6 +205,19 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.ui.modal)A.close(
 document.addEventListener('submit',e=>{
   const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();
   const fd=new FormData(f),kind=f.dataset.form;
+  if(kind==='forgot'){
+    const email=(fd.get('email')||'').trim();S.ui.authBusy=true;S.ui.authEmail=email;render();
+    resetPassword(email).then(({error})=>{S.ui.authBusy=false;if(error){S.ui.authMsg={type:'error',text:friendly(error)}}else S.ui.authSent={kind:'reset',email};render()}).catch(e=>{S.ui.authBusy=false;S.ui.authMsg={type:'error',text:friendly(e)};render()});
+    return;
+  }
+  if(kind==='newpw'){
+    const pw=fd.get('password')||'',pw2=fd.get('password2')||'';
+    if(pw!==pw2){S.ui.authMsg={type:'error',text:'Die beiden Passwörter sind nicht gleich.'};render();return}
+    S.ui.authBusy=true;S.ui.authMsg=null;render();
+    setPassword(pw).then(({error})=>{S.ui.authBusy=false;if(error){S.ui.authMsg={type:'error',text:friendly(error)};render();return}
+      toast('Dein neues Passwort ist gespeichert.');location.hash='#profil'}).catch(e=>{S.ui.authBusy=false;S.ui.authMsg={type:'error',text:friendly(e)};render()});
+    return;
+  }
   if(kind==='signin'||kind==='signup'||kind==='magic'){
     const email=(fd.get('email')||'').trim(),pw=fd.get('password')||'';
     S.ui.authBusy=true;S.ui.authMsg=null;S.ui.authEmail=email;render();

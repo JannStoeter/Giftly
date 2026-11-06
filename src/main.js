@@ -12,6 +12,7 @@ import './actions.js';
 import { loadPromo } from './lib/promo.js';
 
 async function boot(){
+  const recoveryLink=/type=recovery/.test(location.hash); // vor getSession merken, Supabase räumt die Adresse danach auf
   loadState(); // Demo-Daten (nur ohne Konto relevant)
   // Verarbeitet auch Login-Links aus E-Mails (Tokens im URL-Fragment), bevor der Router läuft.
   let session=null;
@@ -19,8 +20,10 @@ async function boot(){
   const fromLink=/access_token|error_description/.test(location.hash);
   if(session){
     await enter(session.user);
-    const adopted=adoptDraft();
-    if(adopted){
+    const adopted=recoveryLink?false:adoptDraft();
+    if(recoveryLink){
+      history.replaceState(null,'',location.pathname+'#neues-passwort');
+    }else if(adopted){
       history.replaceState(null,'',location.pathname+'#wuensche');
       setTimeout(()=>toast('Dein Wishtale ist angelegt. Jetzt fehlen nur noch deine Wünsche.'),400);
     }else if(fromLink||!location.hash||['#login','#anmelden','#registrieren','#demo'].includes(location.hash)){
@@ -39,6 +42,7 @@ async function boot(){
     setTimeout(async()=>{
       if(event==='SIGNED_IN'&&sess&&!S.auth.user){
         await enter(sess.user);
+        if(location.hash==='#neues-passwort'){route();return}
         const adopted=adoptDraft();
         const a=S.accounts.me;
         location.hash=adopted?'#wuensche':a&&!a.interests.length&&!a.wishes.length?'#start':'#profil';

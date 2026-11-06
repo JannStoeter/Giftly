@@ -6,12 +6,12 @@ import { Wuensche } from './views/wishes.js';
 import { Historie } from './views/history.js';
 import { Entdecken } from './views/inspiration.js';
 import { Gast } from './views/giver.js';
-import { Login } from './views/auth.js';
+import { Login, Recovery } from './views/auth.js';
 import { fetchPublic, scheduleSync } from './lib/remote.js';
 import { loadPinterest, pinConsent } from './lib/social.js';
 import { Modal } from './views/modals.js';
 
-export const VIEWS={start:Start,profil:Profil,wuensche:Wuensche,historie:Historie,entdecken:Entdecken,gast:Gast,login:Login};
+export const VIEWS={start:Start,profil:Profil,wuensche:Wuensche,historie:Historie,entdecken:Entdecken,gast:Gast,login:Login,recovery:Recovery};
 const DEFAULT_VIEW='profil';
 
 let lastModalKey='';
@@ -31,7 +31,7 @@ export function render(top){
   const sheetY=oldSheet?oldSheet.scrollTop:0;
   const modalKey=S.ui.modal?`${S.ui.modal}:${S.ui.pickId||''}:${S.ui.worldId||''}`:'';
   const body=VIEWS[v]();
-  if(v==='login'){
+  if(v==='login'||v==='recovery'){
     $('#app').innerHTML=LoginHeader()+`<main id="main" class="appmain">${body}</main>`+LegalFoot();
     window.scrollTo(0,0);
     return;
@@ -74,15 +74,16 @@ export function route(){
   if(guest){
     S.ui.person=guest[1];S.ui.view='gast';startGuest(guest[1]);
   }
+  else if(!anon&&h==='neues-passwort'){S.ui.view='recovery'}
   else if(anon&&h==='demo'){setDemo(true);history.replaceState(null,'',location.pathname+'#profil');S.ui.view='profil'}
   else if(anon&&h==='start'){setDemo(false);ensureDraft();S.ui.acct='draft';S.ui.view='start'}
-  else if(anon&&(h==='registrieren'||h==='anmelden'||!S.auth.demo)){
+  else if(anon&&(h==='registrieren'||h==='anmelden'||h==='passwort-vergessen'||!S.auth.demo)){
     // Anmelden und Registrieren sind eigene Seiten und beenden die Demo
     setDemo(false);ensureDraft();
-    S.ui.authTab=h==='registrieren'?'up':'in';S.ui.view='login';
+    S.ui.authTab=h==='registrieren'?'up':h==='passwort-vergessen'?'forgot':'in';S.ui.view='login';
   }
   else if(h==='schenken'){location.hash='#p/jonas';return}  // alter Link
-  else S.ui.view=(h in VIEWS&&h!=='gast'&&h!=='login'&&!(anon&&h==='start'))?h:DEFAULT_VIEW;
+  else S.ui.view=(h in VIEWS&&h!=='gast'&&h!=='login'&&h!=='recovery'&&!(anon&&h==='start'))?h:DEFAULT_VIEW;
   S.ui.modal=null;
   render(true);
 }
