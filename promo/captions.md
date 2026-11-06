@@ -12,7 +12,7 @@ Eine Wunschliste sagt dir, was du dir wünschst, aber sie erzählt nicht, warum,
 
 Wishtale ist deine Wunschliste und ein bisschen mehr. Neben deinen Wünschen erzählt es, was du gern machst, welche Marken du liebst, was schon bei dir steht und was du lieber nicht geschenkt bekommen möchtest. Daraus entstehen Vorschläge, auf die du selbst vielleicht nie gekommen wärst.
 
-So müssen deine Freunde nicht mehr raten, und du bekommst nichts doppelt. Den Link findest du in der Bio.
+So müssen deine Freunde nicht mehr raten und du bekommst nichts doppelt. Den Link findest du in der Bio.
 
 **Hashtags**
 #wishtale #wunschliste #geschenkideen #weihnachtsgeschenke #geschenke #blackfriday #geschenkideenfürsie #geschenkideenfürihn
@@ -20,7 +20,7 @@ So müssen deine Freunde nicht mehr raten, und du bekommst nichts doppelt. Den L
 ## Karussell „Lernen wir Jonas kennen“ (8 Folien, 4:5)
 
 **Text unter dem Beitrag**
-Am Sonntag nimmt sich Jonas Zeit für den perfekten Kaffee, und wenn danach noch Zeit bleibt, kocht Jonas gern für Freunde.
+Am Sonntag nimmt sich Jonas Zeit für den perfekten Kaffee und wenn danach noch Zeit bleibt, kocht Jonas gern für Freunde.
 
 Wische durch die Folien und sieh, wie Lena für Jonas ein Geschenk findet, das wirklich passt: ohne zu raten, ohne etwas doppelt zu kaufen und mit einer Überraschung, die auch eine bleibt.
 

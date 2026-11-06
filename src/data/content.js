@@ -118,7 +118,7 @@ export const PRODUCTS=[
 
 /* Kurzvorstellung für die Profilseite (Beispieldaten). */
 export const ABOUT={
-  jonas:'Jonas ist 34, arbeitet als Produktdesigner und kocht am liebsten für Freunde. Seinen Kaffee brüht er selbst, und seine Wohnung richtet er Stück für Stück ein, am liebsten mit wenigen, guten Dingen.',
+  jonas:'Jonas ist 34, arbeitet als Produktdesigner und kocht am liebsten für Freunde. Seinen Kaffee brüht er selbst und seine Wohnung richtet er Stück für Stück ein, am liebsten mit wenigen, guten Dingen.',
   mira:'Mira ist 31 und plant jedes freie Wochenende eine Tour in die Berge. Sie packt leicht, liest unterwegs viel und freut sich über Dinge, die lange halten.',
   noah:'Noah ist 5 und baut am liebsten riesige Türme. Er liebt Tiere, vor allem Ponys, und ist am liebsten draußen unterwegs.'
 };

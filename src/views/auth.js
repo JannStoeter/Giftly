@@ -10,7 +10,7 @@ export function Login(){
   return `<div class="wrap"><div class="authcard">
    <p class="eyebrow">Wishtale</p>
    <h1>${tab==='up'?'Schön, dass du da bist':'Schön, dich wiederzusehen'}</h1>
-   <p class="muted" style="margin:6px 0 18px">${tab==='up'?'Mit einem Konto bleiben deine Wünsche sicher gespeichert, und deine Freunde können sie über deinen persönlichen Link ansehen, ganz ohne sich selbst anzumelden.':'Melde dich an, dann geht es genau dort weiter, wo du aufgehört hast.'}</p>
+   <p class="muted" style="margin:6px 0 18px">${tab==='up'?'Mit einem Konto bleiben deine Wünsche sicher gespeichert und deine Freunde können sie über deinen persönlichen Link ansehen, ganz ohne sich selbst anzumelden.':'Melde dich an, dann geht es genau dort weiter, wo du aufgehört hast.'}</p>
    <div class="seg" role="tablist" style="margin-bottom:16px"><button role="tab" aria-selected="${tab==='in'}" class="${tab==='in'?'on':''}" data-act="authtab" data-v="in">Anmelden</button><button role="tab" aria-selected="${tab==='up'}" class="${tab==='up'?'on':''}" data-act="authtab" data-v="up">Registrieren</button></div>
    ${note}${err}${msg}
    ${tab==='up'?`<form data-form="signup" class="authform">

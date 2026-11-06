@@ -26,7 +26,7 @@ export function Picker(st){
   }
   return body;
 }
-const NAME_STEP={k:'name',t:'Wie dürfen wir dich nennen?',h:'Dein Vorname reicht völlig. So begrüßen wir dich in deinem Wishtale, und deine Freunde sehen später, bei wem sie gerade stöbern.',name:true};
+const NAME_STEP={k:'name',t:'Wie dürfen wir dich nennen?',h:'Dein Vorname reicht völlig. So begrüßen wir dich in deinem Wishtale und deine Freunde sehen später, bei wem sie gerade stöbern.',name:true};
 /* Ohne Konto beginnt die Einrichtung mit dem Namen, das Konto kommt erst am Ende. */
 export const steps=()=>S.auth.user?STEPS:[NAME_STEP,...STEPS];
 export function Start(){

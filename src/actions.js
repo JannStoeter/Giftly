@@ -113,7 +113,7 @@ const A={
  },
  reserve(el){
   const p=guestPerson(),w=p&&p.wishes.find(x=>x.id===el.dataset.id);if(!w)return;
-  reserveFlow(p,w).then(ok=>{if(ok)toast(`Erledigt, der Wunsch ist für dich reserviert. ${p.name} erfährt davon nichts, und andere Freunde sehen nur „reserviert“.`);render()});
+  reserveFlow(p,w).then(ok=>{if(ok)toast(`Erledigt, der Wunsch ist für dich reserviert. ${p.name} erfährt davon nichts und andere Freunde sehen nur „reserviert“.`);render()});
  },
  choose(el){
   const p=guestPerson(),w=p&&p.wishes.find(x=>x.id===el.dataset.wid);if(!w)return;

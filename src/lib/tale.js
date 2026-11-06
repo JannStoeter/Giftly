@@ -18,7 +18,7 @@ const list = a => (a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' und
 
 const BANK = {
   genuss: n => [`${n} nimmt sich gern Zeit für die kleinen Genussmomente im Alltag.`, 'Eine gute Tasse Kaffee oder Tee am Sonntagmorgen, in aller Ruhe getrunken, gehört bestimmt dazu.', `Damit aus dem Ritual ein richtiges kleines Fest wird, könnten ${n} diese Dinge gefallen:`],
-  kochen: n => [`${n} steht gern in der Küche.`, 'Mit gutem Werkzeug macht das Kochen noch mehr Spaß, und aus einem gewöhnlichen Abendessen wird ein kleines Ritual.', `Für noch mehr Freude am Herd könnten ${n} diese Dinge gefallen:`],
+  kochen: n => [`${n} steht gern in der Küche.`, 'Mit gutem Werkzeug macht das Kochen noch mehr Spaß und aus einem gewöhnlichen Abendessen wird ein kleines Ritual.', `Für noch mehr Freude am Herd könnten ${n} diese Dinge gefallen:`],
   wohnen: n => [`${n} richtet das Zuhause Stück für Stück ein.`, 'Dabei zählen weniger die vielen Dinge als die wenigen, die sich gut anfühlen und gut aussehen.', `Zu diesem Stil könnten ${n} diese Dinge gefallen:`],
   buecher: n => [`${n} versinkt gern in einem guten Buch.`, 'Ein gemütlicher Platz, gutes Licht und ein ruhiger Abend, mehr braucht es dafür gar nicht.', `Damit die Lesestunden noch schöner werden, könnten ${n} diese Dinge gefallen:`],
   outdoor: n => [`${n} ist am liebsten draußen unterwegs.`, 'Wer leicht packt und weit läuft, kommt abends müde und zufrieden an.', `Für das nächste Abenteuer könnten ${n} diese Dinge gefallen:`],
