@@ -17,7 +17,7 @@ export function WishArt(w,pr){
 export function WishCard(w,p,o={}){
   const pr=(w.kind==='frei'||w.status==='selbst')?null:productFor(p,w);
   const line=w.status==='selbst'?'Schon vorhanden':pr?pr.t:w.kind==='erlebnis'?'Erlebnis':w.kind==='frei'?'Ideen ansehen':'';
-  return `<article class="wcard compact ${o.taken?'taken':''} ${o.dim?'dim':''} ${w.status==='selbst'?'done':''}" role="button" tabindex="0" data-act="wopen" data-id="${w.id}" data-ctx="${o.ctx||'guest'}" aria-label="${esc(w.t)}: Details öffnen">
+  return `<div class="wcard compact ${o.taken?'taken':''} ${o.dim?'dim':''} ${w.status==='selbst'?'done':''}" role="button" tabindex="0" data-act="wopen" data-id="${w.id}" data-ctx="${o.ctx||'guest'}">
    <div class="wmedia">${WishArt(w,pr)}
     <div class="top"><span class="tag">${esc(cat(w.c).n)}</span><span class="dots" title="${PRIO[w.prio]}" aria-label="Priorität: ${PRIO[w.prio]}">${[1,2,3].map(n=>`<i class="${n<=w.prio?'on':''}"></i>`).join('')}</span></div>
     ${o.status?`<span class="wstate ${o.status.tone}">${ic('lock','sm')}${esc(o.status.text)}</span>`:''}
@@ -27,5 +27,5 @@ export function WishCard(w,p,o={}){
     <p class="wp">${esc(line)}</p>
     <div class="wm">${o.meta||''}<span class="wgo">Ansehen ›</span></div>
    </div>
-  </article>`;
+  </div>`;
 }

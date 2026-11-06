@@ -24,6 +24,6 @@ export function PinsModal(){
    <p class="eyebrow">Pinterest</p><h2 id="mt">Was ${name} inspiriert</h2>
    <div class="pinwrap"><a ${attrs} href="${esc(url)}"></a></div>
    <p class="disc">Diese Inhalte stammen von Pinterest. Es gelten deren Datenschutzbestimmungen. <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Auf Pinterest öffnen</a></p>
-   <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn ghost" data-act="close">Schließen</button></div>
+   <div class="row" style="justify-content:flex-end;margin-top:10px;gap:8px"><button class="btn ghost" data-act="pinrevoke">Zustimmung widerrufen</button><button class="btn ghost" data-act="close">Schließen</button></div>
   </div></div>`;
 }

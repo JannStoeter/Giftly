@@ -1,14 +1,11 @@
-// Prüft, ob alle Fotos aus src/data/photos.js erreichbar sind (Unsplash/Pexels).
-// Nutzt curl, damit ein konfigurierter HTTPS-Proxy automatisch verwendet wird.
-import { execFileSync } from 'node:child_process';
-import { PHOTOS, photoUrl } from '../src/data/photos.js';
+// Prüft, ob zu jedem Foto aus src/data/photos.js eine Datei in public/photos liegt.
+import { existsSync } from 'node:fs';
+import { PHOTOS, PHOTO_SIZES, photoUrl } from '../src/data/photos.js';
 
 let bad = 0;
-for (const key of Object.keys(PHOTOS)) {
-  const url = photoUrl(key, 200);
-  let code = '000';
-  try { code = execFileSync('curl', ['-s', '-m', '20', '-o', '/dev/null', '-w', '%{http_code}', url]).toString(); } catch { /* bleibt 000 */ }
-  if (code !== '200') { bad++; console.log(`FEHLT  ${key} (${code})  ${url}`); } else console.log(`ok     ${key}`);
+for (const key of Object.keys(PHOTOS)) for (const w of PHOTO_SIZES) {
+  const f = 'public' + photoUrl(key, w);
+  if (!existsSync(f)) { bad++; console.log('FEHLT  ' + f); }
 }
-console.log(bad ? `\n${bad} Foto(s) nicht erreichbar.` : '\nAlle Fotos erreichbar.');
+console.log(bad ? `\n${bad} Datei(en) fehlen. Mit npm run photos:fetch laden.` : 'Alle Fotos sind vorhanden.');
 process.exit(bad ? 1 : 0);

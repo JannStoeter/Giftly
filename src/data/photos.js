@@ -36,21 +36,14 @@ const ID = {
   mountain:   '1464822759023-fed622ff2c3b', // Berge
   plant:      '1485955900006-10f4d324d411', // Pflanze
   bag:        '1553062407-98eeb64c6a62',    // Rucksack
-  // Creator-Looks
-  'look:l1':  '1513694203232-719a280e022f', // Flur / Interior
-  'look:l2':  '1507473885765-e6ed057f782c', // Abendlicht
-  'look:l3':  '1495474472287-4d71bcdd2085', // Kaffee-Ecke
-  'look:l4':  '1556909114-f6e7ad7d3136',    // Schmorgericht / Küche
-  'look:l5':  '1470071459604-3b5ec3a7fe05', // Hüttentour
-  'look:l6':  'px:7235892',    // Packen
   // Landingpage
   'hero':     '1513885535751-8b9238bd345a',
 };
 
 export const PHOTOS = ID;
 
-/** URL für ein Motiv in gewünschter Breite, oder null, wenn kein Foto hinterlegt ist. */
-export function photoUrl(key, w = 800) {
+/** Adresse beim Foto-Anbieter. Wird nur zum einmaligen Herunterladen genutzt (npm run photos:fetch), nie im Browser. */
+export function remoteUrl(key, w = 800) {
   const id = ID[key];
   if (!id) return null;
   if (id.startsWith('px:')) {
@@ -58,4 +51,12 @@ export function photoUrl(key, w = 800) {
     return `https://images.pexels.com/photos/${n}/pexels-photo-${n}.jpeg?auto=compress&cs=tinysrgb&w=${w}`;
   }
   return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=70`;
+}
+
+/** Fotos liegen auf unserer eigenen Domain (public/photos), damit beim Laden keine Daten an Dritte gehen. */
+export const PHOTO_SIZES = [600, 1200];
+export function photoUrl(key, w = 800) {
+  if (!ID[key]) return null;
+  const size = PHOTO_SIZES.find(x => w <= x) || PHOTO_SIZES[PHOTO_SIZES.length - 1];
+  return `/photos/${key.replace(/[^\w-]/g, '-')}-${size}.jpg`;
 }

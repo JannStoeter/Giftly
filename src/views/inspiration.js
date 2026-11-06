@@ -33,7 +33,7 @@ export function Entdecken(){
     const c=cat(id),list=worldOffers(m,id,3);
     if(!list.length)return '';
     return `<section class="psec" style="margin-bottom:18px">
-     <div class="row" style="gap:12px;margin-bottom:10px"><span class="wm-img" style="width:56px;height:56px">${art(c.a,c.t)}</span><div><p class="eyebrow">Deine Welt</p><h3 style="font-size:26px">${esc(c.n)}</h3></div></div>
+     <div class="row" style="gap:12px;margin-bottom:10px"><span class="wm-img" style="width:56px;height:56px">${art(c.a,c.t)}</span><div><p class="eyebrow">Deine Welt</p><h3 aria-level="2" style="font-size:26px">${esc(c.n)}</h3></div></div>
      <div class="offers">${list.map(o=>Card(o,id,mine.has(o.t.toLowerCase()))).join('')}</div>
     </section>`;
   }).filter(Boolean);

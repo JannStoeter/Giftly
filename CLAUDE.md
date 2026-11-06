@@ -22,4 +22,6 @@
 - Amazon-Partner-ID `jannst-21` in `src/lib/shops.js`, immer mit Hinweis „Anzeige“.
 - Instagram-Material wird mit `npm run promo` erzeugt (`promo/`).
 - Texte der Landingpage sind über `data-edit`-Schlüssel in der Datenbank überschreibbar (`src/cms/`). Neue Texte in `index.html` bekommen einen eigenen Schlüssel, bestehende Schlüssel nicht umbenennen oder umsortieren, sonst passen gespeicherte Änderungen nicht mehr.
+- Rechtsseiten (`impressum.html`, `datenschutz.html`, `barrierefreiheit.html`) beziehen Name, Anschrift und Aufsichtsbehörde aus `legal.config.mjs`. Leere Pflichtfelder erscheinen gelb markiert und der Build warnt. Änderungen an Datenverarbeitung (neue Dienste, Cookies, Tracking, Partner) gehören in `datenschutz.html`.
+- Schriften und Fotos werden selbst ausgeliefert (`@fontsource`, `public/photos`, Nachladen mit `npm run photos:fetch`). Keine Google-Fonts, keine Hotlinks zu Unsplash oder Pexels.
 - Vor dem Pushen: `npx eslint src` und `npm run build`.

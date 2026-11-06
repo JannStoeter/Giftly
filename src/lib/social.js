@@ -58,6 +58,7 @@ export const pinterestKind = url => (url.replace(/^https:\/\/www\.pinterest\.com
 const KEY = 'wishtale:consent:pinterest';
 export const hasPinConsent = () => { try { return localStorage.getItem(KEY) === '1'; } catch { return false; } };
 export const givePinConsent = () => { try { localStorage.setItem(KEY, '1'); } catch { /* nur für diese Sitzung */ } window.__pinConsent = true; };
+export const revokePinConsent = () => { try { localStorage.removeItem(KEY); } catch { /* ignorieren */ } window.__pinConsent = false; };
 export const pinConsent = () => hasPinConsent() || !!window.__pinConsent;
 
 let pinPromise;

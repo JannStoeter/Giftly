@@ -21,6 +21,7 @@ export function Wuensche(){
      <div class="seg" role="group" aria-label="Kategorie"><button class="${u.wc==='alle'?'on':''}" data-act="wc" data-v="alle">Alle</button>${used.map(c=>`<button class="${u.wc===c?'on':''}" data-act="wc" data-v="${c}">${cat(c).n}</button>`).join('')}</div>
      ${densSeg()}
    </div>
+   <h2 class="vh">Deine Wünsche</h2>
    <div class="wgrid ${u.big?'big':''}">${list.map(w=>WishCard(w,m,{
       meta:(w.kind==='kategorie'?`<span class="chip gold">Kategorie${w.budget?' bis '+money(w.budget):''}</span>`:'')+(w.kind==='erlebnis'?'<span class="chip">Erlebnis</span>':'')+(w.kind==='frei'?'<span class="chip">Freier Wunsch</span>':'')+(w.via?`<span class="chip gold">via ${esc(crea(w.via).handle)}</span>`:'')+w.occ.map(o=>`<span class="chip">${occL(o)}</span>`).join(''),
       status:m.managed&&(w.res||w.bought)?{text:w.bought?'Gekauft':'Reserviert',tone:w.bought?'me':'res'}:null,

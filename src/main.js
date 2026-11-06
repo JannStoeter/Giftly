@@ -1,3 +1,6 @@
+import '@fontsource/instrument-serif/400.css';
+import '@fontsource/instrument-serif/400-italic.css';
+import '@fontsource-variable/schibsted-grotesk/index.css';
 import './styles/main.css';
 import { loadState } from './state.js';
 import { S } from './state.js';

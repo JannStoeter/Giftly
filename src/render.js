@@ -1,6 +1,6 @@
 import { S, saveState, setDemo, ensureDraft } from './state.js';
 import { $, esc } from './lib/util.js';
-import { Header, BottomNav, GuestHeader, LoginHeader } from './views/shared.js';
+import { Header, BottomNav, GuestHeader, LoginHeader, LegalFoot } from './views/shared.js';
 import { Start, Profil } from './views/profile.js';
 import { Wuensche } from './views/wishes.js';
 import { Historie } from './views/history.js';
@@ -32,19 +32,19 @@ export function render(top){
   const modalKey=S.ui.modal?`${S.ui.modal}:${S.ui.pickId||''}:${S.ui.worldId||''}`:'';
   const body=VIEWS[v]();
   if(v==='login'){
-    $('#app').innerHTML=LoginHeader()+`<main id="main" class="appmain">${body}</main>`;
+    $('#app').innerHTML=LoginHeader()+`<main id="main" class="appmain">${body}</main>`+LegalFoot();
     window.scrollTo(0,0);
     return;
   }
   if(v==='start'&&!S.auth.user){
     // Einrichtung ohne Konto: ruhige Seite ohne App-Navigation, das Konto kommt erst danach
-    $('#app').innerHTML=LoginHeader()+`<main id="main" class="appmain">${body}</main>`;
+    $('#app').innerHTML=LoginHeader()+`<main id="main" class="appmain">${body}</main>`+LegalFoot();
     window.scrollTo(0,top?0:y);
     saveState();
     return;
   }
   if(v==='gast'){
-    $('#app').innerHTML=GuestHeader()+`<main id="main" class="appmain">${body}</main>`+Modal();
+    $('#app').innerHTML=GuestHeader()+`<main id="main" class="appmain">${body}</main>`+LegalFoot()+Modal();
     window.scrollTo(0,top?0:y);
     const gs=document.querySelector('.sheet');
     if(gs)gs.scrollTop=(modalKey&&modalKey===lastModalKey)?sheetY:0;
@@ -55,7 +55,7 @@ export function render(top){
   $('#app').innerHTML=Header(v)
     +(S.me.managed?`<div class="mgbar">Du verwaltest das Konto von ${esc(S.me.name)}.<button data-act="acct" data-id="me">Zurück zu ${esc(S.accounts.me.name)}</button></div>`:'')
     +`<main id="main" class="appmain">${body}</main>`
-    +BottomNav(v)+Modal();
+    +LegalFoot()+BottomNav(v)+Modal();
   window.scrollTo(0,top?0:y);
   const sheet=document.querySelector('.sheet');
   if(sheet)sheet.scrollTop=(modalKey&&modalKey===lastModalKey)?sheetY:0;

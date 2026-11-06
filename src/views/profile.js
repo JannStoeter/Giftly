@@ -38,7 +38,7 @@ export function Start(){
     body=`<form data-form="draftname" class="addrow" style="margin-top:22px"><label class="sr" for="dn" style="position:absolute;left:-9999px">Dein Vorname</label><input id="dn" class="inp" data-prof="name" value="${esc(S.me.name)}" maxlength="60" placeholder="Zum Beispiel Lena" autocomplete="given-name"></form>`;
   }else body=Picker(st);
   return `<div class="wrap"><div class="ob">
-   <div class="prog" aria-label="Schritt ${i+1} von ${list0.length}">${list0.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join('')}</div>
+   <div class="prog" role="img" aria-label="Schritt ${i+1} von ${list0.length}">${list0.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join('')}</div>
    <p class="eyebrow">Dein Wishtale · ${i+1} von ${list0.length}</p>
    ${S.me.managed?`<div class="banner green" style="margin-top:10px">${ic('user')}<span>Du richtest gerade das Profil für ${esc(S.me.name)} ein. Am schönsten wird es, wenn ihr es zusammen macht.</span></div>`:''}
    <h1>${st.t}</h1><p class="muted" style="font-size:17px">${st.h}</p>
@@ -49,7 +49,7 @@ export function Start(){
 }
 
 /* ---- Profile ---- */
-export function MgPanel(m){return `<section class="panel" style="margin-top:16px;display:grid;gap:10px"><div class="row" style="justify-content:space-between"><h3 style="font-size:24px">Kind-Konto</h3><span class="pill">${ic('lock','sm')}Nur auf Einladung</span></div>
+export function MgPanel(m){return `<section class="panel" style="margin-top:16px;display:grid;gap:10px"><div class="row" style="justify-content:space-between"><h3 aria-level="2" style="font-size:24px">Kind-Konto</h3><span class="pill">${ic('lock','sm')}Nur auf Einladung</span></div>
  <p class="muted" style="font-size:15px">Du pflegst Profil, Wünsche und Feedback für ${esc(m.name)}. Du siehst, was reserviert oder gekauft ist, damit nichts doppelt ankommt. ${esc(m.name)} bekommt davon nichts mit, damit die Überraschung bleibt.</p>
  <div class="chips">${m.invited.map(x=>`<span class="chip ok">${ic('check','sm')}${esc(x)}</span>`).join('')||'<span class="muted" style="font-size:14px">Noch niemand eingeladen.</span>'}</div>
  <div class="row"><button class="btn sec sm" data-act="invite">${ic('plus','sm')}Person einladen</button></div>
@@ -61,7 +61,7 @@ export function Profil(){
     if(pv&&vk==='privat')return '';
     const st=STEPS.find(x=>x.k===k),ed=!pv&&st&&S.ui.editK===k;
     const btn=!pv&&st?`<button class="linkbtn" data-act="pedit" data-k="${k}">${ed?'Fertig':'Ändern'}</button>`:'';
-    return `<section class="psec"><div class="hd"><h3>${title}</h3><span class="row" style="gap:10px">${btn}${VisPill(vk,pv?null:k)}</span></div>${ed?Picker(st):inner}</section>`;
+    return `<section class="psec"><div class="hd"><h3 aria-level="2">${title}</h3><span class="row" style="gap:10px">${btn}${VisPill(vk,pv?null:k)}</span></div>${ed?Picker(st):inner}</section>`;
   };
   const chips=(a,cls='')=>a.length?`<div class="chips">${a.map(x=>`<span class="chip ${cls}">${esc(x)}</span>`).join('')}</div>`:'<p class="muted">Noch nichts hinterlegt.</p>';
   const line=`${m.name} ${m.interests.length?`liebt ${m.interests.slice(0,3).map(esc).join(', ')}`:'hat noch keine Interessen hinterlegt'}. ${m.nogos.length?`Lieber nichts mit ${m.nogos.slice(0,2).map(esc).join(' oder ')}.`:''} ${m.alts.length?`Wenn die Idee fehlt: ${esc(m.alts[0])}.`:''}`;
@@ -86,13 +86,13 @@ export function Profil(){
    ${sec('alts','Alternativen, wenn keine Idee passt',chips(m.alts,'ok'))}
    ${OwnedSec(m)}
    ${SocialSec(m)}
-   <section class="psec"><div class="hd"><h3>Dein Feedback</h3>${VisPill('nur')}</div><p class="muted">Wie dir ein Geschenk wirklich gefallen hat, bleibt unter uns. Wer dir etwas geschenkt hat, bekommt höchstens eine freundliche Nachricht.</p></section>
+   <section class="psec"><div class="hd"><h3 aria-level="2">Dein Feedback</h3>${VisPill('nur')}</div><p class="muted">Wie dir ein Geschenk wirklich gefallen hat, bleibt unter uns. Wer dir etwas geschenkt hat, bekommt höchstens eine freundliche Nachricht.</p></section>
    ${Legend()}`}
   </div>`;
 }
 
 function AboutSec(m){
-  return `<section class="psec"><div class="hd"><h3>Über mich</h3>${VisPill('alle')}</div>
+  return `<section class="psec"><div class="hd"><h3 aria-level="2">Über mich</h3>${VisPill('alle')}</div>
    ${m.managed?'':`<div class="fld"><label for="pname">Dein Vorname</label><input id="pname" class="inp" data-prof="name" value="${esc(m.name)}" maxlength="60" autocomplete="given-name"></div>`}
    <label for="about" class="muted" style="font-size:14px">Erzähl in ein paar Sätzen etwas über dich. Deine Freunde lesen das als Erstes, wenn sie etwas für dich suchen, und bekommen so ein Gefühl dafür, was dir gefällt.</label>
    <textarea id="about" class="ta" data-prof="about" maxlength="320" placeholder="z. B. Ich koche gern für Freunde, trinke meinen Kaffee selbst gebrüht und richte meine Wohnung Stück für Stück ein.">${esc(m.about||'')}</textarea></section>`;
@@ -102,14 +102,14 @@ function AboutSec(m){
 function Meter(m){
   const c=completeness(m);
   return `<section class="meter" aria-label="Wie gut kennen wir dich"><div class="row" style="justify-content:space-between;gap:10px"><strong>Dein Wishtale ist zu ${c.pct} % fertig</strong><span class="muted" style="font-size:13px">${c.pct>=80?'Das sieht richtig gut aus':c.pct>=50?'Ein schöner Anfang':'Da geht noch einiges'}</span></div>
-   <div class="bar" role="progressbar" aria-valuenow="${c.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${c.pct}%"></i></div>
+   <div class="bar" role="progressbar" aria-label="Fortschritt deines Wishtale" aria-valuenow="${c.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${c.pct}%"></i></div>
    <p class="muted" style="font-size:13.5px">Je besser wir dich kennen, desto treffender können wir deinen Freunden passende Ideen zeigen.${c.next.length?` Ein guter nächster Schritt: <b>${esc(c.next[0])}</b>`:''}</p></section>`;
 }
 
 /* Produkte, die man schon hat. Sie fließen in die Empfehlungen ein, damit nichts doppelt gekauft wird. */
 function OwnedSec(m){
   const owned=m.wishes.filter(w=>w.status==='selbst');
-  return `<section class="psec"><div class="hd"><h3>Das habe ich schon</h3>${VisPill('alle')}</div>
+  return `<section class="psec"><div class="hd"><h3 aria-level="2">Das habe ich schon</h3>${VisPill('alle')}</div>
    <p class="muted" style="font-size:14px">Was steht bei dir zu Hause schon im Schrank? Trag es hier ein, zum Beispiel eine Siebträgermaschine. Dann schlagen wir dir und deinen Freunden nichts vor, was du bereits hast.</p>
    ${owned.length?`<div class="chips">${owned.map(w=>`<span class="chip ok">${esc(w.t)}<button class="chipx" data-act="ownedel" data-id="${w.id}" aria-label="${esc(w.t)} entfernen">×</button></span>`).join('')}</div>`:''}
    <form data-form="owned" class="addrow"><label for="ownedt" style="position:absolute;left:-9999px">Was hast du schon?</label><input id="ownedt" name="t" class="inp" placeholder="z. B. Siebträgermaschine, Wanderrucksack" autocomplete="off" maxlength="120"><button class="btn sec sm" type="submit">${ic('plus','sm')}Hinzufügen</button></form></section>`;
@@ -118,7 +118,7 @@ function OwnedSec(m){
 /* Pinterest und Instagram verlinken. Freunde sehen auf der Profilseite, was dich inspiriert. */
 function SocialSec(m){
   const s=m.social||{};
-  return `<section class="psec"><div class="hd"><h3>Was dich inspiriert</h3>${VisPill((m.vis&&m.vis.social)||'giver','social')}</div>
+  return `<section class="psec"><div class="hd"><h3 aria-level="2">Was dich inspiriert</h3>${VisPill((m.vis&&m.vis.social)||'giver','social')}</div>
    <p class="muted" style="font-size:14px">Wenn du magst, verlinkst du hier dein Pinterest oder dein Instagram. Deine Freunde können sich dort umsehen und bekommen ein Gefühl für deinen Geschmack, ohne selbst ein Konto zu brauchen. Bei Pinterest zeigen wir ihnen deine Pins sogar direkt hier an.</p>
    <form data-form="social" class="authform">
     <div class="fld"><label for="sp">Pinterest (dein Profil oder ein Board)</label><input id="sp" name="pinterest" class="inp" inputmode="url" autocomplete="off" placeholder="z. B. pinterest.de/dein-name/kaffee-ecke" value="${esc(s.pinterest||'')}"></div>

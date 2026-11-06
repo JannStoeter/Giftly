@@ -5,7 +5,8 @@ import { check } from './logic.js';
 import { offersFor, worldOffers } from './lib/products.js';
 import { guessCategory } from './lib/category.js';
 import { parseAmazonInput, searchUrl } from './lib/shops.js';
-import { parsePinterest, parseInstagram, givePinConsent } from './lib/social.js';
+import { parsePinterest, parseInstagram, givePinConsent, revokePinConsent } from './lib/social.js';
+import { sb } from './lib/supabase.js';
 import { render, route, refreshGuest } from './render.js';
 import { guestRpc } from './lib/remote.js';
 import { signIn, signUp, magicLink, signOut, friendly } from './lib/auth.js';
@@ -139,6 +140,15 @@ const A={
  ownedel(el){S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
  pins(el){S.ui.pinsCtx=el.dataset.ctx||'guest';S.ui.modal='pins';render()},
  pinconsent(){givePinConsent();render()},
+ pinrevoke(){revokePinConsent();location.reload()},
+ delacct(){
+  if(!confirm('Möchtest du dein Konto mit allen Wünschen und Einträgen wirklich löschen? Das lässt sich nicht rückgängig machen.'))return;
+  sb.rpc('delete_my_account').then(({data,error})=>{
+   if(error||!data){toast('Das hat leider nicht geklappt. Bitte versuche es noch einmal oder schreib uns.');return}
+   try{Object.keys(localStorage).filter(k=>k.startsWith('wishtale:')||k.startsWith('sb-')).forEach(k=>localStorage.removeItem(k))}catch{/* ignorieren */}
+   sb.auth.signOut().catch(()=>{}).finally(()=>{location.hash='#anmelden';location.reload()});
+  });
+ },
  aside(){S.ui.asideOpen=!S.ui.asideOpen;render()},
  wopen(el){S.ui.pickId=el.dataset.id;S.ui.wishCtx=el.dataset.ctx||'guest';S.ui.modal='wishdetail';render();setTimeout(()=>document.querySelector('.sheet [data-act=close]')?.focus({preventScroll:true}),30)},
  try(el){const p=guestPerson();S.ui.idea=el.dataset.v;S.ui.ideaRes=check(p,el.dataset.v);render()},
