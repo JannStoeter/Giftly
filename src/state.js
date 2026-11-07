@@ -5,6 +5,7 @@ export const S={
  auth:{user:null,demo:false,sync:'idle',syncError:'',error:''},
  guest:null,
  promo:null,
+ given:[],
  me:{
   id:'me',name:'Lena',tone:2,
   interests:['Lesen','Wandern','Kochen'],cats:['buecher','outdoor','kochen','wohnen'],

@@ -2,6 +2,7 @@ import { S } from '../state.js';
 import { esc, ic } from '../lib/util.js';
 import { art } from '../lib/art.js';
 import { FB } from '../data/content.js';
+import { GivenSection } from './given.js';
 
 export function Historie(){
   const m=S.me;
@@ -23,6 +24,7 @@ export function Historie(){
        <button class="chip" data-act="again" data-id="${g.id}">${g.again?'Würde mich wieder freuen':'Lieber nicht nochmal'}</button>
       </div></div></article>`).join('')}</div>
     <div class="legend" style="margin-top:14px"><span>${ic('eye','sm')}Deine Bewertungen sieht nur du. Deine Freunde sehen lediglich, was es war, von wem es kam und wann.</span></div></section>
+   ${m.managed?'':GivenSection()}
   </div>`;
 }
 export function SwapPanel(g){

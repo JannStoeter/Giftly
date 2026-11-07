@@ -2,6 +2,7 @@ import { S, initials } from '../state.js';
 import { esc, ic } from '../lib/util.js';
 import { CATS, OCC, PRIO } from '../data/content.js';
 import { WishModal } from './wishmodal.js';
+import { GivenModal, GiftGivenModal } from './given.js';
 import { WorldModal } from './world.js';
 import { PinsModal } from './pins.js';
 import { AMAZON_DISCLOSURE, searchUrl } from '../lib/shops.js';
@@ -49,6 +50,8 @@ export function AmazonModal(){
 export function Modal(){
   const m=S.ui.modal;if(!m)return '';
   if(m==='amazon')return AmazonModal();
+  if(m==='given')return GivenModal();
+  if(m==='giftgiven')return GiftGivenModal();
   if(m==='wishdetail')return WishModal();
   if(m==='world')return WorldModal();
   if(m==='pins')return PinsModal();

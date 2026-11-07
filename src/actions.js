@@ -10,6 +10,7 @@ import { sb } from './lib/supabase.js';
 import { inspectLink, priceField, summary } from './lib/inspect.js';
 import { hidePromo } from './views/inspiration.js';
 import { track } from './lib/track.js';
+import { saveGift, removeGift } from './lib/given.js';
 import { render, route, refreshGuest } from './render.js';
 import { guestRpc } from './lib/remote.js';
 import { signIn, signUp, magicLink, signOut, friendly, resendSignup, resetPassword, setPassword } from './lib/auth.js';
@@ -53,6 +54,12 @@ function reserveFlow(p,w){
       .catch(()=>{toast('Das hat leider nicht geklappt. Magst du es bitte noch einmal versuchen?');return false});
   }
   w.res='me';return Promise.resolve(true);
+}
+/* Geschenk merken (nur echte Gast-Ansicht, nicht die Demo-Vorschau). Fehler bleiben still. */
+function remember(p,w,patch){
+  if(!p||!w||p.managed)return;
+  const ref=(p.handle||p.id)+':'+w.id;
+  saveGift({ref,recipient:p.name,handle:p.handle||'',wishTitle:w.t,what:w.t,occasion:'',price:w.price||null,...patch}).then(()=>render()).catch(()=>{});
 }
 const A={
  scroll(el){document.getElementById(el.dataset.t)?.scrollIntoView({behavior:'smooth',block:'start'})},
@@ -133,27 +140,28 @@ const A={
  },
  reserve(el){
   const p=guestPerson(),w=p&&p.wishes.find(x=>x.id===el.dataset.id);if(!w)return;
-  reserveFlow(p,w).then(ok=>{if(ok)toast(`Erledigt, der Wunsch ist für dich reserviert. ${p.name} erfährt davon nichts und andere Freunde sehen nur „reserviert“.`);render()});
+  reserveFlow(p,w).then(ok=>{if(ok)remember(p,w,{status:'reserved'});if(ok)toast(`Erledigt, der Wunsch ist für dich reserviert. ${p.name} erfährt davon nichts und andere Freunde sehen nur „reserviert“.`);render()});
  },
  choose(el){
   const p=guestPerson(),w=p&&p.wishes.find(x=>x.id===el.dataset.wid);if(!w)return;
   const o=offersFor(p,w),pick=[o.main,...o.alts].filter(Boolean).find(x=>String(x.id)===el.dataset.pid);
   reserveFlow(p,w).then(ok=>{
-   if(ok&&pick){S.ui.chosen[w.id]={t:pick.t,url:pick.url,price:pick.price||null};toast(`Reserviert: ${pick.t}. Du kannst ihn jederzeit hier wiederfinden.`)}
+   if(ok&&pick){S.ui.chosen[w.id]={t:pick.t,url:pick.url,price:pick.price||null};remember(p,w,{status:'reserved',what:pick.t,url:pick.url||'',price:pick.price||w.price||null});toast(`Reserviert: ${pick.t}. Du kannst ihn jederzeit hier wiederfinden.`)}
    render();
   });
  },
  release(el){
   const p=guestPerson(),w=p&&p.wishes.find(x=>x.id===el.dataset.id);if(!w)return;
   delete S.ui.chosen[w.id];
+  const gg=S.given.find(x=>x.ref===(p.handle||p.id)+':'+w.id&&x.status==='reserved');if(gg)removeGift(gg.id);
   if(p.remote){guestRpc('release_wish',w.id).then(refreshGuest).catch(()=>toast('Das hat nicht geklappt.'));return}
   w.res=null;render();
  },
  bought(el){
   const p=guestPerson(),w=p&&p.wishes.find(x=>x.id===el.dataset.id);if(!w)return;
   const done=()=>{toast('Prima, als gekauft markiert. Die Überraschung bleibt natürlich bestehen.')};
-  if(p.remote){guestRpc('mark_bought',w.id).then(()=>{done();return refreshGuest()}).catch(()=>toast('Das hat nicht geklappt.'));return}
-  w.bought=true;done();render();
+  if(p.remote){guestRpc('mark_bought',w.id).then(()=>{remember(p,w,{status:'bought'});done();return refreshGuest()}).catch(()=>toast('Das hat nicht geklappt.'));return}
+  w.bought=true;remember(p,w,{status:'bought'});done();render();
  },
  world(el){S.ui.worldId=el.dataset.id;S.ui.worldCtx=el.dataset.ctx||'guest';S.ui.modal='world';render();setTimeout(()=>document.querySelector('.sheet [data-act=close]')?.focus({preventScroll:true}),30)},
  ownedel(el){S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
@@ -179,6 +187,11 @@ async readlink(el,ev){
   if(!S.me.wishes.some(w=>w.status==='selbst'&&w.t.toLowerCase()===t.label.toLowerCase()))S.me.wishes.unshift(W({t:t.label,c:t.c,kind:'produkt',prio:1,status:'selbst',vis:'alle',a:t.a,tone:t.tone,kw:t.kw}));
   toast(`Notiert: ${t.label} hast du schon. Solche Vorschläge blenden wir aus. Unter „Das habe ich schon“ im Profil kannst du es wieder entfernen.`);render();
  },
+ givenreact(el){
+  const g=S.given.find(x=>x.id===el.dataset.id);if(!g)return;
+  const o=['','ja','teils','nein'];saveGift({id:g.id,reaction:o[(o.indexOf(g.reaction||'')+1)%4]||null}).then(()=>render());
+ },
+ givendel(el){if(confirm('Dieses Geschenk aus deiner Liste entfernen?'))removeGift(el.dataset.id).then(()=>render())},
  promohide(el){hidePromo(el.dataset.id);render()},
  pinrevoke(){revokePinConsent();location.reload()},
  delacct(){
@@ -301,6 +314,10 @@ document.addEventListener('submit',e=>{
   }
   if(kind==='custom'){const v=(fd.get('v')||'').trim(),k=fd.get('k');if(v&&!S.me[k].includes(v))S.me[k].push(v);render()}
   if(kind==='idea'){const v=(fd.get('idea')||'').trim();S.ui.idea=v;S.ui.ideaRes=v?check(guestPerson(),v):null;render()}
+  if(kind==='givengift'){
+    saveGift({recipient:(fd.get('recipient')||'').trim(),what:(fd.get('what')||'').trim(),occasion:fd.get('occasion')||'',when:fd.get('when')||undefined,price:parsePrice(fd.get('price')),reaction:fd.get('reaction')||null,note:(fd.get('note')||'').trim(),status:'given'}).then(()=>{S.ui.modal=null;toast('Das Geschenk steht jetzt in deiner Liste.');render()});
+    return;
+  }
   if(kind==='gift'){
     const [y,mo]=(fd.get('when')||'2026-11').split('-');
     const what=fd.get('what').trim();

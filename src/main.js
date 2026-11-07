@@ -10,6 +10,7 @@ import { toast } from './lib/util.js';
 import { route, render } from './render.js';
 import './actions.js';
 import { loadPromo } from './lib/promo.js';
+import { loadGiven, migrateGiven } from './lib/given.js';
 
 async function boot(){
   const recoveryLink=/type=recovery/.test(location.hash); // vor getSession merken, Supabase räumt die Adresse danach auf
@@ -20,6 +21,7 @@ async function boot(){
   const fromLink=/access_token|error_description/.test(location.hash);
   if(session){
     await enter(session.user);
+    await migrateGiven().catch(()=>0);await loadGiven().catch(()=>{});
     const adopted=recoveryLink?false:adoptDraft();
     if(recoveryLink){
       history.replaceState(null,'',location.pathname+'#neues-passwort');
@@ -34,6 +36,7 @@ async function boot(){
   }else if(fromLink){
     history.replaceState(null,'',location.pathname+'#anmelden');
   }
+  if(!session)await loadGiven().catch(()=>{});
   window.addEventListener('hashchange',route);
   route();
   loadPromo().then(p=>{S.promo=p;if(['entdecken','gast','profil','wuensche'].includes(S.ui.view)&&!S.ui.modal&&!document.activeElement?.matches?.('input,textarea,select'))render()});
@@ -43,6 +46,7 @@ async function boot(){
     setTimeout(async()=>{
       if(event==='SIGNED_IN'&&sess&&!S.auth.user){
         await enter(sess.user);
+        await migrateGiven().catch(()=>0);await loadGiven().catch(()=>{});
         if(location.hash==='#neues-passwort'){route();return}
         const adopted=adoptDraft();
         const a=S.accounts.me;

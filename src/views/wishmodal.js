@@ -6,6 +6,7 @@ import { art, artIllu } from '../lib/art.js';
 import { offersFor } from '../lib/products.js';
 import { cat, crea, occL, PRIO } from '../data/content.js';
 import { priceLine } from './product.js';
+import { RememberNote } from './given.js';
 
 const REL = 'noopener noreferrer sponsored nofollow';
 
@@ -55,7 +56,7 @@ export function WishModal() {
   let state = '';
   if (ctx === 'guest') {
     if (w.bought) state = `<div class="banner green">${ic('check')}<span>Das hast du schon besorgt. Die Überraschung bleibt natürlich bestehen.</span></div>`;
-    else if (mine) state = `<div class="banner green">${ic('lock')}<span>Du hast diesen Wunsch reserviert.${chosen ? ` Deine Wahl: <b>${esc(chosen.t)}</b>.` : ''} ${esc(p.name)} erfährt davon nichts.</span></div>`;
+    else if (mine) state = `<div class="banner green">${ic('lock')}<span>Du hast diesen Wunsch reserviert.${chosen ? ` Deine Wahl: <b>${esc(chosen.t)}</b>.` : ''} ${esc(p.name)} erfährt davon nichts.${p.managed ? '' : RememberNote()}</span></div>`;
     else if (taken) state = `<div class="banner">${ic('lock')}<span>Um diesen Wunsch kümmert sich schon jemand anderes.</span></div>`;
   }
 

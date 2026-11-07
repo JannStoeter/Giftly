@@ -22,7 +22,7 @@ export const VisPill=(k,btn)=>{const x=V[k];return btn?`<button class="pill" dat
 export function GuestHeader(){
   return `<header class="hdr"><div class="wrap">
    <a class="mark" href="../" aria-label="wishtale, zur Startseite">wishtale<i></i></a>
-   <div class="right">${S.auth.user?'':'<a class="btn ghost sm" href="#anmelden">Anmelden</a>'}<a class="btn pri sm" href="${S.auth.user?'#profil':'#start'}">${S.auth.user?'Zu meinem Wishtale':'Wishtale erstellen'}</a></div>
+   <div class="right">${S.given.length?`<button class="btn ghost sm" data-act="modal" data-v="given">Meine Geschenke (${S.given.length})</button>`:''}${S.auth.user?'':'<a class="btn ghost sm" href="#anmelden">Anmelden</a>'}<a class="btn pri sm" href="${S.auth.user?'#profil':'#start'}">${S.auth.user?'Zu meinem Wishtale':'Wishtale erstellen'}</a></div>
   </div></header>`;
 }
 
