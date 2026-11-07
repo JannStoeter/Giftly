@@ -601,3 +601,8 @@ mark.todo{background:#F5D98B;color:#3A2A00;padding:0 4px;border-radius:4px}
 .promocard .disc{color:#C9D3BD}
 .promocard .offer .eyebrow{color:#8A5F10}.promocard .offer .price span{color:var(--muted)}
 .promocard .oa{grid-template-columns:1fr!important}.promocard .oa .btn{justify-content:center}
+
+/* Vorschläge von Wishtale klar vom Wunsch der Person trennen */
+.sugg{display:grid;gap:4px;border:1px dashed var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;margin:12px 0;font-size:14.5px;line-height:1.5}
+.sugg b{font-weight:600}.sugg span{color:var(--muted)}
+.offer.suggest{border-style:dashed}

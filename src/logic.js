@@ -1,8 +1,9 @@
+import { livePRODUCTS } from './lib/catalog.js';
 import { fits } from './lib/fit.js';
 import { weightOf } from './lib/weights.js';
 import { esc, norm, kwOf, same, overlap, money, gen } from './lib/util.js';
 import { S } from './state.js';
-import { ACT, CATALOG, PRODUCTS, cat, occL } from './data/content.js';
+import { ACT, CATALOG, cat, occL } from './data/content.js';
 
 export const tagsOf=p=>p.interests.map(l=>ACT.find(a=>a.l===l)?.t).filter(Boolean);
 export const ownedOf=p=>p.wishes.filter(w=>w.status==='selbst');
@@ -37,7 +38,7 @@ export function recommend(p){
   return {good,skip};
 }
 export function picks(p,w){
-  const b=w.budget||1e9,all=PRODUCTS.filter(x=>w.kw.some(k=>same(k,x.cat))&&fits(w,x)),inb=all.filter(x=>(x.price??x.est)<=b);
+  const b=w.budget||1e9,all=livePRODUCTS().filter(x=>w.kw.some(k=>same(k,x.cat))&&fits(w,x)),inb=all.filter(x=>(x.price??x.est)<=b);
   const list=inb.map(x=>{let sc=x.q*2;const why=[];
     if(p.brands.includes(x.brand)){sc+=4;why.push(`${esc(x.brand)} gehört zu ${esc(gen(p.name))} Lieblingsmarken.`)}
     why.push(w.budget?`Das sollte nach unserer Einschätzung gut ins Budget bis ${money(w.budget)} passen. Den genauen Preis siehst du bei Amazon.`:'Den genauen Preis siehst du bei Amazon.');

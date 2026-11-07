@@ -4,25 +4,36 @@ import { esc, money, toast } from './util.js';
 import { CATS } from '../data/content.js';
 import { withAmazonTag } from '../lib/shops.js';
 import { guessCategory } from '../lib/category.js';
+import { PRODUCTS, PRICE_DATE } from '../data/content.js';
+import { amazonUrl, WORLD_OF_CAT } from '../lib/products.js';
 
 export const PARTNERS = { amazon: 'Amazon', mydays: 'mydays', 'jochen-schweizer': 'Jochen Schweizer', otto: 'Otto', zalando: 'Zalando', thalia: 'Thalia', direkt: 'Direkt beim Hersteller', sonstige: 'Sonstige' };
 const empty = () => ({ title: '', brand: '', category: 'wohnen', partner: 'amazon', url: '', price: '', image_url: '', note: '', active: true, featured: false, sort: 0 });
 
 export async function mount(el) {
-  let rows = [], edit = null, q = '', weights = {};
+  let rows = [], edit = null, q = '', weights = {}, off = [];
   const load = async () => {
     rows = await list('products', 'sort', true);
     const { data } = await sb.from('settings').select('value').eq('key', 'category_weights').maybeSingle();
-    weights = (data && data.value) || {}; draw();
+    weights = (data && data.value) || {};
+    const o = await sb.from('settings').select('value').eq('key', 'catalog_disabled').maybeSingle(); off = (o.data && o.data.value) || [];
+    draw();
   };
   const wlabel = v => (v === 0 ? 'Nicht zeigen' : v < 100 ? 'Weniger' : v > 100 ? 'Mehr' : 'Normal');
   const steering = () => `<section class="card"><h2>Automatische Auswahl steuern</h2>
     <p class="muted">Wishtale wählt die Produkte selbst aus, passend zu Interessen, Marken und Wünschen. Hier legst du nur fest, welche Kategorien dabei stärker oder schwächer nach vorn rücken. 100 % ist normal, 0 % blendet eine Kategorie ganz aus.</p>
     <div class="weights">${CATS.map(c => { const v = weights[c.id] ?? 100; return `<div class="wrow"><label for="w-${c.id}">${c.n}</label><input id="w-${c.id}" type="range" min="0" max="200" step="10" value="${v}" data-w="${c.id}"><output for="w-${c.id}">${v} % · ${wlabel(v)}</output></div>`; }).join('')}</div>
     <div class="row"><button class="btn pri sm" data-a="saveweights">Gewichtung speichern</button><button class="btn ghost sm" data-a="resetweights">Alles auf normal</button></div></section>`;
+  const catalog = () => `<section class="card"><h2>Katalog prüfen</h2>
+    <p class="muted">Das sind die Produkte, aus denen die App automatisch auswählt. Wir testen sie nicht selbst, deshalb lohnt sich ab und zu ein Blick: Ist das Produkt noch lieferbar, wie sind die Bewertungen, stimmt der Preis? Ein ausgeblendetes Produkt wird nirgends mehr vorgeschlagen. Preisstand der Angaben: ${esc(PRICE_DATE)}.</p>
+    <div class="tablewrap"><table><thead><tr><th>Produkt</th><th>Welt</th><th>Eigenschaften</th><th>Status</th><th></th></tr></thead><tbody>
+    ${PRODUCTS.map(x => `<tr><td><b>${esc(x.t)}</b><br><span class="muted">${esc(x.brand || '')} · Qualität ${x.q} von 5</span></td><td>${esc((CATS.find(c => c.id === (WORLD_OF_CAT[x.cat] || 'wohnen')) || {}).n || '')}</td><td>${esc((x.attrs || []).join(', ') || '–')}</td>
+      <td>${off.includes(x.id) ? '<span class="pill">Ausgeblendet</span>' : '<span class="pill ok">Wird vorgeschlagen</span>'}</td>
+      <td class="actions"><a class="btn ghost sm" href="${esc(amazonUrl(x))}" target="_blank" rel="noopener noreferrer">Bei Amazon prüfen</a> <button class="btn sec sm" data-a="catalog" data-id="${x.id}">${off.includes(x.id) ? 'Wieder zeigen' : 'Ausblenden'}</button></td></tr>`).join('')}
+    </tbody></table></div></section>`;
   const draw = () => {
     const shown = rows.filter(r => !q || (r.title + r.brand + r.note).toLowerCase().includes(q));
-    el.innerHTML = `<div class="head"><div><h1>Produkte</h1><p class="muted">Die Empfehlungen in der App entstehen automatisch. Du steuerst sie über die Gewichtung der Kategorien und kannst eigene Produkte ergänzen. Ein Produkt mit Haken bei „Hervorgehoben“ erscheint zusätzlich unter Inspiration als Empfehlung von Wishtale (mit „Anzeige“).</p></div></div>${steering()}<div class="head"><div><h2>Eigene Produkte (optional)</h2></div><button class="btn pri" data-a="new">Produkt hinzufügen</button></div>
+    el.innerHTML = `<div class="head"><div><h1>Produkte</h1><p class="muted">Die Empfehlungen in der App entstehen automatisch. Du steuerst sie über die Gewichtung der Kategorien und kannst eigene Produkte ergänzen. Ein Produkt mit Haken bei „Hervorgehoben“ erscheint zusätzlich unter Inspiration als Empfehlung von Wishtale (mit „Anzeige“).</p></div></div>${steering()}${catalog()}<div class="head"><div><h2>Eigene Produkte (optional)</h2></div><button class="btn pri" data-a="new">Produkt hinzufügen</button></div>
      <div class="row"><label class="sr" for="pq">Suchen</label><input id="pq" class="inp" placeholder="Produkte suchen" value="${esc(q)}" style="max-width:320px"></div>
      ${edit ? form() : ''}
      <div class="tablewrap"><table><thead><tr><th>Produkt</th><th>Partner</th><th>Preis</th><th>Status</th><th></th></tr></thead><tbody>
@@ -52,6 +63,7 @@ export async function mount(el) {
       if (a === 'new') { edit = empty(); draw(); el.querySelector('#f-title')?.focus(); }
       else if (a === 'edit') { edit = { ...r }; draw(); el.querySelector('#f-title')?.focus(); window.scrollTo(0, 0); }
       else if (a === 'cancel') { edit = null; draw(); }
+      else if (a === 'catalog') { const id = b.dataset.id; off = off.includes(id) ? off.filter(x => x !== id) : [...off, id]; const { error } = await sb.from('settings').upsert({ key: 'catalog_disabled', value: off }); if (error) throw error; toast(off.includes(id) ? 'Das Produkt wird nicht mehr vorgeschlagen.' : 'Das Produkt wird wieder vorgeschlagen.'); draw(); }
       else if (a === 'saveweights') { const { error } = await sb.from('settings').upsert({ key: 'category_weights', value: weights }); if (error) throw error; toast('Die Gewichtung ist gespeichert und wirkt sofort in der App.'); }
       else if (a === 'resetweights') { weights = {}; draw(); toast('Zurückgesetzt. Zum Übernehmen bitte speichern.'); }
       else if (a === 'toggle') { await save('products', { id: r.id, active: !r.active }); toast(r.active ? 'Das Produkt ist ausgeschaltet.' : 'Das Produkt ist wieder aktiv.'); await load(); }

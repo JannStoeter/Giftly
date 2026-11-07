@@ -64,7 +64,9 @@ export function Modal(){
     <div class="fld"><span class="lb">Besonders passend zu (optional)</span><div class="radios">${OCC.map(o=>`<label><input type="checkbox" name="occ" value="${o.id}" ${(d.occ||[]).includes(o.id)?'checked':''}><span>${o.l}</span></label>`).join('')}</div></div>
     <div class="fld"><label for="wp">Preis in Euro (optional)</label><input id="wp" name="price" class="inp" inputmode="decimal" placeholder="z. B. 69,90" value="${d.price?String(d.price).replace('.',','):''}"></div>
     ${S.ui.editWish?'':`<div class="fld"><span class="lb">Produkt bei Amazon suchen?</span><div><button type="button" class="btn amz sm" data-act="azopen">Bei Amazon stöbern ${ic('arrow','sm')}</button></div></div>`}
-    <div class="fld"><label for="wl">Link (optional)</label><input id="wl" name="link" class="inp" placeholder="z. B. shop.de/produkt" autocomplete="off" value="${esc(d.link||'')}"></div>
+    <div class="fld"><label for="wl">Link (optional)</label><input id="wl" name="link" class="inp" placeholder="z. B. shop.de/produkt" autocomplete="off" value="${esc(d.link||'')}">
+     <div class="row" style="margin:6px 0 0;gap:8px"><button type="button" class="btn sec sm" data-act="readlink">Angaben aus dem Link lesen</button></div>
+     <p id="wlstat" class="hint" role="status" aria-live="polite">Wir lesen Name, Preis und Größe aus dem Link. Bei Amazon nutze „Bei Amazon stöbern“.</p></div>
     <div class="fld"><label for="wn">Notiz</label><textarea id="wn" name="note" class="ta" placeholder="Farbe, Größe, Stimmung">${esc(d.note||'')}</textarea></div>
     <div class="fld"><label for="wc2">Kategorie</label><select id="wc2" name="c" class="sel">${CATS.map(c=>`<option value="${c.id}" ${(d.c||'wohnen')===c.id?'selected':''}>${c.n}</option>`).join('')}</select></div>
     <div class="fld"><span class="lb">Wie wichtig ist es dir?</span><div class="radios">${[1,2,3].map(n=>`<label><input type="radio" name="prio" value="${n}" ${n===(d.prio||2)?'checked':''}><span>${PRIO[n]}</span></label>`).join('')}</div></div>

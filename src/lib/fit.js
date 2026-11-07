@@ -33,3 +33,11 @@ export function fits(w, x) {
   if (have.has('guss')) have.add('eisen');
   return need.every(a => (a.startsWith('!') ? !have.has(a.slice(1)) : have.has(a)));
 }
+
+const LABEL = { beschichtet: 'beschichtet', '!beschichtet': 'unbeschichtet', guss: 'Gusseisen', eisen: 'Eisen', emailliert: 'emailliert', edelstahl: 'Edelstahl', schwanenhals: 'Schwanenhals', temperatur: 'mit Temperaturwahl', retro: 'Retro-Design', hand: 'Handmühle', keramik: 'Keramik' };
+/** Die Kriterien eines Wunsches in Worten, z. B. „beschichtet“ oder „bis 100 €“. Leer, wenn der Wunsch keine nennt. */
+export function criteriaText(w) {
+  const bits = wanted(w).map(a => LABEL[a]).filter(Boolean);
+  if (w.kind === 'kategorie' && w.budget) bits.push(`bis ${w.budget} €`);
+  return bits.join(', ');
+}

@@ -33,3 +33,15 @@ export function rest(token, fetchImpl = fetch) {
 
 export const send = (res, status, body) => { res.status(status).setHeader('Cache-Control', 'no-store'); res.json(body); };
 export const fail = (res, e) => send(res, e.status || 500, { error: e.status ? e.message : 'Unerwarteter Fehler. Bitte versuche es noch einmal.' });
+
+/** Für Funktionen, die jede angemeldete Person nutzen darf (nicht nur Admins). Gibt die Nutzer-ID zurück. */
+export async function requireUser(req, fetchImpl = fetch) {
+  const h = req.headers?.authorization || '';
+  const token = h.startsWith('Bearer ') ? h.slice(7) : '';
+  if (!token) throw new HttpError(401, 'Bitte melde dich an.');
+  const u = await fetchImpl(`${SUPABASE_URL}/auth/v1/user`, { headers: { apikey: SUPABASE_KEY, authorization: `Bearer ${token}` } });
+  if (!u.ok) throw new HttpError(401, 'Die Anmeldung ist abgelaufen. Bitte melde dich neu an.');
+  const j = await u.json().catch(() => ({}));
+  if (!j.id) throw new HttpError(401, 'Bitte melde dich an.');
+  return { id: j.id, token };
+}

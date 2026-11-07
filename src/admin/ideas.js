@@ -7,6 +7,7 @@ import { gen } from '../lib/util.js';
 import { PRODUCTS, PRICE_DATE, cat } from '../data/content.js';
 import { WORLD_OF_CAT } from '../lib/products.js';
 import { weightOf } from '../lib/weights.js';
+import { livePRODUCTS } from '../lib/catalog.js';
 import { amazonUrl } from '../lib/products.js';
 
 const TAGS = '#wishtale #wunschliste #geschenkideen #geschenke #wishlist';
@@ -18,7 +19,7 @@ const week = () => Math.floor(Date.now() / (7 * 864e5));
 
 /** Wählt ein Produkt automatisch: gewichtet nach Qualität und Kategorie-Gewichtung, wechselt jede Woche. */
 export function pickProduct(offset = 0) {
-  const pool = PRODUCTS.map(x => ({ x, w: Math.max(0, x.q * weightOf(WORLD_OF_CAT[x.cat] || 'wohnen')) })).filter(e => e.w > 0);
+  const pool = livePRODUCTS().map(x => ({ x, w: Math.max(0, x.q * weightOf(WORLD_OF_CAT[x.cat] || 'wohnen')) })).filter(e => e.w > 0);
   if (!pool.length) return null;
   const sorted = [...pool].sort((a, b) => b.w - a.w || a.x.id.localeCompare(b.x.id));
   // Aus der oberen Hälfte der gewichteten Liste rotieren, damit nicht immer dasselbe Produkt kommt

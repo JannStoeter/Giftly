@@ -11,6 +11,7 @@ import { AMAZON_TAG, normUrl, searchUrl } from './shops.js';
 import { picks, excluded, recommend } from '../logic.js';
 import { weightOf } from './weights.js';
 import { fits, wanted } from './fit.js';
+import { livePRODUCTS } from './catalog.js';
 
 export const amazonUrl = p => p.asin ? `https://www.amazon.de/dp/${p.asin}?tag=${AMAZON_TAG}` : searchUrl.amazon(p.search || p.t);
 
@@ -23,7 +24,7 @@ export function productFor(person, w) {
   const own = deepLink(w.link);
   if (own) return { t: w.t, url: own, host: new URL(own).hostname.replace(/^www\./, ''), price: w.price || null, priceBy: 'user', source: 'link', direct: true };
   // Nur Produkte, die zu den genannten Eigenschaften passen (z. B. „beschichtet“)
-  const match = PRODUCTS.filter(x => w.kw.some(k => same(k, x.cat)) && fits(w, x));
+  const match = livePRODUCTS().filter(x => w.kw.some(k => same(k, x.cat)) && fits(w, x));
   const brandHit = match.find(x => norm(w.t).includes(norm(x.brand)));
   const catHit = brandHit || [...match].sort((a, b) => b.q - a.q)[0];
   if (catHit && w.kind !== 'frei') return fromProduct(catHit, 'katalog');
@@ -61,7 +62,7 @@ export function offersFor(person, w) {
     const offers = list.map(e => ({ ...fromProduct(e.x, 'vorschlag'), id: e.x.id, why: e.why }));
     return { main: offers[0] || (main && { ...main, id: 'main' }) || null, alts: offers.slice(1, 4), over };
   }
-  const pool = PRODUCTS.filter(x => w.kw.some(k => same(k, x.cat)) && fits(w, x));
+  const pool = livePRODUCTS().filter(x => w.kw.some(k => same(k, x.cat)) && fits(w, x));
   if (main && pool.length && w.kind !== 'frei') {
     const mp = pool.find(x => x.t === main.t);
     const alts = pool.filter(x => x !== mp).sort((a, b) => b.q - a.q).slice(0, 3).map(x => ({ ...fromProduct(x, 'katalog'), id: x.id }));
@@ -75,7 +76,7 @@ export function offersFor(person, w) {
 
 /** Beliebte Wunschideen für Profile, die noch kaum etwas angegeben haben. Gewichtung aus dem CMS gilt auch hier. */
 export function popularOffers(n = 4) {
-  return PRODUCTS
+  return livePRODUCTS()
     .map(x => ({ x, sc: x.q * weightOf(WORLD_OF_CAT[x.cat] || 'wohnen') }))
     .filter(e => e.sc > 0).sort((a, b) => b.sc - a.sc).slice(0, n)
     .map(({ x }) => ({ ...fromProduct(x, 'katalog'), id: x.id, why: [] }));
@@ -125,7 +126,7 @@ const nearby = t => `https://www.google.de/search?q=${encodeURIComponent(t + ' i
  */
 export function worldOffers(person, cid, n = 6) {
   const out = [];
-  PRODUCTS.filter(x => WORLD_OF_CAT[x.cat] === cid && !excluded(person, { kw: [...kwOf(x.t), x.cat] })).forEach(x => {
+  livePRODUCTS().filter(x => WORLD_OF_CAT[x.cat] === cid && !excluded(person, { kw: [...kwOf(x.t), x.cat] })).forEach(x => {
     const wt = weightOf(cid);
     if (wt === 0) return;
     const why = [];

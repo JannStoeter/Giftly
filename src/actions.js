@@ -7,6 +7,7 @@ import { guessCategory } from './lib/category.js';
 import { parseAmazonInput, searchUrl } from './lib/shops.js';
 import { parsePinterest, parseInstagram, givePinConsent, revokePinConsent } from './lib/social.js';
 import { sb } from './lib/supabase.js';
+import { inspectLink, priceField, summary } from './lib/inspect.js';
 import { hidePromo } from './views/inspiration.js';
 import { render, route, refreshGuest } from './render.js';
 import { guestRpc } from './lib/remote.js';
@@ -149,6 +150,21 @@ const A={
  ownedel(el){S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
  pins(el){S.ui.pinsCtx=el.dataset.ctx||'guest';S.ui.modal='pins';render()},
  pinconsent(){givePinConsent();render()},
+async readlink(el,ev){
+  const auto=ev===true,f=document.querySelector('form[data-form=wish]');if(!f)return;
+  const raw=f.elements.link.value.trim(),st=document.getElementById('wlstat'),say=t=>{if(st)st.textContent=t};
+  if(!raw){say('Füge zuerst einen Link ein.');return}
+  if(/amazon\.|amzn\.|(^|\/\/)a\.co/i.test(raw)){if(!auto)say('Amazon lässt das automatische Lesen nicht zu. Nutze dafür „Bei Amazon stöbern“.');return}
+  say('Wir lesen den Link …');
+  try{
+    const p=await inspectLink(raw);
+    const t=f.elements.t,pr=f.elements.price,nt=f.elements.note;
+    if(!t.value.trim())t.value=p.title.slice(0,160);
+    const pf=priceField(p);if(pf&&(!auto||!pr.value.trim()))pr.value=pf;
+    if(p.size&&!/gr(ö|oe)ße:/i.test(nt.value)&&(!auto||!nt.value.trim()))nt.value=(nt.value.trim()?nt.value.trim()+'\n':'')+`Größe: ${p.size}`;
+    say(`Gefunden: ${summary(p)}. Bitte prüfe die Angaben, der Preis kann sich ändern.${p.price&&p.currency&&p.currency!=='EUR'?' Der Preis steht nicht in Euro, bitte passe ihn an.':''}`);
+  }catch(e){say(e.message||'Das hat nicht geklappt.')}
+ },
  ihave(el){
   const t=ownedTypeFor(el.dataset.id);if(!t)return;
   if(!S.me.wishes.some(w=>w.status==='selbst'&&w.t.toLowerCase()===t.label.toLowerCase()))S.me.wishes.unshift(W({t:t.label,c:t.c,kind:'produkt',prio:1,status:'selbst',vis:'alle',a:t.a,tone:t.tone,kw:t.kw}));
@@ -193,8 +209,9 @@ document.addEventListener('change',e=>{
   // Neuer Wunsch: Kategorie passend zum Titel vorschlagen, solange noch nichts anderes gewählt wurde
   if(e.target.id==='wt'){const s=document.getElementById('wc2');if(s&&!s.dataset.touched)s.value=guessCategory(e.target.value,s.value)}
   if(e.target.id==='wc2')e.target.dataset.touched='1';
+  if(e.target.id==='wl'&&e.target.value.trim())A.readlink(null,true);
 });
-document.addEventListener('paste',e=>{if(e.target.dataset?.az==='text'){const el=e.target;setTimeout(()=>{if(el.value.trim())azParse(el.value)},0)}});
+document.addEventListener('paste',e=>{if(e.target.id==='wl'){setTimeout(()=>A.readlink(null,true),0);return}if(e.target.dataset?.az==='text'){const el=e.target;setTimeout(()=>{if(el.value.trim())azParse(el.value)},0)}});
 document.addEventListener('paste',e=>{
   if(e.target.id!=='azurl')return;
   e.preventDefault();azParse(e.clipboardData.getData('text'));

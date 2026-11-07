@@ -6,6 +6,7 @@
 import { sb } from './supabase.js';
 import { withAmazonTag } from './shops.js';
 import { setWeights } from './weights.js';
+import { setCatalogOff } from './catalog.js';
 
 let cache = null;
 export async function loadPromo() {
@@ -14,9 +15,9 @@ export async function loadPromo() {
     const [c, p, st] = await Promise.all([
       sb.from('campaigns').select('*').order('starts_at', { ascending: false }),
       sb.from('products').select('*').order('sort', { ascending: true }),
-      sb.from('settings').select('value').eq('key', 'category_weights').maybeSingle(),
+      sb.from('settings').select('key,value').in('key', ['category_weights', 'catalog_disabled']),
     ]);
-    if (!st.error && st.data) setWeights(st.data.value);
+    if (!st.error && st.data) for (const r of st.data) { if (r.key === 'category_weights') setWeights(r.value); if (r.key === 'catalog_disabled') setCatalogOff(r.value); }
     cache = { campaigns: c.error ? [] : c.data, products: p.error ? [] : p.data };
   } catch { cache = { campaigns: [], products: [] }; }
   return cache;

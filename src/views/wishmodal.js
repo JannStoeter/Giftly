@@ -1,6 +1,7 @@
 /* Detail-Fenster zu einem Wunsch: Vorschlag ansehen, Alternativen vergleichen, wählen oder weitersuchen. */
 import { S, guestPerson } from '../state.js';
-import { esc, ic } from '../lib/util.js';
+import { esc, ic, gen } from '../lib/util.js';
+import { criteriaText } from '../lib/fit.js';
 import { art, artIllu } from '../lib/art.js';
 import { offersFor } from '../lib/products.js';
 import { cat, crea, occL, PRIO } from '../data/content.js';
@@ -13,10 +14,10 @@ function Offer(pr, w, ctx, role) {
   const amazon = pr.host === 'amazon.de' || pr.host.endsWith('.amazon.de');
   const label = amazon ? (pr.direct ? 'Bei Amazon ansehen' : 'Bei Amazon suchen') : `Zu ${esc(pr.host)}`;
   const chosen = S.ui.chosen && S.ui.chosen[w.id] && S.ui.chosen[w.id].t === pr.t;
-  return `<div class="offer ${role === 'main' ? 'main' : ''} ${chosen ? 'chosen' : ''}">
+  return `<div class="offer ${role === 'main' ? 'main' : ''} ${pr.source === 'link' ? '' : 'suggest'} ${chosen ? 'chosen' : ''}">
    ${pr.brand ? `<span class="otn brand" aria-hidden="true"><b>${esc(pr.brand.slice(0, 1))}</b><small>${esc(pr.brand)}</small></span>` : `<span class="otn">${artIllu(pr.a || 'gift', pr.tone || 0)}</span>`}
    <div class="obody">
-    ${role === 'main' ? `<span class="eyebrow">${pr.source === 'link' ? 'Gewünschtes Produkt' : pr.source === 'erzeugt' ? 'Vorschlag von Wishtale' : 'Unser Vorschlag'}</span>` : ''}
+    <span class="eyebrow">${pr.source === 'link' ? 'Gewünschtes Produkt' : role === 'main' ? 'Vorschlag von Wishtale' : 'Vorschlag'}</span>
     <strong class="ot">${esc(pr.t)}</strong>
     ${priceLine(pr)}
     ${(pr.why || []).slice(0, 2).map(t => `<span class="why">${esc(t)}</span>`).join('')}
@@ -27,6 +28,17 @@ function Offer(pr, w, ctx, role) {
     ${guestFree ? `<button class="btn pri sm" data-act="choose" data-wid="${w.id}" data-pid="${esc(pr.id)}">Diesen wählen</button>` : ''}
    </div>
   </div>`;
+}
+
+/** Macht klar, was ein Vorschlag von Wishtale ist und was ein Wunsch der Person selbst. */
+function Suggest(p, w, o, ctx) {
+  const suggested = o.main ? o.main.source !== 'link' : o.alts.length > 0;
+  if (!suggested) return '';
+  const crit = criteriaText(w);
+  if (ctx === 'own') {
+    return `<div class="sugg"><b>Du hast kein bestimmtes Produkt gewählt</b><span>Deine Freunde sehen deshalb Vorschläge von Wishtale${crit ? `, die zu den Kriterien deines Wunsches passen (${esc(crit)})` : ''}. Möchtest du ein bestimmtes Produkt, ergänze den Link dazu.</span> <button class="btn sec sm" data-act="wedit" data-id="${w.id}" style="margin-top:8px">Link ergänzen</button></div>`;
+  }
+  return `<div class="sugg"><b>Vorschlag von Wishtale</b><span>${esc(p.name)} hat kein bestimmtes Produkt ausgewählt. ${crit ? `Diese Auswahl passt zu den Kriterien des Wunsches (${esc(crit)}).` : 'Diese Auswahl passt zum Wunsch.'} Es ist nicht ${esc(gen(p.name))} Wahl. Wir testen und bewerten die Produkte nicht, schau dir deshalb vor dem Kauf Preis und Bewertungen an.</span></div>`;
 }
 
 export function WishModal() {
@@ -69,10 +81,11 @@ export function WishModal() {
    </div>
    ${ctx === 'preview' ? `<div class="banner green">${ic('eye')}<span>So sehen Schenkende diesen Wunsch.</span></div>` : ''}
    ${state}
+   ${Suggest(p, w, o, ctx)}
    ${o.main ? `<section class="wm-sec">${Offer(o.main, w, ctx, 'main')}</section>` : (w.kind === 'erlebnis' ? `<p class="muted" style="margin:14px 0">Für ein Erlebnis brauchst du kein Produkt. Überlege am besten mit anderen Freunden, was sich organisieren lässt, und reserviere den Wunsch hier, damit niemand doppelt plant.</p>` : '')}
-   ${o.alts.length ? `<section class="wm-sec"><p class="eyebrow" style="margin-bottom:8px">${w.kind === 'frei' ? 'Ideen zu diesem Wunsch' : 'Alternativen'}</p>${o.alts.map(a => Offer(a, w, ctx, 'alt')).join('')}</section>` : ''}
+   ${o.alts.length ? `<section class="wm-sec"><p class="eyebrow" style="margin-bottom:8px">${w.kind === 'frei' ? 'Ideen von Wishtale zu diesem Wunsch' : o.main && o.main.source === 'link' ? 'Alternativen von Wishtale' : 'Weitere Vorschläge von Wishtale'}</p>${o.alts.map(a => Offer(a, w, ctx, 'alt')).join('')}</section>` : ''}
    ${o.over ? `<p class="muted" style="font-size:13px">${o.over} Produkt${o.over > 1 ? 'e' : ''} über dem Budget ausgeblendet.</p>` : ''}
-   <p class="disc">Die Links zu Amazon sind Partnerlinks (Anzeige). Dir entstehen dadurch keine Mehrkosten. Maßgeblich ist immer der Preis bei Amazon.</p>
+   <p class="disc">Die Links zu Amazon sind Partnerlinks (Anzeige). Dir entstehen dadurch keine Mehrkosten. Maßgeblich ist immer der Preis bei Amazon. Vorschläge von Wishtale wählen wir nach den Kriterien des Wunsches aus. Wir testen und bewerten die Produkte nicht.</p>
    <div class="row wm-foot">${footer}<span style="flex:1"></span><button class="btn ghost" data-act="close">Schließen</button></div>
   </div></div>`;
 }

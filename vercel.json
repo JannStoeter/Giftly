@@ -59,6 +59,9 @@
     },
     "api/draft.js": {
       "maxDuration": 60
+    },
+    "api/inspect.js": {
+      "maxDuration": 20
     }
   }
 }
