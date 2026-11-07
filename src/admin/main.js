@@ -5,8 +5,8 @@ import './admin.css';
 import { adminState, signIn, signOut, count } from './api.js';
 import { $, esc, toast } from './util.js';
 
-const TABS = [['start', 'Übersicht'], ['produkte', 'Produkte'], ['aktionen', 'Aktionen'], ['instagram', 'Instagram'], ['ads', 'Google Ads'], ['texte', 'Seitentexte'], ['verbindungen', 'Verbindungen']];
-const MODS = { produkte: () => import('./products.js'), aktionen: () => import('./campaigns.js'), instagram: () => import('./instagram.js'), ads: () => import('./ads.js'), texte: () => import('./texts.js'), verbindungen: () => import('./connections.js') };
+const TABS = [['start', 'Übersicht'], ['auswertung', 'Auswertung'], ['produkte', 'Produkte'], ['aktionen', 'Aktionen'], ['instagram', 'Instagram'], ['ads', 'Google Ads'], ['texte', 'Seitentexte'], ['verbindungen', 'Verbindungen']];
+const MODS = { auswertung: () => import('./usage.js'), produkte: () => import('./products.js'), aktionen: () => import('./campaigns.js'), instagram: () => import('./instagram.js'), ads: () => import('./ads.js'), texte: () => import('./texts.js'), verbindungen: () => import('./connections.js') };
 const root = $('#root');
 
 function loginView(msg) {

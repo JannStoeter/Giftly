@@ -46,37 +46,46 @@
 <li><code>wishtale:v1</code> und <code>wishtale:draft</code>: Eingaben in der Demo und der Entwurf deines Wishtale vor der Anmeldung,</li>
 <li><code>wishtale:guest</code>: der zufällige Schlüssel für Reservierungen,</li>
 <li><code>wishtale:demo</code> (nur für die Sitzung): ob du gerade die Demo ansiehst,</li>
-<li><code>wishtale:consent:pinterest</code>: deine Entscheidung zu Pinterest (siehe Abschnitt 9).</li>
+<li><code>wishtale:consent:pinterest</code>: deine Entscheidung zu Pinterest (siehe Abschnitt 10),</li>
+<li><code>wishtale:promo-hidden</code> und <code>wishtale:nudge-hidden</code>: welche Hinweise du in der App ausgeblendet hast,</li>
+<li><code>wishtale:no-stats</code>: deine Entscheidung, die Statistik auszuschalten (siehe Abschnitt 8).</li>
 </ul>
 <p>Du kannst diese Einträge jederzeit in den Einstellungen deines Browsers löschen.</p>
 
-<h2>8. Amazon und andere Partnerlinks</h2>
+<h2>8. Statistik ohne Cookies</h2>
+<p>Wir messen, wie Wishtale genutzt wird, damit wir die Seite verbessern können. Dafür melden unsere Seiten Ereignisse wie „Startseite aufgerufen“, „Einrichtung gestartet“ oder „Konto-Formular abgeschickt“ an unseren Server bei Vercel. Gespeichert werden die aufgerufene Seite (ohne Teile hinter ? oder #), die Herkunft (nur die Domain, zum Beispiel instagram.com), Kürzel aus dem Link (utm_source, utm_medium, utm_campaign), die Gerätegruppe (Handy, Tablet, Computer), das Land und ein Hash.</p>
+<p>Der Hash entsteht auf dem Server aus deiner IP-Adresse, der Browserkennung und dem Datum und wechselt jeden Tag. Er erlaubt keine Verknüpfung über mehrere Tage. Deine IP-Adresse und die Browserkennung selbst speichern wir nicht. Wir setzen dafür keine Cookies und legen nichts auf deinem Gerät ab, deshalb brauchen wir dafür kein Einwilligungsbanner. Rechtsgrundlage ist unser berechtigtes Interesse an einem besseren Angebot (Art. 6 Abs. 1 lit. f DSGVO). Die Ereignisse löschen wir nach etwa 13 Monaten.</p>
+<p>Kommst du mit Kürzeln zu einer Aktion (zum Beispiel <code>utm_campaign</code>) zu uns und legst ein Konto an, speichern wir diese Kürzel beim Konto. So sehen wir, welche Aktion neue Konten gebracht hat.</p>
+<p>Wenn dein Browser „Do Not Track“ oder „Global Privacy Control“ sendet, zählen wir dich nicht. Du kannst die Statistik außerdem für diesen Browser selbst ausschalten:</p>
+<p><button type="button" class="btn sec sm" id="stats-toggle">Statistik ausschalten</button> <span class="muted" id="stats-state" role="status"></span></p>
+
+<h2>9. Amazon und andere Partnerlinks</h2>
 <p>Links zu Amazon sind Partnerlinks (Partner-ID jannst-21) und mit „Anzeige“ gekennzeichnet. Solange du nicht auf einen solchen Link klickst, fließen keine Daten an Amazon. Wenn du klickst, öffnet sich die Seite von Amazon, und dort gilt deren Datenschutzerklärung. Amazon setzt dort Cookies, um zu erkennen, dass der Kauf über unseren Link kam. Bei Käufen erhalten wir von Amazon keine Informationen über dich, nur anonyme Provisionsmeldungen. Weitere Partner werden wir hier ergänzen.</p>
 
-<h2>9. Pinterest (nur mit deiner Zustimmung)</h2>
+<h2>10. Pinterest (nur mit deiner Zustimmung)</h2>
 <p>Wenn eine Person ihr Pinterest verlinkt hat, zeigen wir die Pins erst, nachdem du ausdrücklich zugestimmt hast. Erst dann laden wir ein Skript von Pinterest (assets.pinterest.com). Dabei werden Daten wie deine IP-Adresse an Pinterest Europe Ltd. (Irland) und Pinterest Inc. (USA) übertragen, und Pinterest kann Cookies setzen. Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG). Du kannst sie jederzeit in dem Fenster mit den Pins widerrufen. Ohne Zustimmung bleiben die Pins verborgen, und es gibt nur einen normalen Link.</p>
 
-<h2>10. Amazon-Kurzlinks und Produktlinks</h2>
+<h2>11. Amazon-Kurzlinks und Produktlinks</h2>
 <p>Wenn du bei einem Wunsch einen Amazon-Kurzlink (zum Beispiel amzn.eu) einfügst, ruft unser Server bei Vercel diesen Link ab, um die lange Adresse zu ermitteln. Dabei übertragen wir nur den Link und keine Angaben zu dir.</p>
 <p>Wenn du als angemeldete Person bei einem Wunsch den Link zu einem Shop einfügst, ruft unser Server bei Vercel diese Seite einmal ab und liest daraus Produktname, Preis und Größe, damit du nichts abtippen musst. Dabei gehen nur der Link und ein Hinweis auf unseren Dienst an den Shop. Deine Daten und deine IP-Adresse werden dabei nicht übertragen. Die Seite selbst speichern wir nicht, nur die Angaben, die du übernimmst (Rechtsgrundlage: Vertragserfüllung, Art. 6 Abs. 1 lit. b DSGVO).</p>
 
-<h2>11. Instagram</h2>
+<h2>12. Instagram</h2>
 <p>Wir betreiben ein Profil bei Instagram (@wishtale.de). Dafür ist Meta Platforms Ireland Ltd. mitverantwortlich. Wenn du es besuchst, gilt deren Datenschutzerklärung. Auf dieser Webseite binden wir Instagram nicht ein, es gibt nur einen Link.</p>
 
-<h2>12. Kontakt</h2>
+<h2>13. Kontakt</h2>
 <p>Wenn du uns schreibst, verarbeiten wir deine E-Mail-Adresse und deine Nachricht, um sie zu beantworten (Art. 6 Abs. 1 lit. f DSGVO, bei Vertragsfragen lit. b). Wir löschen sie, wenn die Sache erledigt ist und keine Aufbewahrungspflicht besteht.</p>
 
-<h2>13. Wie lange wir Daten speichern</h2>
-<p>Wir speichern dein Konto und deine Eingaben, solange du ein Konto hast. Wenn du es löschst, entfernen wir dein Profil mit Wünschen, Geschenken und Reservierungen. Ein gelöschtes Konto lässt sich nicht wiederherstellen. Logfiles bei Vercel werden nach kurzer Zeit automatisch gelöscht. Sicherungen der Datenbank verschwinden ebenfalls nach wenigen Wochen.</p>
+<h2>14. Wie lange wir Daten speichern</h2>
+<p>Wir speichern dein Konto und deine Eingaben, solange du ein Konto hast. Wenn du es löschst, entfernen wir dein Profil mit Wünschen, Geschenken und Reservierungen. Ein gelöschtes Konto lässt sich nicht wiederherstellen. Logfiles bei Vercel werden nach kurzer Zeit automatisch gelöscht. Die Ereignisse der Statistik (Abschnitt 8) löschen wir nach etwa 13 Monaten. Sicherungen der Datenbank verschwinden ebenfalls nach wenigen Wochen.</p>
 
-<h2>14. Deine Rechte</h2>
+<h2>15. Deine Rechte</h2>
 <p>Du hast das Recht auf Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21 DSGVO). Eine Einwilligung kannst du jederzeit mit Wirkung für die Zukunft widerrufen. Dein Konto kannst du in der App unter „Konto und Einstellungen“ selbst löschen. Für alles andere schreib uns an <a href="mailto:{{legal:email}}">{{legal:email}}</a>.</p>
 <p>Du kannst dich außerdem bei einer Datenschutz-Aufsichtsbehörde beschweren, zum Beispiel bei der für uns zuständigen: {{legal:authority}}.</p>
 
-<h2>15. Keine automatisierten Entscheidungen</h2>
+<h2>16. Keine automatisierten Entscheidungen</h2>
 <p>Wishtale schlägt Produkte und Ideen vor, die zu den Angaben im Profil passen. Das geschieht anhand einfacher Regeln. Es entstehen daraus keine Entscheidungen mit rechtlicher Wirkung für dich.</p>
 
-<h2>16. Änderungen</h2>
+<h2>17. Änderungen</h2>
 <p>Wenn sich an Wishtale etwas Wesentliches ändert, etwa ein neuer Partner oder ein neuer Dienst, passen wir diese Erklärung an. Die jeweils aktuelle Fassung findest du immer hier.</p>
 <p class="muted">Stand: {{legal:updated}}</p>
 </div></main>

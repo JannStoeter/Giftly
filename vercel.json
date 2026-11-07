@@ -62,6 +62,9 @@
     },
     "api/inspect.js": {
       "maxDuration": 20
+    },
+    "api/event.js": {
+      "maxDuration": 10
     }
   }
 }

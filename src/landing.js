@@ -43,3 +43,14 @@ import('./lib/promo.js').then(async({loadPromo,safeUrl})=>{
   if(c.cta_label&&c.cta_url){const a=document.createElement('a');a.href=safeUrl(c.cta_url);a.textContent=c.cta_label;bar.appendChild(a)}
   document.body.insertBefore(bar,document.querySelector('.skip')?.nextSibling||document.body.firstChild);
 }).catch(()=>{});
+
+/* Statistik: Aufruf der Seite und Klicks auf die Knöpfe zur App. UTM-Kürzel aus der Adresse reisen in den Links zur App mit, damit neue Konten einer Aktion zugeordnet werden können. */
+import('./lib/track.js').then(({track,utmFromUrl})=>{
+  track('view',{once:true});
+  const u=utmFromUrl(),qs=new URLSearchParams();
+  for(const k of Object.keys(u))qs.set('utm_'+k,u[k]);
+  document.querySelectorAll('a[href^="app/"]').forEach(a=>{
+    if([...qs].length){const [path,hash='']=a.getAttribute('href').split('#');a.setAttribute('href',path+(path.includes('?')?'&':'?')+qs.toString()+(hash?'#'+hash:''))}
+    a.addEventListener('click',()=>track('cta',{label:(a.closest('header')?'kopfzeile':a.closest('.hero')?'start':a.closest('section')?.id||'seite')+':'+(a.getAttribute('href').split('#')[1]||'app')}));
+  });
+}).catch(()=>{});

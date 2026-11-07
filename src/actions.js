@@ -9,6 +9,7 @@ import { parsePinterest, parseInstagram, givePinConsent, revokePinConsent } from
 import { sb } from './lib/supabase.js';
 import { inspectLink, priceField, summary } from './lib/inspect.js';
 import { hidePromo } from './views/inspiration.js';
+import { track } from './lib/track.js';
 import { render, route, refreshGuest } from './render.js';
 import { guestRpc } from './lib/remote.js';
 import { signIn, signUp, magicLink, signOut, friendly, resendSignup, resetPassword, setPassword } from './lib/auth.js';
@@ -58,6 +59,7 @@ const A={
  go(el){const v=el.dataset.v;if(v==='start')S.ui.step=0;location.hash='#'+v;if(location.hash==='#'+v&&S.ui.view===v)render(true)},
  pick(el){const k=el.dataset.k,v=el.dataset.v,a=S.me[k],i=a.indexOf(v);i>-1?a.splice(i,1):a.push(v);render()},
  next(){
+  if(S.ui.view==='start'&&S.ui.step===1&&!S.auth.user)track('choice',{label:'profile',once:true,path:'/app/'});
   if(!S.auth.user&&S.ui.step===0&&!(S.me.name||'').trim()){toast('Magst du uns zuerst deinen Vornamen verraten?');document.getElementById('dn')?.focus();return}
   S.ui.step++;render(true)},prev(){S.ui.step--;render(true)},
  finish(){
@@ -67,6 +69,7 @@ const A={
  edit(){S.ui.step=S.auth.user?1:0;location.hash='#start'},
  quick(){
   // Direkt zur Wunschliste. Ohne Konto wird zuerst eines angelegt, danach geht es mit dem ersten Wunsch weiter.
+  track('choice',{label:'quick',once:true,path:'/app/'});
   if(!S.auth.user){S.me.quick=true;S.me.name=(S.me.name||'').trim();saveState();S.ui.step=0;location.hash='#registrieren';return}
   S.ui.step=0;location.hash='#wuensche';setTimeout(()=>{S.ui.modal='wish';S.ui.editWish=null;render()},50);
  },
@@ -88,7 +91,7 @@ const A={
  newpw(){S.ui.modal=null;location.hash='#neues-passwort'},
  authback(){S.ui.authSent=null;S.ui.authResent=null;S.ui.authMsg=null;render()},
  authtab(el){S.ui.authSent=null;S.ui.authMsg=null;location.hash=el.dataset.v==='up'?'#registrieren':'#anmelden'},
- demo(){S.ui.authMsg=null;location.hash='#demo'},
+ demo(){S.ui.authMsg=null;track('demo',{once:true,path:'/app/'});location.hash='#demo'},
  tologin(){S.ui.modal=null;S.ui.authMsg=null;location.hash='#start'},
  exitdemo(){S.ui.modal=null;S.ui.authMsg=null;location.hash='#start'},
  logout(){signOut().finally(()=>{location.hash='';location.reload()})},
@@ -249,6 +252,7 @@ document.addEventListener('submit',e=>{
   }
   if(kind==='signin'||kind==='signup'||kind==='magic'){
     const email=(fd.get('email')||'').trim(),pw=fd.get('password')||'';
+    if(kind==='signup')track('signup_submit',{path:'/app/'});
     S.ui.authBusy=true;S.ui.authMsg=null;S.ui.authEmail=email;render();
     const job=kind==='signin'?signIn(email,pw):kind==='signup'?signUp((fd.get('name')||'').trim(),email,pw):magicLink(email);
     job.then(({data,error})=>{

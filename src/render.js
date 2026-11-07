@@ -10,6 +10,7 @@ import { Login, Recovery } from './views/auth.js';
 import { fetchPublic, scheduleSync } from './lib/remote.js';
 import { loadPinterest, pinConsent } from './lib/social.js';
 import { Modal } from './views/modals.js';
+import { track } from './lib/track.js';
 
 export const VIEWS={start:Start,profil:Profil,wuensche:Wuensche,historie:Historie,entdecken:Entdecken,gast:Gast,login:Login,recovery:Recovery};
 const DEFAULT_VIEW='profil';
@@ -85,6 +86,8 @@ export function route(){
   else if(h==='schenken'){location.hash='#p/jonas';return}  // alter Link
   else S.ui.view=(h in VIEWS&&h!=='gast'&&h!=='login'&&h!=='recovery'&&!(anon&&h==='start'))?h:DEFAULT_VIEW;
   S.ui.modal=null;
+  if(S.ui.view==='start'&&anon)track('start',{once:true,path:'/app/'});
+  if(S.ui.view==='gast')track('guest_view',{once:true,path:'/app/'});
   render(true);
 }
 
