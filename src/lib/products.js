@@ -15,6 +15,20 @@ import { livePRODUCTS } from './catalog.js';
 
 export const amazonUrl = p => p.asin ? `https://www.amazon.de/dp/${p.asin}?tag=${AMAZON_TAG}` : searchUrl.amazon(p.search || p.t);
 
+/**
+ * Genaue Wünsche („Siku Fendt Traktor 824 mit Pflug“): Hier schlagen wir nichts anderes vor, sondern suchen genau diesen Begriff.
+ * Ein Katalogprodukt zählt nur, wenn es den Wunsch inhaltlich abdeckt.
+ */
+const STOP = new Set(['mit', 'und', 'für', 'fuer', 'der', 'die', 'das', 'ein', 'eine', 'von', 'zum', 'zur', 'set']);
+const words = t => norm(t).split(/[^a-zäöüss0-9]+/).filter(x => x && !STOP.has(x));
+export const isSpecific = w => w.kind !== 'kategorie' && w.kind !== 'frei' && w.kind !== 'erlebnis' && (/\d/.test(w.t) || words(w.t).length >= 4);
+export function covers(w, x) {
+  if (!isSpecific(w)) return true;
+  const hay = norm([x.t, x.brand, x.cat, x.search].filter(Boolean).join(' '));
+  const ws = words(w.t);
+  return ws.filter(k => hay.includes(k.length > 4 ? k.slice(0, -1) : k)).length / ws.length >= 0.8;
+}
+
 /** Ergebnis: { t, url, host, price, a, tone, source, ideas } */
 export function productFor(person, w) {
   if (w.kind === 'kategorie') {
@@ -24,11 +38,11 @@ export function productFor(person, w) {
   const own = deepLink(w.link);
   if (own) return { t: w.t, url: own, host: new URL(own).hostname.replace(/^www\./, ''), price: w.price || null, priceBy: 'user', source: 'link', direct: true };
   // Nur Produkte, die zu den genannten Eigenschaften passen (z. B. „beschichtet“)
-  const match = livePRODUCTS().filter(x => w.kw.some(k => same(k, x.cat)) && fits(w, x));
+  const match = livePRODUCTS().filter(x => w.kw.some(k => same(k, x.cat)) && fits(w, x) && covers(w, x));
   const brandHit = match.find(x => norm(w.t).includes(norm(x.brand)));
   const catHit = brandHit || [...match].sort((a, b) => b.q - a.q)[0];
   if (catHit && w.kind !== 'frei') return fromProduct(catHit, 'katalog');
-  const cat = !wanted(w).length && CATALOG.find(i => i.k === 'ding' && overlap(w.kw, i.kw));
+  const cat = !wanted(w).length && !isSpecific(w) && CATALOG.find(i => i.k === 'ding' && overlap(w.kw, i.kw));
   if (cat && w.kind !== 'frei') return { t: cat.t, url: searchUrl.amazon(cat.t), host: 'amazon.de', range: cat.p, a: cat.a, source: 'katalog', direct: false };
   if (w.kind === 'erlebnis' || w.kind === 'frei') return null; // dafür gibt es Ideen (ideasFor)
   return { t: w.t, url: searchUrl.amazon(w.t), host: 'amazon.de', source: 'erzeugt', direct: false };
@@ -62,7 +76,7 @@ export function offersFor(person, w) {
     const offers = list.map(e => ({ ...fromProduct(e.x, 'vorschlag'), id: e.x.id, why: e.why }));
     return { main: offers[0] || (main && { ...main, id: 'main' }) || null, alts: offers.slice(1, 4), over };
   }
-  const pool = livePRODUCTS().filter(x => w.kw.some(k => same(k, x.cat)) && fits(w, x));
+  const pool = livePRODUCTS().filter(x => w.kw.some(k => same(k, x.cat)) && fits(w, x) && covers(w, x));
   if (main && pool.length && w.kind !== 'frei') {
     const mp = pool.find(x => x.t === main.t);
     const alts = pool.filter(x => x !== mp).sort((a, b) => b.q - a.q).slice(0, 3).map(x => ({ ...fromProduct(x, 'katalog'), id: x.id }));

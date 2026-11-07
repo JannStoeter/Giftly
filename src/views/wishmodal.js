@@ -18,7 +18,7 @@ function Offer(pr, w, ctx, role) {
   return `<div class="offer ${role === 'main' ? 'main' : ''} ${pr.source === 'link' ? '' : 'suggest'} ${chosen ? 'chosen' : ''}">
    ${pr.brand ? `<span class="otn brand" aria-hidden="true"><b>${esc(pr.brand.slice(0, 1))}</b><small>${esc(pr.brand)}</small></span>` : `<span class="otn">${artIllu(pr.a || 'gift', pr.tone || 0)}</span>`}
    <div class="obody">
-    <span class="eyebrow">${pr.source === 'link' ? 'Gewünschtes Produkt' : role === 'main' ? 'Vorschlag von Wishtale' : 'Vorschlag'}</span>
+    <span class="eyebrow">${pr.source === 'link' ? 'Gewünschtes Produkt' : pr.source === 'erzeugt' ? 'Suche nach genau diesem Wunsch' : role === 'main' ? 'Vorschlag von Wishtale' : 'Vorschlag'}</span>
     <strong class="ot">${esc(pr.t)}</strong>
     ${priceLine(pr)}
     ${(pr.why || []).slice(0, 2).map(t => `<span class="why">${esc(t)}</span>`).join('')}
