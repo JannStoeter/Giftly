@@ -25,7 +25,7 @@ const draftPayload = () => {
   const d = S.accounts.draft;
   if (!draftHasData() || !d) return undefined;
   const cut = a => (a || []).slice(0, 30).map(x => String(x).slice(0, 60));
-  return { interests: cut(d.interests), cats: cut(d.cats), brands: cut(d.brands), tries: cut(d.tries), nogos: cut(d.nogos), alts: cut(d.alts) };
+  return { interests: cut(d.interests), cats: cut(d.cats), brands: cut(d.brands), tries: cut(d.tries), nogos: cut(d.nogos), alts: cut(d.alts), quick: !!d.quick };
 };
 export const signUp = (name, email, password) =>
   sb.auth.signUp({ email, password, options: { data: { full_name: name, draft: draftPayload() }, emailRedirectTo: redirectUrl() } });
@@ -57,7 +57,7 @@ export function adoptDraft() {
   if (!d && meta && typeof meta === 'object') {
     // Kein Entwurf in diesem Browser (zum Beispiel Link am Handy geöffnet): aus dem Konto nehmen
     const list = v => (Array.isArray(v) ? v.filter(x => typeof x === 'string').slice(0, 30).map(x => x.slice(0, 60)) : []);
-    d = { name: S.auth.user.user_metadata.full_name || '', interests: list(meta.interests), cats: list(meta.cats), brands: list(meta.brands), tries: list(meta.tries), nogos: list(meta.nogos), alts: list(meta.alts) };
+    d = { quick: !!meta.quick, name: S.auth.user.user_metadata.full_name || '', interests: list(meta.interests), cats: list(meta.cats), brands: list(meta.brands), tries: list(meta.tries), nogos: list(meta.nogos), alts: list(meta.alts) };
   }
   if (meta) sb.auth.updateUser({ data: { draft: null } }).catch(() => {}); // einmal übernommen, dann weg
   const a = S.accounts.me;
@@ -69,6 +69,7 @@ export function adoptDraft() {
     for (const k of ['interests', 'cats', 'brands', 'tries', 'nogos', 'alts']) a[k] = [...d[k]];
     took = d.interests.length + d.cats.length + d.brands.length + d.tries.length + d.nogos.length + d.alts.length > 0;
   }
+  const quick = !!d.quick && !took;
   clearDraft();
-  return took;
+  return quick ? 'quick' : took;
 }

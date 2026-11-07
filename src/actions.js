@@ -64,7 +64,13 @@ const A={
   if(!S.auth.user){S.me.name=(S.me.name||'').trim();saveState();S.ui.step=0;location.hash='#registrieren';return}
   toast('Geschafft! Dein Wishtale ist startklar.');location.hash='#profil'},
  pedit(el){S.ui.editK=S.ui.editK===el.dataset.k?null:el.dataset.k;render()},
- edit(){S.ui.step=0;location.hash='#start'},
+ edit(){S.ui.step=S.auth.user?1:0;location.hash='#start'},
+ quick(){
+  // Direkt zur Wunschliste. Ohne Konto wird zuerst eines angelegt, danach geht es mit dem ersten Wunsch weiter.
+  if(!S.auth.user){S.me.quick=true;S.me.name=(S.me.name||'').trim();saveState();S.ui.step=0;location.hash='#registrieren';return}
+  S.ui.step=0;location.hash='#wuensche';setTimeout(()=>{S.ui.modal='wish';S.ui.editWish=null;render()},50);
+ },
+ nudgehide(){try{localStorage.setItem('wishtale:nudge-hidden',String(Date.now()))}catch{/* nur für diese Sitzung */}S.ui.nudgeOff=true;render()},
  preview(el){S.ui.preview=el.dataset.v==='1';render()},
  vis(el){const o=['alle','giver','privat'],k=el.dataset.k;S.me.vis[k]=o[(o.indexOf(S.me.vis[k]||'giver')+1)%3];render()},
  wf(el){S.ui.wf=el.dataset.v;render()},wc(el){S.ui.wc=el.dataset.v;render()},

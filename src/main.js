@@ -25,7 +25,8 @@ async function boot(){
       history.replaceState(null,'',location.pathname+'#neues-passwort');
     }else if(adopted){
       history.replaceState(null,'',location.pathname+'#wuensche');
-      setTimeout(()=>toast('Dein Wishtale ist angelegt. Jetzt fehlen nur noch deine Wünsche.'),400);
+      if(adopted==='quick')setTimeout(()=>{toast('Schön, dass du da bist. Schreib jetzt deinen ersten Wunsch auf.');S.ui.modal='wish';S.ui.editWish=null;render()},500);
+      else setTimeout(()=>toast('Dein Wishtale ist angelegt. Jetzt fehlen nur noch deine Wünsche.'),400);
     }else if(fromLink||!location.hash||['#login','#anmelden','#registrieren','#demo'].includes(location.hash)){
       const a=S.accounts.me;
       history.replaceState(null,'',location.pathname+(a&&!a.interests.length&&!a.wishes.length?'#start':'#profil'));
@@ -47,7 +48,8 @@ async function boot(){
         const a=S.accounts.me;
         location.hash=adopted?'#wuensche':a&&!a.interests.length&&!a.wishes.length?'#start':'#profil';
         route();
-        if(adopted)toast('Dein Wishtale ist angelegt. Jetzt fehlen nur noch deine Wünsche.');
+        if(adopted==='quick'){toast('Schön, dass du da bist. Schreib jetzt deinen ersten Wunsch auf.');S.ui.modal='wish';S.ui.editWish=null;render()}
+        else if(adopted)toast('Dein Wishtale ist angelegt. Jetzt fehlen nur noch deine Wünsche.');
       }else if(event==='SIGNED_OUT'&&S.auth.user){
         S.auth.user=null;location.hash='#anmelden';location.reload();
       }

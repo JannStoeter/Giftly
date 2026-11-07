@@ -3,6 +3,15 @@ import { esc, ic, money } from '../lib/util.js';
 import { WishCard } from './card.js';
 import { V, cat, crea, occL } from '../data/content.js';
 import { AppPromo } from './inspiration.js';
+import { completeness } from '../lib/tale.js';
+
+/** Freundlicher Hinweis, solange das Profil noch dünn ist. Verschwindet für eine Woche, wenn man „Später“ wählt. */
+function Nudge(m){
+  if(S.ui.nudgeOff||m.managed)return '';
+  try{const t=+localStorage.getItem('wishtale:nudge-hidden');if(t&&Date.now()-t<6048e5)return ''}catch{/* ohne Speicher */}
+  if(completeness(m).pct>=45)return '';
+  return `<div class="banner green nudge" role="note">${ic('user')}<span><b>Deine Wunschliste steht.</b> Wenn du uns noch ein paar Dinge über dich verrätst, zum Beispiel was du magst, welche Marken du liebst und was du schon hast, passen die Vorschläge für deine Freunde viel besser. Das dauert nur zwei Minuten.</span><span class="row" style="gap:8px;margin:0"><button class="btn pri sm" data-act="edit">Profil einrichten</button><button class="linkbtn" data-act="nudgehide">Später</button></span></div>`;
+}
 
 export function VisIcon(k){const x=V[k];return `<span class="pill" title="${x.l}" aria-label="${x.l}">${ic(x.i,'sm')}</span>`}
 export function densSeg(){return `<div class="seg" role="group" aria-label="Darstellung"><button class="${!S.ui.big?'on':''}" data-act="dens" data-v="0">Kompakt</button><button class="${S.ui.big?'on':''}" data-act="dens" data-v="1">Groß</button></div>`}
@@ -15,6 +24,7 @@ export function Wuensche(){
   const open=m.wishes.filter(w=>w.status==='offen').length;
   return `<div class="wrap">
    ${AppPromo()}
+   ${Nudge(m)}
    <div class="pagehead"><p class="eyebrow">Meine Wünsche</p><h1>${m.managed?`${open} Wünsche von ${esc(m.name)}.`:`${open} Dinge, über die ich mich freuen würde.`}</h1></div>
    <div class="banner" style="margin-bottom:8px">${ic('lock')}<span>${m.managed?`Als Elternteil siehst du, was reserviert oder gekauft ist. ${esc(m.name)} sieht es nicht.`:'Die Überraschung bleibt: Du siehst nie, ob jemand einen deiner Wünsche reserviert oder gekauft hat.'}</span></div>
    <p class="muted" style="font-size:14px;margin-bottom:16px">Du musst nicht jedes Produkt kennen. Schreib zum Beispiel „Hochwertige Pfanne bis 100 €“, dann suchen wir für deine Freunde passende Vorschläge heraus. Auch ohne Link finden wir bei Amazon etwas Passendes.</p>

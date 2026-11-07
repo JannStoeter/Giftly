@@ -28,8 +28,9 @@ export function Picker(st){
   return body;
 }
 const NAME_STEP={k:'name',t:'Wie dürfen wir dich nennen?',h:'Dein Vorname reicht völlig. So begrüßen wir dich in deinem Wishtale und deine Freunde sehen später, bei wem sie gerade stöbern.',name:true};
-/* Ohne Konto beginnt die Einrichtung mit dem Namen, das Konto kommt erst am Ende. */
-export const steps=()=>S.auth.user?STEPS:[NAME_STEP,...STEPS];
+const CHOICE_STEP={k:'choice',t:'Wie möchtest du starten?',h:'Beides ist in Ordnung, und du kannst jederzeit zwischen den Wegen wechseln.',choice:true};
+/* Ohne Konto beginnt die Einrichtung mit dem Namen, das Konto kommt erst am Ende. Danach darf man wählen: gleich Wünsche aufschreiben oder erst das Profil einrichten. */
+export const steps=()=>S.auth.user?[CHOICE_STEP,...STEPS]:[NAME_STEP,CHOICE_STEP,...STEPS];
 export function Start(){
   const list0=steps(),anon=!S.auth.user;
   S.ui.step=Math.max(0,Math.min(S.ui.step,list0.length-1));
@@ -37,6 +38,10 @@ export function Start(){
   let body='';
   if(st.name){
     body=`<form data-form="draftname" class="addrow" style="margin-top:22px"><label class="sr" for="dn" style="position:absolute;left:-9999px">Dein Vorname</label><input id="dn" class="inp" data-prof="name" value="${esc(S.me.name)}" maxlength="60" placeholder="Zum Beispiel Lena" autocomplete="given-name"></form>`;
+  }else if(st.choice){
+    body=`<div class="choices">
+     <button class="choice" data-act="quick"><b>Direkt Wünsche aufschreiben</b><span>In einer Minute steht deine erste Wunschliste. Dein Profil kannst du jederzeit später ergänzen.</span></button>
+     <button class="choice main" data-act="next"><span class="pill ok">Empfohlen</span><b>Erst mein Profil einrichten</b><span>Mit deinen Interessen, Lieblingsmarken und dem, was du schon hast, passen die Vorschläge für deine Freunde viel besser. Das dauert etwa zwei Minuten.</span></button></div>`;
   }else body=Picker(st);
   return `<div class="wrap"><div class="ob">
    <div class="prog" role="img" aria-label="Schritt ${i+1} von ${list0.length}">${list0.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join('')}</div>
@@ -45,7 +50,7 @@ export function Start(){
    <h1>${st.t}</h1><p class="muted" style="font-size:17px">${st.h}</p>
    ${body}
    <div class="obnav">${i?`<button class="btn ghost" data-act="prev">${ic('back','sm')}Zurück</button>`:anon?`<a class="btn ghost" href="../">${ic('back','sm')}Zur Startseite</a>`:`<button class="btn ghost" data-act="go" data-v="profil">${ic('back','sm')}Abbrechen</button>`}
-   <button class="btn pri" data-act="${last?'finish':'next'}">${last?(anon?'Fertig, weiter zu meinem Konto':'Fertig, zeig mir mein Profil'):'Weiter'} ${ic('arrow','sm')}</button></div>
+   ${st.choice?'':`<button class="btn pri" data-act="${last?'finish':'next'}">${last?(anon?'Fertig, weiter zu meinem Konto':'Fertig, zeig mir mein Profil'):'Weiter'} ${ic('arrow','sm')}</button>`}</div>
   </div></div>`;
 }
 

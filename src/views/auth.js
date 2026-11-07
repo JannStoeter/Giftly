@@ -47,7 +47,7 @@ export function Login(){
   const msg=m?`<div class="banner ${m.type==='ok'?'green':''}" role="status" style="margin-bottom:14px"><span>${esc(m.text)}</span></div>`:'';
   const err=S.auth.error?`<div class="banner" style="margin-bottom:14px"><span>${esc(S.auth.error)}</span></div>`:'';
   const dr=tab==='up'&&draftHasData()?S.accounts.draft:null;
-  const note=dr?`<div class="banner green" role="status" style="margin-bottom:14px"><span>${dr.name?`Dein Wishtale ist fast fertig, ${esc(dr.name)}. `:'Dein Wishtale ist fast fertig. '}Lege jetzt ein Konto an, damit nichts verloren geht.</span></div>`:'';
+  const note=dr?`<div class="banner green" role="status" style="margin-bottom:14px"><span>${dr.quick?`${dr.name?esc(dr.name)+', deine':'Deine'} Wunschliste ist gleich startklar. Lege jetzt ein Konto an, dann schreibst du deinen ersten Wunsch auf.`:`${dr.name?`Dein Wishtale ist fast fertig, ${esc(dr.name)}. `:'Dein Wishtale ist fast fertig. '}Lege jetzt ein Konto an, damit nichts verloren geht.`}</span></div>`:'';
   return `<div class="wrap"><div class="authcard">
    <p class="eyebrow">Wishtale</p>
    <h1>${tab==='up'?'Schön, dass du da bist':'Schön, dich wiederzusehen'}</h1>
