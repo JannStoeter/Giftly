@@ -1,3 +1,4 @@
+import { ZettelModal } from './zettel.js';
 import { S, initials } from '../state.js';
 import { esc, ic } from '../lib/util.js';
 import { CATS, OCC, PRIO } from '../data/content.js';
@@ -52,6 +53,7 @@ export function Modal(){
   if(m==='amazon')return AmazonModal();
   if(m==='given')return GivenModal();
   if(m==='giftgiven')return GiftGivenModal();
+  if(m==='zettel')return ZettelModal();
   if(m==='wishdetail')return WishModal();
   if(m==='world')return WorldModal();
   if(m==='pins')return PinsModal();

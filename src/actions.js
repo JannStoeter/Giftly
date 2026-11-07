@@ -11,6 +11,7 @@ import { inspectLink, priceField, summary } from './lib/inspect.js';
 import { hidePromo } from './views/inspiration.js';
 import { track } from './lib/track.js';
 import { saveGift, removeGift } from './lib/given.js';
+import { readZettelRemote } from './lib/zettel.js';
 import { render, route, refreshGuest } from './render.js';
 import { guestRpc } from './lib/remote.js';
 import { signIn, signUp, magicLink, signOut, friendly, resendSignup, resetPassword, setPassword } from './lib/auth.js';
@@ -87,7 +88,7 @@ const A={
  selbst(el){const w=S.me.wishes.find(x=>x.id===el.dataset.id);w.status=w.status==='selbst'?'offen':'selbst';toast(w.status==='selbst'?'Dann ist dieser Wunsch erledigt. Deine Freunde sehen jetzt, dass du das schon hast.':'Der Wunsch ist wieder offen.');render()},
  prio(el){const w=S.me.wishes.find(x=>x.id===el.dataset.id);w.prio=w.prio%3+1;toast('Priorität: '+PRIO[w.prio]);render()},
  delw(el){S.ui.modal=null;S.me.wishes=S.me.wishes.filter(x=>x.id!==el.dataset.id);render()},
- modal(el){if(el.dataset.v==='wish')S.ui.editWish=null;S.ui.modal=el.dataset.v;render();setTimeout(()=>document.querySelector('.sheet input,.sheet select')?.focus({preventScroll:true}),30)},
+ modal(el){if(el.dataset.v==='wish')S.ui.editWish=null;if(el.dataset.v==='zettel')S.ui.zt=null;S.ui.modal=el.dataset.v;render();setTimeout(()=>document.querySelector('.sheet input,.sheet select')?.focus({preventScroll:true}),30)},
  close(){S.ui.modal=null;S.ui.editWish=null;render()},
  wedit(el){S.ui.editWish=el.dataset.id;S.ui.modal='wish';render();setTimeout(()=>document.getElementById('wt')?.focus({preventScroll:true}),30)},
  resend(){
@@ -314,6 +315,27 @@ document.addEventListener('submit',e=>{
   }
   if(kind==='custom'){const v=(fd.get('v')||'').trim(),k=fd.get('k');if(v&&!S.me[k].includes(v))S.me[k].push(v);render()}
   if(kind==='idea'){const v=(fd.get('idea')||'').trim();S.ui.idea=v;S.ui.ideaRes=v?check(guestPerson(),v):null;render()}
+  if(kind==='zettel'){
+    const files=[...f.elements.files.files],text=(fd.get('text')||'').trim();
+    if(!files.length&&!text){S.ui.zt={error:'Bitte wähle ein Foto aus oder füge den Text ein.'};render();return}
+    S.ui.zt={busy:true};render();
+    readZettelRemote({text,files}).then(r=>{
+      S.ui.zt=r.wishes.length?{items:r.wishes,name:r.name,unclear:r.unclear}:{error:'Auf dem Zettel konnten wir keine Wünsche finden. Ein schärferes oder helleres Foto hilft oft, oder du fügst den Text ein.'};
+      track('choice',{label:'zettel',once:true,path:'/app/'});render();
+    }).catch(e=>{S.ui.zt={error:e.message||'Das hat nicht geklappt.'};render()});
+    return;
+  }
+  if(kind==='zettelsave'){
+    const z=S.ui.zt||{},on=fd.getAll('on').map(Number);let n=0;
+    on.forEach(i=>{
+      const w=(z.items||[])[i],t=(fd.get('t'+i)||'').trim();if(!w||!t)return;
+      const c=guessCategory(t,'wohnen');
+      S.me.wishes.unshift(W({t,c,kind:w.kind,prio:2,price:w.price,note:w.note||'',a:w.kind==='erlebnis'?'ticket':cat(c).a,tone:cat(c).t,kw:kwOf(t)}));n++;
+    });
+    S.ui.zt=null;S.ui.modal=null;
+    if(n)toast(`${n===1?'Ein Wunsch steht':n+' Wünsche stehen'} jetzt auf der Wunschliste. Bei jedem Wunsch kannst du den Link ergänzen.`);
+    location.hash='#wuensche';render();return;
+  }
   if(kind==='givengift'){
     saveGift({recipient:(fd.get('recipient')||'').trim(),what:(fd.get('what')||'').trim(),occasion:fd.get('occasion')||'',when:fd.get('when')||undefined,price:parsePrice(fd.get('price')),reaction:fd.get('reaction')||null,note:(fd.get('note')||'').trim(),status:'given'}).then(()=>{S.ui.modal=null;toast('Das Geschenk steht jetzt in deiner Liste.');render()});
     return;
